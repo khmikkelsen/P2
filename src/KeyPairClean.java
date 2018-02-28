@@ -43,8 +43,6 @@ public class KeyPairClean
     /* Rekursiv gcd funktion */
     private int gcd(int x, int y)
     {
-        System.out.print("gcd("+x+","+y+")\n");
-
         if ( y == 0 ) {
             return x;
         }
