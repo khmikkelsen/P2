@@ -1,7 +1,9 @@
+// Main
 public class User
 {
-    private int publicKey;
-    private int privateKey;
-
-
+    public static void main(String[] args)
+    {
+        private int publicKey;
+        private int privateKey;
+    }
 }
