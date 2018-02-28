@@ -1,13 +1,16 @@
-public class TestMain
+package A306.rsa;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+class RSATest
 {
-    public static void main (String[] args)
+    // Test the result of public key.
+    @Test
+    private void testPublicKey()
     {
-        KeyPair alice = new KeyPair(61, 53);
-
-        System.out.print("\npublic key for "+61+" & "+53+" er "+alice.getPublicKey()+"\n");
-
-        System.out.print("private key for "+61+" & "+53+" er "+alice.getPrivateKey()+"\n");
-
-
+        KeyPairClean key = new KeyPairClean(13, 7);
+        assertEquals(key.getPublicKey(), 1);
     }
 }
