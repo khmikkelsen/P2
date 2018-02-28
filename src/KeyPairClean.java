@@ -110,7 +110,7 @@ class KeyPairClean
     // Getters
     public int getPublicKey()
     {
-        return publicKey;
+        return this.publicKey;
     }
 
     protected int getPrivateKey()
