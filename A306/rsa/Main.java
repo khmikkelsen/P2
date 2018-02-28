@@ -12,8 +12,11 @@ class KeyPairClean
     private int n = p*q;
 
     // Constructor
-    public KeyPairClean(int p, int q)
+    public KeyPairClean(int p, int q) throws IllegalArgumentException
     {
+        if (p < 0 || q < 0)
+            throw new IllegalArgumentException("Negative primes not legal.");
+
         this.p = p;
         this.q = q;
         this.lambda = lcm(p - 1, q - 1);
@@ -26,14 +29,14 @@ class KeyPairClean
     {
         Random rand = new Random();
 
-        int e = rand.nextInt(lambda-1) + 2; // rand e = 1 < e < lambda.
+        int e = rand.nextInt(this.lambda-1) + 2; // rand e = 1 < e < lambda.
 
-        while (1 < e && e < lambda) {
+        while (1 < e && e < this.lambda) {
 
-            if (isPrime(e) && gcd(e, lambda) == 1) // co-prime fundet hvis 1: et primtal, 2: gcd er 1 med lambda.
+            if (isPrime(e) && gcd(e, this.lambda) == 1) // co-prime fundet hvis 1: et primtal, 2: gcd er 1 med lambda.
                 break;
             else
-                e = rand.nextInt(lambda-1) + 2;
+                e = rand.nextInt(this.lambda-1) + 2;
         }
 
         return e; // e er den tilhørende public key eksponent.
