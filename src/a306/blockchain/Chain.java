@@ -3,11 +3,20 @@ package a306.blockchain;
 import java.math.BigInteger;
 
 public class Chain {
-    private static final long targetTimespan = 14 * 24 * 60 * 60; // Two weeks (in seconds).
 
+    // Two weeks (in seconds);wanted time for 2016 blocks.
+    private static final long targetTimespan = 14 * 24 * 60 * 60;
+
+    //BigInteger is used for large Integers, i.e greater than 64-bit
+    //The BigInteger constructor: takes the string represenation of a big int and the base(radix) to make a BigInteger
+    //The proofOfWorkLimit is the max difficulty target
     private static final BigInteger proofOfWorkLimit = new BigInteger("00000000FFFF0000000000000000000000000000000000000000000000000000", 16); // Highest target (difficulty 1)
     private static Target chainTarget = new Target(proofOfWorkLimit);
 
+    /*
+     * The function adjustDifficulty: ajusts the difficulty based on 'if the previous 2016 blocks took more than two
+     * weeks to find, the difficulty is reduced. If they took less than two weeks, the difficulty is increased. '
+     */
     void adjustDifficulty() {
 
         Block lastBlock = new Block("", null);
@@ -17,6 +26,7 @@ public class Chain {
         System.out.println("pow limit: " + proofOfWorkLimit.toString(16));
 
 
+        //Find the actual time it took for the 2016 blocks to be generated??
         long actualTimespan = lastBlock.getTimestamp() - firstBlock.getTimestamp();
 
         actualTimespan = targetTimespan / 2;
@@ -28,13 +38,14 @@ public class Chain {
 //        }
 
 
-
+        //
         BigInteger newBigIntegerTarget = new Target(lastBlock.getCompactDifficulty()).getBigIntegerTarget();
 
+        //Calculate new target
         newBigIntegerTarget = newBigIntegerTarget.multiply(BigInteger.valueOf(actualTimespan));
         newBigIntegerTarget = newBigIntegerTarget.divide(BigInteger.valueOf(targetTimespan));
 
-
+        //New target for nodes; hash must be less than target
         Target newTarget = new Target(newBigIntegerTarget);
 //        System.out.println("New target in hex: " + newTarget.getBigIntegerTarget().toString(16));
 //        System.out.println("New target in compact form: " + newTarget.getCompactTarget());
