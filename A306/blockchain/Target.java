@@ -57,7 +57,7 @@ public class Target {
      */
     private BigInteger calculateBigIntergerTarget() {
         int factor = Integer.valueOf(compactTarget.substring(0, 2), 16);
-        BigInteger value = new BigInteger(compactTarget.substring(2, compactTarget.length()), 16);
+        BigInteger value = new BigInteger(compactTarget.substring(2, 8), 16);
 
         BigInteger two = new BigInteger("2", 10);
         BigInteger result = value.multiply(two.pow(8 * (factor - 3)));
