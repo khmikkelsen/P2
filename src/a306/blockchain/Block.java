@@ -21,9 +21,9 @@ class Block {
     private List<Message> msg;
 
 
-    /*
-     *The constructer for a block: creates block header at instance creation.
-     */
+
+    //The constructor for a block: creates block header at instance creation.
+
     Block(String prevHeadHash, List<Message> msg) {
         this.msg = msg;
         this.prevHeadhash = prevHeadHash;
@@ -31,8 +31,9 @@ class Block {
     }
 
 
-    /*
-     *The method calculateHash:
+    /**
+     * The method calculateHash: creates a hashed header of the block.
+     * @return hash(digest) of block
      */
     public final String calculateHash() {
         return StringUtil.applySha256(
@@ -44,9 +45,10 @@ class Block {
         );
     }
 
-    /*
-     * The method calcMerkleHash: takes each message(Blockchain transsaction) and creates a hash(digest) of it, and then
+    /**
+     * The method calcMerkleHash: takes each message(Blockchain transaction) and creates a hash(digest) of it, and then
      * uses them to create the Merkle root hash.
+     * @return  Merkle root, consisting of a blocks transaction hashes
      */
     public String calcMerkleHash() {
         List<String> hashedMessages = new ArrayList<>();
@@ -61,16 +63,18 @@ class Block {
         return merkleRootHash;
     }
 
-    /*
-     *The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node, then hashcount is init.
+    /**
+     * The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node, then hashCount is init.
      * For as long as i is less than amount of hashes, then hash i and i+1 get combined into a new hash and added to the
      * newNodes list. hashedCount iterates after a combination is made.  i is iterated by 2 beacuse 2 hashes are combined
      * each time.
-     *When out of for loop, nodeSize is checked aginst hashedCount to explore if any hashes remains uncombined. If yes,
-     *it is added to the newNodes list.
-     *Is recursive. The whole process starts again, with the now updated hash list : newNodes.
-     * When the newNode list has a size of 1, then the function returnes the first hash in list, which is now
+     * When out of for loop, nodeSize is checked against hashedCount to explore if any hashes remains uncombined. If yes,
+     * it is added to the newNodes list.
+     * Is recursive. The whole process starts again, with the now updated hash list : newNodes.
+     * When the newNode list has a size of 1, then the function returns the first hash in list, which is now
      * a Merkle root.
+     * @param nodes List<String> to generate a Merkle root
+     * @return nodes, or rather the newly generated merkle root , which is the first and only element in nodes list.
      */
     private String calculateMerkleRootHash(List<String> nodes) {
         if (nodes.size() > 1) {
@@ -95,7 +99,8 @@ class Block {
     }
 
 
-    public void mineBlock(int difficulty) {
+    public void mineBlock() {
+
 
 
     }

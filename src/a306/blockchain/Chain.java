@@ -2,19 +2,26 @@ package a306.blockchain;
 
 import java.math.BigInteger;
 
+
+/**
+ * The class chain: is used to adjust target difficulty and generate new target so the miners can create
+ * a block for the blockchain.
+ *
+ */
 public class Chain {
 
     // Two weeks (in seconds);wanted time for 2016 blocks.
     private static final long targetTimespan = 14 * 24 * 60 * 60;
 
-    //BigInteger is used for large Integers, i.e greater than 64-bit
-    //The BigInteger constructor: takes the string represenation of a big int and the base(radix) to make a BigInteger
-    //The proofOfWorkLimit is the max difficulty target
+    /*BigInteger is used for large Integers, i.e greater than 64-bit
+    * The BigInteger constructor: takes the string representation of a big int and the base(radix) to make a BigInteger
+    * The proofOfWorkLimit is the max difficulty target
+    */
     private static final BigInteger proofOfWorkLimit = new BigInteger("00000000FFFF0000000000000000000000000000000000000000000000000000", 16); // Highest target (difficulty 1)
     private static Target chainTarget = new Target(proofOfWorkLimit);
 
-    /*
-     * The function adjustDifficulty: ajusts the difficulty based on 'if the previous 2016 blocks took more than two
+    /**
+     * The function adjustDifficulty: adjusts the difficulty based on 'if the previous 2016 blocks took more than two
      * weeks to find, the difficulty is reduced. If they took less than two weeks, the difficulty is increased. '
      */
     void adjustDifficulty() {

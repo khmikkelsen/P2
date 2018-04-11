@@ -5,6 +5,11 @@ import java.math.BigInteger;
 import static a306.blockchain.DifficultyMath.appendZeros;
 import static a306.blockchain.DifficultyMath.zeroPadHex;
 
+/**
+ * The class target is used to convert targets from big integer type to compact type; to convert
+ * compact targets to big integer type.
+ */
+
 public class Target {
 
     private BigInteger bigIntegerTarget;
@@ -22,7 +27,7 @@ public class Target {
         this.bigIntegerTarget = calculateBigIntergerTarget();
     }
 
-    /*
+    /**
      *The function calculateCompactTarget: First) makes the target into base256;uses toString to make the BigInt
      *a base16 string. Also, zeroPadHex is used to check if hex string length is a multiple of two, else a leading zero is added;
      *this is for conversion into base256.
@@ -52,7 +57,7 @@ public class Target {
         return compactTarget;
     }
 
-    /*
+    /**
      *The function calculateBigIntegerTarget: uses compactTargets firt digit value to find length of the BigInt
      *representation. Then, gets the value of rest of digits. This data is used in a formula to convert compact form
      *into a BigInteger target.
