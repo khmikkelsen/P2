@@ -1,4 +1,4 @@
-package A306.Padding;
+package Padding;
 
 public class Cipher
 {

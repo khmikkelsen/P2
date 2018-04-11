@@ -1,9 +1,6 @@
-package a306.blockchain;
+package blockchain;
 
 import java.math.BigInteger;
-
-import static a306.blockchain.DifficultyMath.appendZeros;
-import static a306.blockchain.DifficultyMath.zeroPadHex;
 
 public class Target {
 
@@ -33,7 +30,7 @@ public class Target {
      * Third) check length of the base256 number;the length of number is then added as first digit of number.
      */
     private String calculateCompactTarget() {
-        String base256NewTarget = zeroPadHex(bigIntegerTarget.toString(16));
+        String base256NewTarget = DifficultyMath.zeroPadHex(bigIntegerTarget.toString(16));
 
         String firstDigit = base256NewTarget.substring(0, 2);
 
@@ -44,10 +41,10 @@ public class Target {
         int numberOfDigits = base256NewTarget.length() / 2;
 
         // Take first 6 digits in base256 representation.
-        String compactTarget = zeroPadHex(Integer.toString(numberOfDigits, 16))
+        String compactTarget = DifficultyMath.zeroPadHex(Integer.toString(numberOfDigits, 16))
                 + base256NewTarget.substring(0, Math.min(base256NewTarget.length(), 6));
 
-        compactTarget = appendZeros(compactTarget, 8);
+        compactTarget = DifficultyMath.appendZeros(compactTarget, 8);
 
         return compactTarget;
     }

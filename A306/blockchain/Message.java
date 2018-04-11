@@ -1,4 +1,4 @@
-package a306.blockchain;
+package blockchain;
 
 class Message {
     private String message;

@@ -1,4 +1,4 @@
-package A306.rsa;
+package rsa;
 
 import java.util.Random;
 

@@ -1,10 +1,10 @@
-package A306.Padding;
+package Padding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import A306.rsa.KeyPair;
+import rsa.KeyPair;
 
 public class Padding
 {
