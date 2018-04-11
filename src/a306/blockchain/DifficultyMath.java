@@ -8,7 +8,7 @@ public class DifficultyMath {
     /*
      *
      */
-    public static String prependZeros(String hexValue, int length) {
+    public static String appendZeros(String hexValue, int length) {
         while (hexValue.length() < length) {
             hexValue += "0";
         }
@@ -17,7 +17,7 @@ public class DifficultyMath {
     }
 
     /*
-     * The function prependZeros: is used for prepending(adding leading) zero to a hex number less
+     * The function appendZeros: is used for prepending(adding leading) zero to a hex number less
      * than a spesified length; in this case, if not a multiple of 2; for use when converting into base256
      */
     public static String zeroPadHex(String hexValue) {

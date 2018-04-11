@@ -2,7 +2,7 @@ package a306.blockchain;
 
 import java.math.BigInteger;
 
-import static a306.blockchain.DifficultyMath.prependZeros;
+import static a306.blockchain.DifficultyMath.appendZeros;
 import static a306.blockchain.DifficultyMath.zeroPadHex;
 
 public class Target {
@@ -47,7 +47,7 @@ public class Target {
         String compactTarget = zeroPadHex(Integer.toString(numberOfDigits, 16))
                 + base256NewTarget.substring(0, Math.min(base256NewTarget.length(), 6));
 
-        compactTarget = prependZeros(compactTarget, 8);
+        compactTarget = appendZeros(compactTarget, 8);
 
         return compactTarget;
     }
