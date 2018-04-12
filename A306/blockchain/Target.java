@@ -1,9 +1,13 @@
-package a306.blockchain;
+package A306.blockchain;
 
 import java.math.BigInteger;
 
-import static a306.blockchain.DifficultyMath.appendZeros;
-import static a306.blockchain.DifficultyMath.zeroPadHex;
+//import static A306.blockchain.DifficultyMath.appendZeros;
+//import static A306.blockchain.DifficultyMath.zeroPadHex;
+import static A306.blockchain.DifficultyMath.appendZeros;
+import static A306.blockchain.DifficultyMath.zeroPadHex;
+//import static blockchain.DifficultyMath.appendZeros;
+//import static blockchain.DifficultyMath.zeroPadHex;
 
 public class Target {
 
@@ -72,7 +76,7 @@ public class Target {
         return bigIntegerTarget;
     }
 
-    public String getCompactTarget() {
+    public  String getCompactTarget() {
         return compactTarget;
     }
 }

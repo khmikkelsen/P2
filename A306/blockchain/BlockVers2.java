@@ -1,34 +1,31 @@
 package A306.blockchain;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * This class is for creating blocks within a blockchain. See: Blockchain Technology.
- */
+//Prøver bare en anden måde at lave blok
 
-class Block {
+public class BlockVers2 {
+    String prevHeadhash;
+    String compactDifficulty = new A306.blockchain.Target(new Chain().getProofOfWorkLimit()).getCompactTarget();
+    private int nonce = 0; //'nonce starts at zero and is incremented at each hash'
+    String merkleRootHash;
+    long timestamp;
+    int index;
 
-    private String prevHeadhash;
-    private String compactDifficulty;
-    private int nonce;
-    private String merkleRootHash;
-    private long timestamp;
-
-    private String hash;
+    String hash;
     private List<Message> msg;
 
+    public BlockVers2(int index, long timestamp, List<Message> msg, String prevHeadHash) {
 
-
-    //The constructor for a block: creates block header at instance creation.
-
-    Block(String prevHeadHash, List<Message> msg) {
         this.msg = msg;
         this.prevHeadhash = prevHeadHash;
         this.timestamp = new Date().getTime();
-    }
+        this.index = index;
 
+    }
 
     /**
      * The method calculateHash: creates a hashed header of the block.
@@ -41,6 +38,7 @@ class Block {
                         + merkleRootHash
                         + Integer.toString(nonce)
                         + compactDifficulty
+                        + index
         );
     }
 
@@ -81,7 +79,7 @@ class Block {
 
             int hashedCount = 0;
 
-            for (int i = 0; i < nodes.size() - 1; i += 2) {
+            for (int i = 0; i < nodes.size() -   1; i += 2) {
                 String combinedHash = StringUtil.applySha256(nodes.get(i) + nodes.get(i + 1));
                 hashedCount += 2;
                 newNodes.add(combinedHash);
@@ -97,13 +95,6 @@ class Block {
         return nodes.get(0);
     }
 
-
-    public void mineBlock() {
-
-
-
-    }
-
     public long getTimestamp() {
         return timestamp;
     }
@@ -112,7 +103,6 @@ class Block {
         return compactDifficulty;
     }
 }
-
 
 
 

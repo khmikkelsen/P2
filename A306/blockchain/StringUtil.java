@@ -1,4 +1,4 @@
-package blockchain;
+package A306.blockchain;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

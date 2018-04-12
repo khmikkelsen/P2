@@ -1,4 +1,7 @@
-package a306.blockchain;
+
+package A306.blockchain;
+
+import A306.blockchain.StringUtil;
 
 class Message {
     private String message;

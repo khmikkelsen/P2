@@ -1,4 +1,6 @@
-package blockchain;
+package A306.blockchain;
+
+
 
 import java.math.BigInteger;
 
@@ -19,6 +21,16 @@ public class Chain {
     */
     private static final BigInteger proofOfWorkLimit = new BigInteger("00000000FFFF0000000000000000000000000000000000000000000000000000", 16); // Highest target (difficulty 1)
     private static Target chainTarget = new Target(proofOfWorkLimit);
+
+
+    /*public Target getTarget(){
+        return chainTarget;
+    }
+    */
+
+    public BigInteger getProofOfWorkLimit(){
+        return proofOfWorkLimit;
+    }
 
     /**
      * The function adjustDifficulty: adjusts the difficulty based on 'if the previous 2016 blocks took more than two
