@@ -1,104 +1,91 @@
-package rsa;
+package A306.rsa;
 
+import java.math.BigInteger;
 import java.util.Random;
 
 public class KeyPair
 {
-    private int p; // Skal være primtal
-    private int q; // Skal være primtal
-    private int lambda;
-    private int publicKey; // Public key eksponent
-    private int privateKey; // Private key eksponent
-    private int n = p*q;
+    private BigInteger p; // Skal være primtal
+    private BigInteger q; // Skal være primtal
+    private BigInteger lambda;
+    private BigInteger publicKey; // Public key eksponent
+    private BigInteger privateKey; // Private key eksponent
+    private BigInteger n;
 
     // Constructor
-    public KeyPair(int p, int q) throws IllegalArgumentException
+    public KeyPair(BigInteger p, BigInteger q) throws IllegalArgumentException
     {
-        if (p < 0 || q < 0)
-            throw new IllegalArgumentException("Negative primes not legal.");
+        if (p.compareTo(BigInteger.ONE) < 0 || q.compareTo(BigInteger.ONE) < 0)
+            throw new IllegalArgumentException("Negative primes are illegal.");
 
         this.p = p;
         this.q = q;
-        this.lambda = lcm(p - 1, q - 1);
-        this.publicKey = genPublic(p,q);
+        this.n = p.multiply(q);
+        this.lambda = lcm(p.subtract(BigInteger.ONE) , q.subtract(BigInteger.ONE));
+        this.publicKey = genPublic();
         this.privateKey = genPrivate(publicKey, lambda);
     }
 
     // Public key generation, som finder et tal som er co-prime med lambda = (lcm(p-1,q-1).
-    private int genPublic(int p, int q)
+    private BigInteger genPublic()
     {
         Random rand = new Random();
+        boolean coPrimeCheck = false;
 
-        int e = rand.nextInt(lambda-1) + 2; // rand e = 1 < e < lambda.
+        BigInteger e = BigInteger.probablePrime(1024, rand);
 
-        while (1 < e && e < lambda) {
+        while (!coPrimeCheck) {
 
-            if (isPrime(e) && gcd(e, lambda) == 1) // co-prime fundet hvis 1: et primtal, 2: gcd er 1 med lambda.
-                break;
+            if (e.gcd(lambda).equals(BigInteger.ONE))// co-prime fundet hvis 1: et primtal, 2: gcd er 1 med lambda.
+                coPrimeCheck = true;
             else
-                e = rand.nextInt(lambda-1) + 2;
+            {
+                rand = new Random();
+                e = BigInteger.probablePrime(1024, rand);
+            }
         }
 
         return e; // e er den tilhørende public key eksponent.
     }
 
     // lcm (least common multiple) ved reduktion af greatest common divisor (gcd).
-    private int lcm(int a, int b)
+    private BigInteger lcm(BigInteger a, BigInteger b)
     {
-        return (a / gcd(a,b)) * b;
-    }
+        BigInteger AGcdB = a.gcd(b);
+        BigInteger ATimesB = a.multiply(b);
 
-    // Rekursiv gcd funktion.
-    private int gcd(int x, int y)
-    {
-        if (y == 0)
-            return x;
-        else if ( x >= y && y > 0)
-            return gcd(y, x % y); // Hvis parametre er korrekt, kald funktion igen, med y og rest af x og y
-        else
-            return gcd(y, x); // Hvis y er større end x, kald funktion igen bare omvendt
-    }
-
-    // >>Kan effektiviseres<< Tjekker om et tal er primtal.
-    protected final boolean isPrime(int n)
-    {
-        for (int i = 2; i < n; i++)
-        {
-            if (n % i == 0)
-                return false;
-        }
-
-        return true;
+        return ATimesB.divide(AGcdB);
     }
 
     // Genererer private key.
-    private int genPrivate(int x, int y)
+    private BigInteger genPrivate(BigInteger x, BigInteger y)
     {
-        int roots[] = new int[2];
+        BigInteger roots[] = new BigInteger[2];
 
         roots = egcd(x, y, roots);
-        return (roots[0] * x) + (roots[1] * y) == 1 ? roots[1] : roots[0]; // Returnerer den af de to rødder, som opfylder ax+by = gcd(e,lambda) = 1.
+        return (roots[0].multiply(x).add(roots[1].multiply(y))).equals(BigInteger.ONE) ? roots[1] : roots[0]; // Returnerer den af de to rødder, som opfylder ax+by = gcd(e,lambda) = 1.
     }
 
     // Modular multiplikativ inverse ved hjælp af Euclid's Extended Algoritme.
-    private int[] egcd(int x, int y, int[] roots)
+    private BigInteger[] egcd(BigInteger x, BigInteger y, BigInteger[] roots)
     {
-        int a = 0, b = 1, prevA = 1, prevB = 0, temp, quotient, remainder;
+        BigInteger a = BigInteger.ZERO, b = BigInteger.ONE, prevA = BigInteger.ONE,
+                   prevB = BigInteger.ZERO, temp, quotient, remainder;
 
-        while(y != 0)
+        while(y.compareTo(BigInteger.ZERO) != 0)
         {
-            quotient = x / y;
-            remainder = x % y;
+            quotient = x.divide(y);
+            remainder = x.mod(y);
 
             x = y;
             y = remainder;
 
             temp = a;
-            a = prevA - quotient * a;
+            a = prevA.subtract(quotient.multiply(a));
             prevA = temp;
 
             temp = b;
-            b = prevB - quotient * b;
+            b = prevB.subtract(quotient.multiply(b));
             prevB = temp;
         }
 
@@ -109,14 +96,7 @@ public class KeyPair
     }
 
     // Getters
-    public int getPublicKey(int x)
-    {
-        int[] publicKeys = {this.n, this.publicKey};
-
-        return publicKeys[x];
-    }
-    public int getPrivateKey()
-    {
-        return this.privateKey;
-    }
+    public BigInteger getPublicKey() { return this.n; }
+    public BigInteger getPublicE() { return this.publicKey; }
+    public BigInteger getPrivateKey() { return this.privateKey; }
 }
