@@ -10,7 +10,7 @@ import java.util.List;
 public class BlockVers2 {
     String prevHeadhash;
     String compactDifficulty = new A306.blockchain.Target(new Chain().getProofOfWorkLimit()).getCompactTarget();
-    private int nonce = 0; //'nonce starts at zero and is incremented at each hash'
+    int nonce = 0; //'nonce starts at zero and is incremented at each hash'
     String merkleRootHash;
     long timestamp;
     int index;
@@ -18,18 +18,14 @@ public class BlockVers2 {
     String hash;
     private List<Message> msg;
 
-    public BlockVers2(int index, long timestamp, List<Message> msg, String prevHeadHash) {
-
-        this.msg = msg;
-        this.prevHeadhash = prevHeadHash;
-        this.timestamp = new Date().getTime();
+    public BlockVers2(int index) {
         this.index = index;
 
     }
 
     /**
      * The method calculateHash: creates a hashed header of the block.
-     * @return hash(digest) of block
+     * @return hash of block
      */
     public final String calculateHash() {
         return StringUtil.applySha256(
@@ -43,11 +39,11 @@ public class BlockVers2 {
     }
 
     /**
-     * The method calcMerkleHash: takes each message(Blockchain transaction) and creates a hash(digest) of it, and then
+     * The method calcMerkleHash: takes each message(Blockchain transaction) and creates a hash of it, and then
      * uses them to create the Merkle root hash.
      * @return  Merkle root, consisting of a blocks transaction hashes
      */
-    public String calcMerkleHash() {
+    public String calcMerkleHash(List<Message> msg) {
         List<String> hashedMessages = new ArrayList<>();
 
         for (Message m : msg) {
@@ -61,7 +57,7 @@ public class BlockVers2 {
     }
 
     /**
-     * The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node, then hashCount is init.
+     * The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node.
      * For as long as i is less than amount of hashes, then hash i and i+1 get combined into a new hash and added to the
      * newNodes list. hashedCount iterates after a combination is made.  i is iterated by 2 beacuse 2 hashes are combined
      * each time.
@@ -70,7 +66,7 @@ public class BlockVers2 {
      * Is recursive. The whole process starts again, with the now updated hash list : newNodes.
      * When the newNode list has a size of 1, then the function returns the first hash in list, which is now
      * a Merkle root.
-     * @param nodes List<String> to generate a Merkle root
+     * @param nodes to generate a Merkle root from
      * @return nodes, or rather the newly generated merkle root , which is the first and only element in nodes list.
      */
     private String calculateMerkleRootHash(List<String> nodes) {
@@ -93,6 +89,10 @@ public class BlockVers2 {
         }
 
         return nodes.get(0);
+    }
+
+    public int getNonce(){
+        return nonce;
     }
 
     public long getTimestamp() {

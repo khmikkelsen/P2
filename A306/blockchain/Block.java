@@ -32,7 +32,7 @@ class Block {
 
     /**
      * The method calculateHash: creates a hashed header of the block.
-     * @return hash(digest) of block
+     * @return hash of block
      */
     public final String calculateHash() {
         return StringUtil.applySha256(
@@ -63,16 +63,16 @@ class Block {
     }
 
     /**
-     * The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node, then hashCount is init.
+     * The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node;
      * For as long as i is less than amount of hashes, then hash i and i+1 get combined into a new hash and added to the
-     * newNodes list. hashedCount iterates after a combination is made.  i is iterated by 2 beacuse 2 hashes are combined
+     * newNodes list. hashedCount iterates after a combination is made.  i is iterated by 2 because 2 hashes are combined
      * each time.
      * When out of for loop, nodeSize is checked against hashedCount to explore if any hashes remains uncombined. If yes,
      * it is added to the newNodes list.
      * Is recursive. The whole process starts again, with the now updated hash list : newNodes.
      * When the newNode list has a size of 1, then the function returns the first hash in list, which is now
      * a Merkle root.
-     * @param nodes List<String> to generate a Merkle root
+     * @param nodes  to generate a Merkle root from
      * @return nodes, or rather the newly generated merkle root , which is the first and only element in nodes list.
      */
     private String calculateMerkleRootHash(List<String> nodes) {

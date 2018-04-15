@@ -14,7 +14,7 @@ public class StringUtil {
      * The function applySha256: creates an instance of the sha256 message digest algorithm.
      * First) the message is converted to a sequence of bytes and a byte array is returned.
      * Second) the sha256 algorithm is used upon this array and a hash is returned.
-     * @param input String to create hash
+     * @param input String to create hash from
      * @return Hashed string in hex format.
      */
     public static String applySha256(String input) {

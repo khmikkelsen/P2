@@ -8,6 +8,7 @@ import java.util.List;
 public class BlockchainChain {
 
     LinkedList<BlockVers2> chain = new LinkedList<BlockVers2>();
+    List<Message> msg;
 
     public BlockchainChain() {
 
@@ -19,7 +20,14 @@ public class BlockchainChain {
     private BlockVers2 createGenesisBlock() {
         List<Message> genesis = new ArrayList<>();
         genesis.add(new Message("GenesisBlock"));
-        return new BlockVers2(0, new Date().getTime(), genesis, "0");
+        BlockVers2 genesisBlock = new BlockVers2(0);
+        genesisBlock.timestamp = new Date().getTime();
+        genesisBlock.prevHeadhash = "0";
+        genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
+        genesisBlock.nonce = 0;
+        genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty();
+        return genesisBlock;
+                //BlockVers2(0, new Date().getTime(), genesis, "0");
     }
 
     //Get latest block in chain for further use
@@ -29,17 +37,18 @@ public class BlockchainChain {
 
 
 
-    //Add new block to chain if mining is less than target. Not sure how mining will work yet!
+    //Add new block to chain if mining produces required target (amount of leading zeros).
     private void addBlock(BlockVers2 in) {
 
 
         in.timestamp = in.getTimestamp();
         in.prevHeadhash = getLatestBlock().calculateHash();
         in.hash = in.calculateHash();
-        in.merkleRootHash = in.calcMerkleHash();
+        in.merkleRootHash = in.calcMerkleHash(msg);
         in.compactDifficulty = in.getCompactDifficulty();
+        in.nonce = in.getNonce();
         chain.push(in);
-        in.index = chain.indexOf(in);
+        in.index = chain.indexOf(chain.getLast());
 
     }
 

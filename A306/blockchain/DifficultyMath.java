@@ -1,7 +1,5 @@
 package A306.blockchain;
 
-import java.math.BigInteger;
-
 public class DifficultyMath {
 
 
@@ -21,8 +19,7 @@ public class DifficultyMath {
     }
 
     /**
-     * The function appendZeros: is used for prepending(adding leading) zero to a hex number less
-     * than a specified length; in this case, if not a multiple of 2; for use when converting into base256
+     * The function ZeroPadHex is used to prepend a zero for numbers not a multiple of 2.
      * @param hexValue String to add padding for a hex value
      * @return padded hex value
      */

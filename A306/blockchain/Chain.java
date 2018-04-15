@@ -6,7 +6,7 @@ import java.math.BigInteger;
 
 
 /**
- * The class chain: is used to adjust target difficulty and generate new target so the miners can create
+ * The class chain: is used to adjust target difficulty and generate new target so that the miners can create
  * a block for the blockchain.
  *
  */
