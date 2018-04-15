@@ -17,9 +17,10 @@ public class Chain {
 
     /*BigInteger is used for large Integers, i.e greater than 64-bit
     * The BigInteger constructor: takes the string representation of a big int and the base(radix) to make a BigInteger
-    * The proofOfWorkLimit is the max difficulty target
+    * The proofOfWorkLimit : is maximum target, and is what difficulty 1 sets the hash block
+    * target as. (the bits field  is compact difficulty)
     */
-    private static final BigInteger proofOfWorkLimit = new BigInteger("00000000FFFF0000000000000000000000000000000000000000000000000000", 16); // Highest target (difficulty 1)
+    private static final BigInteger proofOfWorkLimit = new BigInteger("00000000 FF FF 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00", 16); // Highest target (difficulty 1)
     private static Target chainTarget = new Target(proofOfWorkLimit);
 
 
