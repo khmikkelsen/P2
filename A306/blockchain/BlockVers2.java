@@ -119,10 +119,14 @@ public class BlockVers2 {
         String mineHash2 = applySha256(minedHash);
 
 
-        if(mineHash2.nuller == tearget.nuller){
+        while(!mineHash2.nuller <= tearget.nuller){
+            nonce++;
+            genesisBlock.calculateHash();
+            BlockchainChain.generateGenesis(genesisBlock);
+            }
+
             BlockchainChain.generateGenesis(genesisBlock);
 
-            }
 
 
         /* 1)Collect transactions from the transaction pool and build a complete block such that its size does
