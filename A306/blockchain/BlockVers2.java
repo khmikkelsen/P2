@@ -21,7 +21,7 @@ public class BlockVers2 {
     private List<Message> msg;
 
     public BlockVers2() {
-        this.index = index;
+        timestamp = new Date().getTime();
 
     }
 
@@ -106,37 +106,9 @@ public class BlockVers2 {
         return compactDifficulty;
     }
 
-    public void mineBlockGenisis(){
-        List<Message> genesis = new ArrayList<>();
-        genesis.add(new Message("GenesisBlock"));
-        BlockVers2 genesisBlock = new BlockVers2();
-        genesisBlock.timestamp = new Date().getTime();
-        genesisBlock.prevHeadhash = "0";
-        genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
-        genesisBlock.nonce = getNonce();
-        genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty(); //difficulty 1 is at start
-        String minedHash = genesisBlock.calculateHash();
-        String mineHash2 = applySha256(minedHash);
-
-
-        while(!mineHash2.nuller <= tearget.nuller){
-            nonce++;
-            genesisBlock.calculateHash();
-            }
-
-            BlockchainChain.generateGenesis(genesisBlock);
 
 
 
-        /* 1)Collect transactions from the transaction pool and build a complete block such that its size does
-         * not exceed 1 MB.
-         * 2)Calculate the hash by applying SHA-256 twice to the Block header:
-         * (Version + Previous Block Hash + Merkle Root + Timestamp + Difficulty Bits + Nonce )
-         * Compare the result of Step # 2 with the expected number of zeros. If not matched then increment the nonce by
-         * 1 and go back to Step # 1. Technically speaking the hash value is compared with a target.
-         */
-
-    }
 }
 
 
