@@ -20,7 +20,7 @@ public class BlockchainChain {
     private BlockVers2 createGenesisBlock() {
         List<Message> genesis = new ArrayList<>();
         genesis.add(new Message("GenesisBlock"));
-        BlockVers2 genesisBlock = new BlockVers2(0);//Note: change til 0 og remove constructor param. index
+        BlockVers2 genesisBlock = new BlockVers2();
         genesisBlock.timestamp = new Date().getTime();
         genesisBlock.prevHeadhash = "0";
         genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
@@ -28,7 +28,6 @@ public class BlockchainChain {
         genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty(); //difficulty 1 is at start
         genesisBlock.calculateHash();
         return genesisBlock;
-                //BlockVers2(0, new Date().getTime(), genesis, "0");
     }
 
     //Get latest block in chain for further use

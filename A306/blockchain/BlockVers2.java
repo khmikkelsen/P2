@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static A306.blockchain.StringUtil.applySha256;
+
 //Prøver bare en anden måde at lave blok
 
 public class BlockVers2 {
@@ -18,7 +20,7 @@ public class BlockVers2 {
     String hash;
     private List<Message> msg;
 
-    public BlockVers2(int index) {
+    public BlockVers2() {
         this.index = index;
 
     }
@@ -28,7 +30,7 @@ public class BlockVers2 {
      * @return hash of block
      */
     public final String calculateHash() {
-        return StringUtil.applySha256(
+        return applySha256(
                 prevHeadhash
                         + Long.toString(timestamp)
                         + merkleRootHash
@@ -77,7 +79,7 @@ public class BlockVers2 {
             int hashedCount = 0;
 
             for (int i = 0; i < nodes.size() -   1; i += 2) {
-                String combinedHash = StringUtil.applySha256(nodes.get(i) + nodes.get(i + 1));
+                String combinedHash = applySha256(nodes.get(i) + nodes.get(i + 1));
                 hashedCount += 2;
                 newNodes.add(combinedHash);
             }
@@ -105,6 +107,16 @@ public class BlockVers2 {
     }
 
     public boolean mineBlock(){
+        BlockVers2 blockMined = new BlockVers2();
+        String minedHash = blockMined.calculateHash();
+        String mineHash2 = applySha256(minedHash);
+
+
+        if(mineHash2.nuller == tearget.nuller){
+            
+        }
+
+
         /* 1)Collect transactions from the transaction pool and build a complete block such that its size does
          * not exceed 1 MB.
          * 2)Calculate the hash by applying SHA-256 twice to the Block header:
