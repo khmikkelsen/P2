@@ -106,14 +106,14 @@ public class BlockVers2 {
         return compactDifficulty;
     }
 
-    public boolean mineBlockGenisis(){
+    public void mineBlockGenisis(){
         List<Message> genesis = new ArrayList<>();
         genesis.add(new Message("GenesisBlock"));
         BlockVers2 genesisBlock = new BlockVers2();
         genesisBlock.timestamp = new Date().getTime();
         genesisBlock.prevHeadhash = "0";
         genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
-        genesisBlock.nonce = 0;//?
+        genesisBlock.nonce = getNonce();
         genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty(); //difficulty 1 is at start
         String minedHash = genesisBlock.calculateHash();
         String mineHash2 = applySha256(minedHash);
@@ -122,7 +122,6 @@ public class BlockVers2 {
         while(!mineHash2.nuller <= tearget.nuller){
             nonce++;
             genesisBlock.calculateHash();
-            BlockchainChain.generateGenesis(genesisBlock);
             }
 
             BlockchainChain.generateGenesis(genesisBlock);
@@ -136,7 +135,7 @@ public class BlockVers2 {
          * Compare the result of Step # 2 with the expected number of zeros. If not matched then increment the nonce by
          * 1 and go back to Step # 1. Technically speaking the hash value is compared with a target.
          */
-        return true;
+
     }
 }
 
