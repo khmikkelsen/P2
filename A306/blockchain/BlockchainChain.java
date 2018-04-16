@@ -7,27 +7,18 @@ import java.util.List;
 
 public class BlockchainChain {
 
-    LinkedList<BlockVers2> chain = new LinkedList<BlockVers2>();
+    LinkedList<BlockVers2> chain;
     List<Message> msg;
 
     public BlockchainChain() {
 
-        chain.add(createGenesisBlock());
-
+        chain = new LinkedList<BlockVers2>();
     }
 
     //Create the genesis block; Note: Not finished
-    private BlockVers2 createGenesisBlock() {
-        List<Message> genesis = new ArrayList<>();
-        genesis.add(new Message("GenesisBlock"));
-        BlockVers2 genesisBlock = new BlockVers2();
-        genesisBlock.timestamp = new Date().getTime();
-        genesisBlock.prevHeadhash = "0";
-        genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
-        genesisBlock.nonce = 0;//?
-        genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty(); //difficulty 1 is at start
-        genesisBlock.calculateHash();
-        return genesisBlock;
+     static void generateGenesis(BlockVers2 g) {
+
+        new BlockchainChain().chain.add(g);
     }
 
     //Get latest block in chain for further use

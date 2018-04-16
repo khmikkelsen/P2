@@ -106,15 +106,23 @@ public class BlockVers2 {
         return compactDifficulty;
     }
 
-    public boolean mineBlock(){
-        BlockVers2 blockMined = new BlockVers2();
-        String minedHash = blockMined.calculateHash();
+    public boolean mineBlockGenisis(){
+        List<Message> genesis = new ArrayList<>();
+        genesis.add(new Message("GenesisBlock"));
+        BlockVers2 genesisBlock = new BlockVers2();
+        genesisBlock.timestamp = new Date().getTime();
+        genesisBlock.prevHeadhash = "0";
+        genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
+        genesisBlock.nonce = 0;//?
+        genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty(); //difficulty 1 is at start
+        String minedHash = genesisBlock.calculateHash();
         String mineHash2 = applySha256(minedHash);
 
 
         if(mineHash2.nuller == tearget.nuller){
-            
-        }
+            BlockchainChain.generateGenesis(genesisBlock);
+
+            }
 
 
         /* 1)Collect transactions from the transaction pool and build a complete block such that its size does
