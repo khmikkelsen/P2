@@ -1,4 +1,4 @@
-package A306.blockchain;
+package blockchain;
 
 import java.util.ArrayList;
 import java.util.Date;

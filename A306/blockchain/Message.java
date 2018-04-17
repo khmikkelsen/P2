@@ -1,9 +1,9 @@
 
-package A306.blockchain;
+package blockchain;
 
-import A306.blockchain.StringUtil;
+import blockchain.StringUtil;
 
-//Is message signed or unsigned and is sender/receiver public keys?
+//Is message signed or unsigned, and is sender/receiver public keys? is it the message encrypted before signing?
 /* Signing message and public key encryption:
  * 1) hash message, fx sha256
  * 2) Encrypt digest with private key of sender; "Thus, an encrypted hash value is obtained". Use fx
@@ -17,7 +17,6 @@ import A306.blockchain.StringUtil;
  */
 class Message {
     private String message;
-    private String sender;
     private String recipient;
 
     public Message(String message) {
@@ -26,7 +25,6 @@ class Message {
 
     public String calculateHash() {
         return StringUtil.applySha256(message
-                + sender
                 + recipient);
     }
 }

@@ -9,18 +9,36 @@ public class Main {
 
 
 //
-//        list.add(new Message("a"));
-//        list.add(new Message("b"));
-//        list.add(new Message("c"));
+        list.add(new Message("a"));
+        list.add(new Message("b"));
+        list.add(new Message("c"));
 //        list.add(new Message("d"));
 //        list.add(new Message("f"));
 //
-//        Block b = new Block("prevHash", list);
+
+        BlockchainChain chain = new BlockchainChain();
+        chain.generateGenesis();
+
+        chain.addBlock(list);
+        chain.isChainValid();
+
+        System.out.println(chain);
+        System.out.println("Done");
+
+        List<Message> testList = new ArrayList<>();
+
+
 //
-//        b.calcMerkleHash();
+        testList.add(new Message("a"));
+        testList.add(new Message("b"));
+        testList.add(new Message("c"));
+        BlockVers2 b = new BlockVers2("", Chain.getTarget().getCompactTarget(), 1, testList);
+        b.calcMerkleHash();
 
-        Chain c = new Chain();
+        String testMerkleHash = b.getMerkleRootHash();
 
-        c.adjustDifficulty();
+        if (testMerkleHash.equals(chain.getBlock(1).getMerkleRootHash())) {
+            System.out.println("The merkle roots are equal");
+        }
     }
 }

@@ -1,38 +1,39 @@
-package A306.blockchain;
+package blockchain;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import static A306.blockchain.StringUtil.applySha256;
+import static blockchain.StringUtil.applySha256;
 
 public class BlockchainChain {
 
     LinkedList<BlockVers2> chain;
-    List<Message> msg;
+
 
     public BlockchainChain() {
-
         chain = new LinkedList<BlockVers2>();
     }
 
-    private BlockVers2 mineBlockGenisis(){
+    private BlockVers2 mineBlockGenisis() {
         List<Message> genesis = new ArrayList<>();
         genesis.add(new Message("GenesisBlock"));
-        BlockVers2 genesisBlock = new BlockVers2();
-        genesisBlock.timestamp = new Date().getTime();
-        genesisBlock.prevHeadhash = "0";
-        genesisBlock.merkleRootHash = genesisBlock.calcMerkleHash(genesis);
-        genesisBlock.nonce = genesisBlock.getNonce();
-        genesisBlock.compactDifficulty = genesisBlock.getCompactDifficulty(); //difficulty 1 is at start
-        String minedHash = genesisBlock.calculateHash();
-        String mineHash2 = applySha256(minedHash);
 
 
-        while(!mineHash2.nuller <= tearget.nuller){
-            nonce++;
-            genesisBlock.calculateHash();
+        String prevHeadhash = "0000000000000000000000000000000000000000000000000000000000000000";
+
+        BlockVers2 genesisBlock = new BlockVers2(prevHeadhash, Chain.getTarget().getCompactTarget(), chain.size(), genesis);
+        genesisBlock.calcMerkleHash();
+
+        while (new BigInteger(genesisBlock.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
+            if (genesisBlock.nonce == Integer.MAX_VALUE) {
+                genesisBlock.nonce = 0;
+                genesisBlock.setTimestamp(new Date().getTime());
+            } else {
+                genesisBlock.nonce++;
+            }
         }
 
         return genesisBlock;
@@ -48,64 +49,82 @@ public class BlockchainChain {
     }
 
     //Create the genesis block; Note: Not finished
-     private void generateGenesis() {
+    public void generateGenesis() {
+        if (chain.size() > 0) {
+            return;
+        }
+
         BlockVers2 g = mineBlockGenisis();
-         chain.add(g);
-         g.index = chain.indexOf(chain.getLast());
+        chain.add(g);
     }
 
     //Get latest block in chain for further use
-    private BlockVers2 getLatestBlock(){
+    private BlockVers2 getLatestBlock() {
         return chain.getLast();
     }
 
-    private BlockVers2 mineBlock(){
-        BlockVers2 b = new BlockVers2();
-        b.timestamp = b.getTimestamp();
-        b.prevHeadhash = getLatestBlock().calculateHash();
-        b.hash = b.calculateHash();
-        b.merkleRootHash = b.calcMerkleHash(msg);
-        b.compactDifficulty = b.getCompactDifficulty();
-        b.nonce = b.getNonce();
-        String minedHash = b.calculateHash();
-        String mineHash2 = applySha256(minedHash);
+    private BlockVers2 mineBlock(List<Message> msg) {
+        String prevHeadhash = getLatestBlock().calculateHash();
+        BlockVers2 b = new BlockVers2(prevHeadhash, Chain.getTarget().getCompactTarget(), chain.size(), msg);
+        b.calcMerkleHash();
 
-        while(!mineHash2.nuller <= target.nuller){
-            nonce++;
-            b.calculateHash();
+        while (new BigInteger(b.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
+            if (b.nonce == Integer.MAX_VALUE) {
+                b.nonce = 0;
+                b.setTimestamp(new Date().getTime());
+            } else {
+                b.nonce++;
+            }
         }
 
         return b;
-
     }
 
 
-
-
     //Add new block to chain if mining produces required target (amount of leading zeros).
-    private void addBlock() {
-        BlockVers2 in = mineBlock();
+    public void addBlock(List<Message> messages) {
+        if (chain.size() % 2016 == 0 && chain.size() > 0) {
+            Chain.adjustDifficulty(chain.getLast(), chain.get(chain.size() - 1 - 2016));
+        }
+
+        BlockVers2 in = mineBlock(messages);
         chain.add(in);
-        in.index = chain.indexOf(chain.getLast());
 
     }
 
     //check if blocks are valid
-    private boolean isChainValid() {
-        for (int i = 1; i < chain.size(); i++) {
+        void isChainValid() {
+        for (int i = 0; i < chain.size() - 1; i++) {
 
             final BlockVers2 currentBlock = chain.get(i);
-            final BlockVers2 prevBlock = chain.get(i - 1);
+            final BlockVers2 prevBlock = chain.get(i + 1);
 
-            if (currentBlock.hash.equals(currentBlock.calculateHash())) {
-                return false;
+            if (currentBlock.calculateHash().equals(currentBlock.calculateHash())) {
+                System.out.println("True");
             }
 
-            if (prevBlock.hash.equals(prevBlock.calculateHash())){
-                return false;
+            if (prevBlock.calculateHash().equals(prevBlock.calculateHash())) {
+                System.out.println("True");
             }
+
+            else
+                System.out.println("false");
 
         }
-        return true;
+
+
+        
+
+    }
+
+    @Override
+    public String toString() {
+        return "BlockchainChain{" +
+                "chain=" + chain +
+                '}';
+    }
+
+    public BlockVers2 getBlock(int i) {
+        return chain.get(i);
     }
 }

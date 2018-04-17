@@ -1,4 +1,4 @@
-package A306.blockchain;
+package blockchain;
 
 public class DifficultyMath {
 

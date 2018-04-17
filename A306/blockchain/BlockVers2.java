@@ -1,17 +1,15 @@
-package A306.blockchain;
+package blockchain;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static A306.blockchain.StringUtil.applySha256;
-
 //Prøver bare en anden måde at lave blok
 
 public class BlockVers2 {
     String prevHeadhash;
-    String compactDifficulty = new A306.blockchain.Target(new Chain().getProofOfWorkLimit()).getCompactTarget();
+    String compactDifficulty;
     int nonce = 0; //'nonce starts at zero and is incremented at each hash'
     String merkleRootHash;
     long timestamp;
@@ -20,17 +18,22 @@ public class BlockVers2 {
     String hash;
     private List<Message> msg;
 
-    public BlockVers2() {
+    public BlockVers2(String prevHeadhash, String compactDifficulty, int index, List<Message> msg) {
         timestamp = new Date().getTime();
 
+        this.prevHeadhash = prevHeadhash;
+        this.compactDifficulty = compactDifficulty;
+        this.index = index;
+        this.msg = msg;
     }
 
     /**
      * The method calculateHash: creates a hashed header of the block.
+     *
      * @return hash of block
      */
     public final String calculateHash() {
-        return applySha256(
+        return StringUtil.applySha256(
                 prevHeadhash
                         + Long.toString(timestamp)
                         + merkleRootHash
@@ -44,9 +47,10 @@ public class BlockVers2 {
     /**
      * The method calcMerkleHash: takes each message(Blockchain transaction) and creates a hash of it, and then
      * uses them to create the Merkle root hash.
-     * @return  Merkle root, consisting of a blocks transaction hashes
+     *
+     * @return Merkle root, consisting of a blocks transaction hashes
      */
-    public String calcMerkleHash(List<Message> msg) {
+    public void calcMerkleHash() {
         List<String> hashedMessages = new ArrayList<>();
 
         for (Message m : msg) {
@@ -55,8 +59,7 @@ public class BlockVers2 {
         // The list of hashes are given to calculateMerklerootHash function; a Merkle root is returned.
         String merkleRootHash = calculateMerkleRootHash(hashedMessages);
 
-        System.out.println(merkleRootHash);
-        return merkleRootHash;
+        this.merkleRootHash = merkleRootHash;
     }
 
     /**
@@ -69,6 +72,7 @@ public class BlockVers2 {
      * Is recursive. The whole process starts again, with the now updated hash list : newNodes.
      * When the newNode list has a size of 1, then the function returns the first hash in list, which is now
      * a Merkle root.
+     *
      * @param nodes to generate a Merkle root from
      * @return nodes, or rather the newly generated merkle root , which is the first and only element in nodes list.
      */
@@ -78,8 +82,8 @@ public class BlockVers2 {
 
             int hashedCount = 0;
 
-            for (int i = 0; i < nodes.size() -   1; i += 2) {
-                String combinedHash = applySha256(nodes.get(i) + nodes.get(i + 1));
+            for (int i = 0; i < nodes.size() - 1; i += 2) {
+                String combinedHash = StringUtil.applySha256(nodes.get(i) + nodes.get(i + 1));
                 hashedCount += 2;
                 newNodes.add(combinedHash);
             }
@@ -94,7 +98,7 @@ public class BlockVers2 {
         return nodes.get(0);
     }
 
-    public int getNonce(){
+    public int getNonce() {
         return nonce;
     }
 
@@ -107,8 +111,13 @@ public class BlockVers2 {
     }
 
 
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
-
+    public String getMerkleRootHash() {
+        return merkleRootHash;
+    }
 }
 
 

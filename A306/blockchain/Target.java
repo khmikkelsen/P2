@@ -1,8 +1,6 @@
-package A306.blockchain;
+package blockchain;
 
 import java.math.BigInteger;
-import static A306.blockchain.DifficultyMath.appendZeros;
-import static A306.blockchain.DifficultyMath.zeroPadHex;
 
 /**
  * This class is for Target conversion. From compact to base256 and vice versa.
@@ -38,7 +36,7 @@ public class Target {
      * Fourth) Check length of compact number, bust be 4 base256 digits or 8 hex digits
      */
     private String calculateCompactTarget() {
-        String base256NewTarget = zeroPadHex(bigIntegerTarget.toString(16));
+        String base256NewTarget = DifficultyMath.zeroPadHex(bigIntegerTarget.toString(16));
 
         String firstDigit = base256NewTarget.substring(0, 2); //range is exclusive
 
@@ -49,10 +47,10 @@ public class Target {
         int numberOfDigits = base256NewTarget.length() / 2;
 
         // Take first 6 hex digits
-        String compactTarget = zeroPadHex(Integer.toString(numberOfDigits, 16))
+        String compactTarget = DifficultyMath.zeroPadHex(Integer.toString(numberOfDigits, 16))
                 + base256NewTarget.substring(0, Math.min(base256NewTarget.length(), 6));
 
-        compactTarget = appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
+        compactTarget = DifficultyMath.appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
 
         return compactTarget;
     }
