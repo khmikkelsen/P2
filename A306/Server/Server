@@ -1,0 +1,120 @@
+package p2.communication;
+
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main
+{
+    // Main method.
+    public static void main(String[] args)
+    {
+        // Streams.
+        List<BufferedReader> readers = new ArrayList<>();
+        List<BufferedWriter> writers = new ArrayList<>();
+        PrintWriter console = new PrintWriter(System.out, true);
+
+        //Connections.
+        List<Socket> sockets = new ArrayList<>();
+
+        try
+        {
+            console.println("Connecting...");
+            ServerSocket server = new ServerSocket(1);
+            connectSockets(e -> e, true, server, sockets, readers, writers, console);
+            communicate(writers, readers);
+        }
+
+        catch (IOException e)
+        {
+            console.println("Server not setup: " + e.getMessage());
+        }
+    }
+
+    // Searches after connections.
+    private static <T> void connectSockets(Tester<T> tester, T t, ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
+    {
+        int i = 0;
+        Socket s;
+
+        while (tester.test(t))
+        {
+            try
+            {
+                s = server.accept();
+
+                if (s.isConnected())
+                {
+                    sockets.add(s);
+                    console.println("Client connected.");
+                    setupStreams(s, readers, writers);
+                    communicate(writers, readers);
+                    i++;
+                }
+            }
+
+            catch (IOException e)
+            {
+                continue;
+            }
+        }
+    }
+
+    // Setting up streams.
+    private static void setupStreams(Socket socket, List<BufferedReader> readers, List<BufferedWriter> writers)
+    {
+        try
+        {
+            readers.add(new BufferedReader(new InputStreamReader(socket.getInputStream())));
+            writers.add(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())));
+        }
+
+        catch (IOException e)
+        {
+            socket = null;
+        }
+    }
+
+    // Receive messages and send.
+    private static void communicate(List<BufferedWriter> writers, List<BufferedReader> readers)
+    {
+        String message;
+
+        for (int i = 0; i < readers.size(); i++)
+        {
+            try
+            {
+                message = readers.get(i).readLine();
+
+                if (message.length() > 0)
+                    sendMessage(writers, message);
+            }
+
+            catch (IOException e)
+            {
+                continue;
+            }
+        }
+    }
+
+    // Send message to connected clients.
+    private static void sendMessage(List<BufferedWriter> writers, String message)
+    {
+        for (int i = 0; i < writers.size(); i++)
+        {
+            try
+            {
+                writers.get(i).write(message);
+                writers.get(i).newLine();
+                writers.get(i).flush();
+            }
+
+            catch (IOException e)
+            {
+
+            }
+        }
+    }
+}
