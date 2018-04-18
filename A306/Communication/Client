@@ -1,9 +1,109 @@
 package p2.communication;
 
+import java.io.*;
+import java.net.Socket;
+
 public class Main
 {
+    // Main method.
     public static void main(String[] args)
     {
-	
+        BufferedWriter writer = null;
+        BufferedReader reader = null;
+        PrintWriter console = new PrintWriter(System.out, true);
+        Socket connection = null;
+
+        // Setting up.
+        console.println("Connecting to server...");
+        setupConnection(reader, writer, connection, console, "127.0.0.1", 1);
+        console.println("Connected to server.\nStarting chat...");
+
+        if (writer != null && reader != null)
+            chat(reader, writer, console);
+    }
+
+    // Ending session.
+    private static void endSession(PrintWriter console, String message)
+    {
+        console.println(message);
+        System.exit(1);
+    }
+
+    // Sets up connection and streams.
+    private static void setupConnection(BufferedReader reader, BufferedWriter writer, Socket socket, PrintWriter console, String IP, int port)
+    {
+        try
+        {
+            socket = new Socket(IP, port);
+            setupStreams(socket, writer, reader, console);
+        }
+
+        catch (IOException e)
+        {
+            console.println("Could not connect to server.");
+            endSession(console, "Session ended.");
+        }
+    }
+
+    // Setting up streams.
+    private static void setupStreams(Socket socket, BufferedWriter writer, BufferedReader reader, PrintWriter console)
+    {
+        try
+        {
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        }
+
+        catch (IOException e)
+        {
+            console.println("Could not setup streams.");
+        }
+    }
+
+    // chatting with server.
+    private static void serverWrite(BufferedWriter writer, String message) throws IOException
+    {
+        writer.write(message);
+        writer.newLine();
+        writer.flush();
+    }
+
+    // Receive message from server.
+    private static String getMessage(BufferedReader reader) throws IOException
+    {
+        String message;
+
+        while (true)
+        {
+            message = reader.readLine();
+
+            if (message.length() > 0)
+                return message;
+        }
+    }
+
+    // Chat.
+    private static void chat(BufferedReader reader, BufferedWriter writer, PrintWriter console)
+    {
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        String message;
+
+        while (true)
+        {
+            try
+            {
+                console.println(reader.readLine());
+                message = input.readLine();     // Reads String from console.
+
+                if (message.length() > 0)
+                    serverWrite(writer, message);
+            }
+
+            catch (IOException e)
+            {
+                console.println("IOException: " + e.getMessage());
+                break;
+            }
+        }
     }
 }
