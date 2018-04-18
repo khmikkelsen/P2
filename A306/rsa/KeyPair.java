@@ -23,21 +23,21 @@ public class KeyPair
         this.n = p.multiply(q);
         this.lambda = lcm(p.subtract(BigInteger.ONE) , q.subtract(BigInteger.ONE));
         this.publicKey = genPublic();
-        this.privateKey = genPrivate(publicKey, lambda);
+        this.privateKey = publicKey.modInverse(lambda);
     }
 
     // Public key generation, som finder et tal som er co-prime med lambda = (lcm(p-1,q-1).
     private BigInteger genPublic()
     {
         Random rand = new Random();
-        boolean coPrimeCheck = false;
+        boolean coPrimeFound = false;
 
         BigInteger e = BigInteger.probablePrime(1024, rand);
 
-        while (!coPrimeCheck) {
+        while (!coPrimeFound) {
 
             if (e.gcd(lambda).equals(BigInteger.ONE))// co-prime fundet hvis 1: et primtal, 2: gcd er 1 med lambda.
-                coPrimeCheck = true;
+                coPrimeFound = true;
             else
             {
                 rand = new Random();
@@ -57,46 +57,9 @@ public class KeyPair
         return ATimesB.divide(AGcdB);
     }
 
-    // Genererer private key.
-    private BigInteger genPrivate(BigInteger x, BigInteger y)
-    {
-        BigInteger roots[] = new BigInteger[2];
-
-        roots = egcd(x, y, roots);
-        return (roots[0].multiply(x).add(roots[1].multiply(y))).equals(BigInteger.ONE) ? roots[1] : roots[0]; // Returnerer den af de to rødder, som opfylder ax+by = gcd(e,lambda) = 1.
-    }
-
-    // Modular multiplikativ inverse ved hjælp af Euclid's Extended Algoritme.
-    private BigInteger[] egcd(BigInteger x, BigInteger y, BigInteger[] roots)
-    {
-        BigInteger a = BigInteger.ZERO, b = BigInteger.ONE, prevA = BigInteger.ONE,
-                   prevB = BigInteger.ZERO, temp, quotient, remainder;
-
-        while(y.compareTo(BigInteger.ZERO) != 0)
-        {
-            quotient = x.divide(y);
-            remainder = x.mod(y);
-
-            x = y;
-            y = remainder;
-
-            temp = a;
-            a = prevA.subtract(quotient.multiply(a));
-            prevA = temp;
-
-            temp = b;
-            b = prevB.subtract(quotient.multiply(b));
-            prevB = temp;
-        }
-
-        roots[0] = prevA;
-        roots[1] = prevB;
-
-        return roots;
-    }
-
     // Getters
     public BigInteger getPublicKey() { return this.n; }
     public BigInteger getPublicE() { return this.publicKey; }
     public BigInteger getPrivateKey() { return this.privateKey; }
+
 }
