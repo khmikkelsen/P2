@@ -3,6 +3,7 @@ package p2.communication;
 import java.io.*;
 import java.net.Socket;
 
+// Client
 public class Main
 {
     // Main method.
@@ -18,14 +19,17 @@ public class Main
         setupConnection(reader, writer, connection, console, "127.0.0.1", 1);
         console.println("Connected to server.\nStarting chat...");
 
-        if (writer != null && reader != null)
+        if (writer != null && reader != null)   // This is wrongly true.
             chat(reader, writer, console);
+
+        else
+            endSession(console, "Session ended: No streams setup.");
     }
 
     // Ending session.
     private static void endSession(PrintWriter console, String message)
     {
-        console.println(message);
+        console.println("\n" + message);
         System.exit(1);
     }
 
@@ -57,6 +61,7 @@ public class Main
         catch (IOException e)
         {
             console.println("Could not setup streams.");
+            endSession(console, "Session ended.");
         }
     }
 
