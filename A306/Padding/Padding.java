@@ -63,22 +63,25 @@ public class Padding
     }
     private byte[] decodeOAEP() throws IOException
     {
+        System.out.println("DECODE-OAEP");
+        formatByte(decryptedMessage, "decryptedMessage");
         byte[] Y = new byte[1];
         Y[0] = decryptedMessage[0];
 
         byte[] maskedSeed = new byte[lHash.length];
         System.arraycopy(decryptedMessage, 1, maskedSeed, 0, maskedSeed.length);
         byte[] maskedDB = new byte[k - lHash.length - 1];
-        System.out.println("Length of maskedDB: " + maskedDB.length + "\nLength of decryptedMessage: " + decryptedMessage.length);
         System.arraycopy(decryptedMessage, maskedSeed.length + 1, maskedDB, 0, maskedDB.length - 1);
+
+        System.out.println("maskedSeedLen: " + maskedSeed.length);
+        System.out.println("maskedDBLen:   " + maskedDB.length + "\n");
 
         byte[] seedMask = MGF(maskedDB, lHash.length);
         byte[] seed = xorByteArrays(maskedSeed, seedMask);
 
         formatByte(maskedSeed, "maskedSeed: ");
         formatByte(seedMask, "seedMask: ");
-
-        formatByte(seed, "After XOR: ");
+        formatByte(seed, "seed = seedMask xor maskedSeed: ");
 
         byte[] dbMask = MGF(seed, k - lHash.length - 1);
         byte[] DB = xorByteArrays(maskedDB, dbMask);
@@ -86,6 +89,7 @@ public class Padding
         int j = lHash.length;
 
         System.out.println("DBLen: " + DB.length);
+        formatByte(DB, "DB after decode");
         boolean check = false;
 
         while (!check)
@@ -97,7 +101,9 @@ public class Padding
             j++;
 
             if (j == DB.length)
-              throw new ArithmeticException("OAEP-DECODE error; no 0x01 to seperate PS || 0x01 || M");
+            {
+                throw new ArithmeticException("OAEP-DECODE error; no 0x01 to seperate PS || 0x01 || M");
+            }
         }
 
         byte[] M = new byte[DB.length - j];
@@ -105,12 +111,14 @@ public class Padding
         int temp = DB.length - j;
 
         System.out.println("amount to copy to DB: " + DB.length + " - " + j + " = " + temp);
-        formatByte(DB, "DBDecode: ");
-
         System.arraycopy(DB, j   , M, 0, DB.length - j);
+
+        formatByte(message.getBytes(), "Original message");
+        formatByte(M, "Final message: ");
 
         String mess = new String(M);
         System.out.println("And finally... :" + mess);
+        System.out.println("\n\n");
 
         return M;
     }
@@ -124,21 +132,14 @@ public class Padding
 
         BigInteger m = c.modPow(KeyPair.getPrivateKey(), KeyPair.getPublicKey());
 
-
-        formatByte(m.toByteArray(), "C after decryption: ");
-
         return I2OSP(m, k);
     }
     private byte[] encryptRSA()
     {
-        formatByte(EM, "C before encryption: ");
         BigInteger m = OS2IP(EM);
         BigInteger c = m.modPow(KeyPair.getPublicE(), KeyPair.getPublicKey());
-        System.out.println("C: " + c.intValue());
         byte[] C = I2OSP(c, k);
-        System.out.println("C length: " + C.length);
 
-        formatByte(C, "C After encryption: ");
         return C;
     }
     /* OAEP encode primitive
@@ -146,6 +147,7 @@ public class Padding
      */
     private byte[] encodeOAEP() throws IOException
     {
+        System.out.println("\n\nENCODE-OAEP");
         byte[] seed = new byte[lHash.length];
         new Random().nextBytes(seed);
 
@@ -155,17 +157,26 @@ public class Padding
         formatByte(dbMask, "dbMask:        ");
         formatByte(DB, "DB:            ");
         formatByte(maskedDB, "DB xor dbMask: ");
+        System.out.println("\n");
 
         byte[] seedMask = MGF(maskedDB, lHash.length);
         byte[] maskedSeed = xorByteArrays(seed, seedMask);
 
+        formatByte(seed, "seed:              ");
+        formatByte(seedMask, "seedMask:          ");
+        formatByte(maskedSeed, "seed xor seedMask: ");
+
         byte[] EM = new byte[maskedSeed.length + maskedDB.length + 1];
-        EM[0] = 0x0;
+        EM[0] = (byte) 0x0;
 
         System.arraycopy(maskedSeed, 0, EM, 1, maskedSeed.length);
         System.arraycopy(maskedDB, 0, EM, maskedSeed.length+1, maskedDB.length);
 
-        formatByte(EM, "EM: ");
+        formatByte(EM, "encodedMessage: ");
+        System.out.println("EMLen: " + EM.length);
+        System.out.println("maskedDBLen:   " + maskedDB.length);
+        System.out.println("maskedSeedLen: " + maskedSeed.length);
+        System.out.println("\n\n");
         return EM;
     }
     // Length of PS, amount of 0 bytes to write, may be 0
@@ -206,9 +217,7 @@ public class Padding
     private byte[] MGF(byte[] seed, int maskLen) throws IOException
     {
         byte mask[] = new byte[maskLen];
-        byte[] C = new byte[4];
-        int counter = 0;
-
+/*
         try
         {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -221,7 +230,7 @@ public class Padding
                 digest.update(C);
 
                 System.arraycopy(digest.digest(), 0, mask, counter * lHash.length, lHash.length);
-
+                formatByte(digest.digest(), "Digest @ " + counter);
                 counter++;
             }
             if ((counter * lHash.length) < maskLen)
@@ -237,13 +246,11 @@ public class Padding
             }
         }
         catch ( NoSuchAlgorithmException e) {e.printStackTrace();}
-
-     /*   ByteArrayOutputStream outputT = new ByteArrayOutputStream( );
+*/
+        ByteArrayOutputStream outputT = new ByteArrayOutputStream( );
         ByteArrayOutputStream outputC = new ByteArrayOutputStream( );
 
         int ceil = (maskLen / lHash.length);
-
-        System.out.println("Ceil is: " + maskLen + " / " + lHash.length + " = " + ceil);
 
         for (int i = 0; i < ceil; i++)
         {
@@ -255,16 +262,12 @@ public class Padding
             outputT.write( outputT.toByteArray() );
             outputT.write( temp );
 
-            formatByte(temp, "Hash of outputC: ");
-
             outputC.reset();
         }
 
         byte[] maskTemp = outputT.toByteArray();
-        byte[] mask = new byte[maskLen];
-
         System.arraycopy(maskTemp, 0, mask, 0, maskLen);
-*/
+
         return mask;
     }
 
