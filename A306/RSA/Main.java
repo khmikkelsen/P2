@@ -1,4 +1,4 @@
-package rsa;
+package RSA;
 
 import java.io.IOException;
 import java.math.BigInteger;
