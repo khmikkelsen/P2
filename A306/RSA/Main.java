@@ -2,15 +2,17 @@ package RSA;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Formatter;
 import java.util.Random;
+import RSA.RSAOAEP;
 
 public class Main
 {
     public static void main(String[] args)
     {
         Random rand = new Random();
-        BigInteger p = BigInteger.probablePrime(2048, rand);
-        BigInteger q = BigInteger.probablePrime(2048, rand);
+        BigInteger p = BigInteger.probablePrime(1024, rand);
+        BigInteger q = BigInteger.probablePrime(1024, rand);
 
         KeyPairGenerator Alice = new KeyPairGenerator(p, q);
 
@@ -25,6 +27,16 @@ public class Main
             RSAOAEPDecrypt demess = new RSAOAEPDecrypt(mess.getEncryptedMessage(), label, Alice.getPublicKey(), Alice.getPrivateKey());
         }
         catch (IOException e){e.printStackTrace();}
+
+        try
+        {
+            RSAOAEPSign sign = new RSAOAEPSign(copypasta, 32,Alice.getPublicKey(), Alice.getPrivateKey());
+            byte[] signature = sign.getSignature();
+            RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alice.getPublicKey(), Alice.getPublicE());
+
+            sign.getSignaturew(signature);
+        }
+        catch (IOException e) {e.printStackTrace();}
 
 
     }

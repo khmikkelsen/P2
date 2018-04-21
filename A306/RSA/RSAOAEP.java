@@ -12,7 +12,7 @@ public class RSAOAEP
     public byte[] MGF(byte[] seed, int maskLen, int hLen) throws IOException
     {
         byte mask[] = new byte[maskLen];
-        int ceil = (maskLen / hLen);
+        int ceil = ceil(maskLen, hLen);
 
         ByteArrayOutputStream outputT = new ByteArrayOutputStream( );
         ByteArrayOutputStream outputC = new ByteArrayOutputStream( );
@@ -94,6 +94,7 @@ public class RSAOAEP
             formatter1.format("%02x", b);
 
         String hex1 = formatter1.toString();
+        System.out.println(hex1);
 
         return hex1;
     }
@@ -106,5 +107,9 @@ public class RSAOAEP
         String hex1 = formatter1.toString();
 
         System.out.println(byteName+ ": "+hex1);
+    }
+    public int ceil(int x, int y)
+    {
+        return (int) Math.ceil((double) x / (double) y);
     }
 }
