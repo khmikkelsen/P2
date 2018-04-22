@@ -43,14 +43,14 @@ public class RSAOAEPVerify extends RSAOAEP
     }
     private byte[] RSAVerify ()
     {
-        formatByteToStringW(signature,"Before verified");
-        int emLen = modBits/8;
+        /*formatByteToStringW(signature,"Before verified");
+        int emLen = ceil(modBits-1,8);
         BigInteger s = OS2IP(signature);
         BigInteger m = s.modPow(publicKey, rsaMod);
-        byte[] out = I2OSP(m, emLen);
-        formatByteToStringW(out, "After verified ");
+        byte[] out = I2OSP(m, emLen);*/
+        formatByteToStringW(signature, "After verified ");
 
-        return out;
+        return signature;
     }
     private void verifyMessage(int emBits) throws IOException
     {
@@ -90,9 +90,12 @@ public class RSAOAEPVerify extends RSAOAEP
         temp = emLen - mHash.length - sLen - 2;
         System.out.println("temp: "+ temp);
 
+        formatByteToStringW(DB, "DB to check");
         for (int i = 0; i < temp; i++)
-            if (DB[i] != 0)
+            if (DB[i] != 0) {
                 setVerify(false);
+                System.out.println("At position: "+i+", it has: "+DB[i]);
+            }
 
         byte[] Mmark;
         if (sLen > 0)
@@ -114,6 +117,8 @@ public class RSAOAEPVerify extends RSAOAEP
         Mmark = stream.toByteArray();
         byte[] Hmark = sha256(Mmark);
 
+        formatByteToStringW(Hmark, "Hmark");
+        formatByteToStringW(H, "H   ");
         if(H != Hmark)
             setVerify(false);
 

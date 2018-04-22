@@ -39,6 +39,8 @@ public class RSAOAEPSign extends RSAOAEP
         this.salt = genSalt();
 
         this.modBits = rsaMod.bitLength();
+        if (modBits % 8 != 0)
+            throw new ArithmeticException("modBits % 8 != 0");
         this.M = genM();
 
         this.EM = encodeMessage(modBits-1);
@@ -57,21 +59,28 @@ public class RSAOAEPSign extends RSAOAEP
         this.salt = genSalt();
 
         this.modBits = rsaMod.bitLength();
+        if (modBits % 8 != 0)
+            throw new ArithmeticException("modBits % 8 != 0");
         this.M = genM();
 
         this.EM = encodeMessage(modBits-1);
         this.signature = RSASignature();
     }
     private byte[] RSASignature()
-    {
+    {/*
         formatByteToStringW(EM,"Before sign  ");
         int emLen = modBits/8;
+        if (modBits % 8 != 0)
+            throw new ArithmeticException("modBits % 8 != 0");
+
         BigInteger m = OS2IP(EM);
         BigInteger s = m.modPow(privateKey, rsaMod);
+        if (s.compareTo(rsaMod) >= 0)
+            throw new ArithmeticException("Signature out of range");
         byte[] out = I2OSP(s, emLen);
-        formatByteToStringW(out, "After sign   ");
+        formatByteToStringW(out, "After sign   ");*/
 
-        return out;
+        return EM;
     }
 
     private byte[] encodeMessage(int emBits) throws IOException
@@ -112,17 +121,15 @@ public class RSAOAEPSign extends RSAOAEP
         byte[] maskedDB = xorByteArrays(DB, dbMask);
         formatByteToStringW(maskedDB,"masked");
 
-        int temp = (8*emLen)-modBits;
+        int temp = (8*emLen)-emBits;
 
         formatByteToStringW(maskedDB,"maskedDB before");
         BitSet maskedDBBitset = BitSet.valueOf(maskedDB);
 
         System.out.println("temp: "+temp);
         for (int i = 0; i < temp; i++)
-        {
-            maskedDBBitset.set(maskedDBBitset.length() - temp, false);
-            temp--;
-        }
+            maskedDBBitset.set(i, false);
+
         formatByteToStringW(maskedDBBitset.toByteArray(), "maskedDB after");
 
         stream.write( maskedDBBitset.toByteArray() );
@@ -130,6 +137,9 @@ public class RSAOAEPSign extends RSAOAEP
         stream.write( (byte)0xbc );
 
         out = stream.toByteArray();
+
+        if (out.length != modBits/8)
+            throw new ArithmeticException("length != modBits/8");
 
         return out;
     }

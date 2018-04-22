@@ -21,32 +21,12 @@ public class KeyPairGenerator
         this.p = p;
         this.q = q;
         this.n = p.multiply(q);
+        System.out.println("N byte length: "+n.bitLength());
+        this.publicKey = new BigInteger("65537");
         this.lambda = lcm(p.subtract(BigInteger.ONE) , q.subtract(BigInteger.ONE));
-        this.publicKey = genPublic();
         this.privateKey = publicKey.modInverse(lambda);
     }
 
-    // Public key generation, som finder et tal som er co-prime med lambda = (lcm(p-1,q-1).
-    private BigInteger genPublic()
-    {
-        Random rand = new Random();
-        boolean coPrimeFound = false;
-
-        BigInteger e = BigInteger.probablePrime(1024, rand);
-
-        while (!coPrimeFound) {
-
-            if (e.gcd(lambda).equals(BigInteger.ONE))// co-prime fundet hvis 1: et primtal, 2: gcd er 1 med lambda.
-                coPrimeFound = true;
-            else
-            {
-                rand = new Random();
-                e = BigInteger.probablePrime(1024, rand);
-            }
-        }
-
-        return e; // e er den tilhørende public key eksponent.
-    }
 
     // lcm (least common multiple) ved reduktion af greatest common divisor (gcd).
     private BigInteger lcm(BigInteger a, BigInteger b)

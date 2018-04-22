@@ -15,6 +15,7 @@ public class Main
         BigInteger q = BigInteger.probablePrime(1024, rand);
 
         KeyPairGenerator Alice = new KeyPairGenerator(p, q);
+        System.out.println("Alice has e: "+Alice.getPublicE()+"\nAnd n: "+Alice.getPublicKey()+"\nAnd d: "+Alice.getPrivateKey());
 
         String copypasta = "Hej jeg hedder Kaj ";
         System.out.println("Message length: " + copypasta.length());
@@ -30,7 +31,7 @@ public class Main
 
         try
         {
-            RSAOAEPSign sign = new RSAOAEPSign(copypasta, 32,Alice.getPublicKey(), Alice.getPrivateKey());
+            RSAOAEPSign sign = new RSAOAEPSign(copypasta,32,Alice.getPublicKey(), Alice.getPrivateKey());
             byte[] signature = sign.getSignature();
             RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alice.getPublicKey(), Alice.getPublicE());
 
