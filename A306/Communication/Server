@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+// Server
 public class Main
 {
     // Main method.
@@ -86,10 +87,12 @@ public class Main
         {
             try
             {
-                message = readers.get(i).readLine();
-
-                if (message.length() > 0)
+                if (readers.get(i) != null)
+                {
+                    message = readers.get(i).readLine();
+                    System.out.println(message);
                     sendMessage(writers, message);
+                }
             }
 
             catch (IOException e)
@@ -113,7 +116,7 @@ public class Main
 
             catch (IOException e)
             {
-
+                // Empty.
             }
         }
     }
