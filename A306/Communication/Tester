@@ -1,0 +1,6 @@
+package p2.communication;
+
+public interface Tester<E>
+{
+    boolean test(E e);
+}
