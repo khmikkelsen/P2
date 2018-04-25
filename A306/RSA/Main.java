@@ -1,23 +1,20 @@
 package RSA;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Formatter;
 import java.util.Random;
-import RSA.RSAOAEP;
 
 public class Main
 {
     public static void main(String[] args)
     {
         Random rand = new Random();
-        BigInteger p = BigInteger.probablePrime(1024, rand);
-        BigInteger q = BigInteger.probablePrime(1024, rand);
+        //BigInteger p = BigInteger.probablePrime(1024, rand);
+        //BigInteger q = BigInteger.probablePrime(1024, rand);
 
-        KeyPairGenerator Alice = new KeyPairGenerator(p, q);
+        KeyPairGenerator Alice = new KeyPairGenerator(1024);
         System.out.println("Alice has e: "+Alice.getPublicE()+"\nAnd n: "+Alice.getPublicKey()+"\nAnd d: "+Alice.getPrivateKey());
 
-        String copypasta = "Hej jeg hedder Kaj hej";
+        String copypasta = "Hej jeg hedder Kaj";
         System.out.println("Message length: " + copypasta.length());
 
         byte[] label = new byte[]{0x0,0x1,0x02};
@@ -35,7 +32,7 @@ public class Main
             byte[] signature = sign.getSignature();
             RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alice.getPublicKey(), Alice.getPublicE());
 
-            sign.getSignaturew(signature);
+            System.out.println("Signature was: " +veri.getResult());
         }
         catch (IOException e) {e.printStackTrace();}
 

@@ -47,6 +47,7 @@ public class RSAOAEPVerify extends RSAOAEP
         BigInteger s = OS2IP(signature);
         BigInteger m = s.modPow(publicKey, rsaMod);
         byte[] out = I2OSP(m, emLen);
+        formatByteToStringW(out, "After verify");
 
         return out;
     }
@@ -93,6 +94,7 @@ public class RSAOAEPVerify extends RSAOAEP
         BitSet DBBitset = BitSet.valueOf(DB);
         for (int i = 0; i < 0 - temp; i++)
             DBBitset.set(i, false);
+        DB = DBBitset.toByteArray();
 
         // Step 10
         temp = emLen - mHash.length - sLen - 2;

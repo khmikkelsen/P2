@@ -66,8 +66,8 @@ public class RSAOAEPSign extends RSAOAEP
     {
         formatByteToStringW(EM,"Before sign  ");
         int emLen = modBits/8;
-        if (modBits % 8 != 0)
-            throw new ArithmeticException("modBits % 8 != 0");
+        //if (modBits % 8 != 0)
+        //    throw new ArithmeticException("modBits % 8 != 0");
 
         BigInteger m = OS2IP(EM);
         BigInteger s = m.modPow(privateKey, rsaMod);
@@ -125,23 +125,27 @@ public class RSAOAEPSign extends RSAOAEP
         int temp = (8*emLen)-emBits;
 
         formatByteToStringW(maskedDB,"maskedDB before");
-        BitSet maskedDBBitset = BitSet.valueOf(maskedDB);
-
+        byte[] maskedDBtoBit = new byte[1];
+        maskedDBtoBit[0] = maskedDB[0];
+        BitSet maskedDBBitset = BitSet.valueOf(maskedDBtoBit);
         System.out.println("TEMP: "+temp);
-        for (int i = 0; i < temp; i++) {
+        for (int i = 7; i > 7 - temp; i--) {
             maskedDBBitset.set(i, false);
         }
         formatByteToStringW(maskedDBBitset.toByteArray(), "maskedDB after");
 
         // Step 12
-        stream.write( maskedDBBitset.toByteArray() );
+        maskedDBtoBit = maskedDBBitset.toByteArray();
+        maskedDB[0] = maskedDBtoBit[0];
+
+        stream.write( maskedDB );
         stream.write( hHash );
         stream.write( (byte)0xbc );
 
         out = stream.toByteArray();
 
-        if (out.length != modBits/8)
-            throw new ArithmeticException("length != modBits/8");
+        //if (out.length != modBits/8)
+        //    throw new ArithmeticException("length != modBits/8");
 
         return out;
     }
