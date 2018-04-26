@@ -22,10 +22,10 @@ public class Main
 
         try
         {
-            console.println("Connecting...");
-            ServerSocket server = new ServerSocket(1);
-            connectSockets(e -> e, true, server, sockets, readers, writers, console);
-            communicate(writers, readers);
+            console.println("Starting server...");
+            ServerSocket server = new ServerSocket(140);
+            console.println("Server started.");
+            connectCommunicate(e -> e, true, server, sockets, readers, writers, console);
         }
 
         catch (IOException e)
@@ -35,31 +35,34 @@ public class Main
     }
 
     // Searches after connections.
-    private static <T> void connectSockets(Tester<T> tester, T t, ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
+    private static <T> void connectCommunicate(Tester<T> tester, T t, ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
     {
-        int i = 0;
-        Socket s;
+        connectSocket(server, sockets, readers, writers, console);
 
         while (tester.test(t))
         {
-            try
-            {
-                s = server.accept();
+            communicate(server, sockets, writers, readers, console);
+        }
+    }
 
-                if (s.isConnected())
-                {
-                    sockets.add(s);
-                    console.println("Client connected.");
-                    setupStreams(s, readers, writers);
-                    communicate(writers, readers);
-                    i++;
-                }
-            }
+    // Sets up a single connection and a stream.
+    private static void connectSocket(ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
+    {
+        try
+        {
+            Socket s = server.accept();
 
-            catch (IOException e)
+            if (s.isConnected())
             {
-                continue;
+                sockets.add(s);
+                setupStreams(s, readers, writers);
+                console.println("Client connected.");
             }
+        }
+
+        catch (IOException e)
+        {
+            return;
         }
     }
 
@@ -74,30 +77,33 @@ public class Main
 
         catch (IOException e)
         {
-            socket = null;
+            // Empty.
         }
     }
 
     // Receive messages and send.
-    private static void communicate(List<BufferedWriter> writers, List<BufferedReader> readers)
+    private static void communicate(ServerSocket server, List<Socket> sockets, List<BufferedWriter> writers, List<BufferedReader> readers, PrintWriter console)
     {
         String message;
+        int amountOfSockets = sockets.size();
 
-        for (int i = 0; i < readers.size(); i++)
+        for (int i = 0; i < amountOfSockets; i++)
         {
+            connectSocket(server, sockets, readers, writers, console);
+
             try
             {
                 if (readers.get(i) != null)
                 {
                     message = readers.get(i).readLine();
                     System.out.println(message);
-                    sendMessage(writers, message);
+                    sendMessage(writers, sockets.get(i).getInetAddress().getHostName() + ": " + message);
                 }
             }
 
             catch (IOException e)
             {
-                continue;
+                // Empty.
             }
         }
     }
