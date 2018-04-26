@@ -120,10 +120,11 @@ public class Main
                 console.print(": ");
                 console.flush();
                 message = input.readLine();     // Reads String from console.
-                console.println(getMessage());
 
                 if (message.length() > 0)
                     serverWrite(message);
+
+                console.println(getMessage());
             }
 
             catch (IOException e)
