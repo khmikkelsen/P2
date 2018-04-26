@@ -18,10 +18,10 @@ public class Main
 
         // Setting up.
         console.println("Connecting to server...");
-        setupConnection(console, "172.22.183.17", 1);
+        setupConnection(console, "192.168.0.100", 140);
         console.println("Connected.\nChat started.");
 
-        if (writer != null && reader != null)   // This is wrongly true.
+        if (writer != null && reader != null)
             chat(console);
 
         else
@@ -99,13 +99,12 @@ public class Main
     {
         String message;
 
-        while (true)
-        {
-            message = reader.readLine();
+        message = reader.readLine();
 
-            if (message.length() > 0)
-                return message;
-        }
+        if (message.length() > 0)
+            return message;
+
+        return "";
     }
 
     // Chat.
@@ -121,7 +120,7 @@ public class Main
                 console.print(": ");
                 console.flush();
                 message = input.readLine();     // Reads String from console.
-                // console.println(getMessage());
+                console.println(getMessage());
 
                 if (message.length() > 0)
                     serverWrite(message);
