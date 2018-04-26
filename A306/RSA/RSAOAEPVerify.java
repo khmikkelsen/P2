@@ -47,13 +47,11 @@ public class RSAOAEPVerify extends RSAOAEP
         BigInteger s = OS2IP(signature);
         BigInteger m = s.modPow(publicKey, rsaMod);
         byte[] out = I2OSP(m, emLen);
-        formatByteToStringW(out, "After verify");
 
         return out;
     }
     private void verifyMessage(int emBits) throws IOException
     {
-        System.out.println("\nVERIFY\n");
         int emLen = ceil(emBits,8);
 
         // Step 2
@@ -61,27 +59,22 @@ public class RSAOAEPVerify extends RSAOAEP
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
         // Step 3 & 4
-        if (emLen < mHash.length + sLen + 2) {
+        if (emLen < mHash.length + sLen + 2)
             setVerify(false);
-            System.out.println("Em < mHash + sLen + 2");
-        }
-        else if (EM[EM.length-1] != (byte) 0xbc) {
+
+        else if (EM[EM.length-1] != (byte) 0xbc)
             setVerify(false);
-            System.out.println("No 0xbc");
-        }
+
         // Step 5
         byte[] maskedDB = new byte[emLen-mHash.length-1];
         byte[] H = new byte[mHash.length];
         System.arraycopy(EM, 0,maskedDB, 0, maskedDB.length);
         System.arraycopy(EM, maskedDB.length, H, 0, H.length);
-        formatByteToStringW(maskedDB, "maskedDB");
-        formatByteToStringW(H,"H       ");
 
         // Step 6
         int temp = 8*emLen-emBits;
         BitSet maskedDBBitset = BitSet.valueOf(maskedDB);
 
-        System.out.println("TemP: "+temp);
         for (int i = 0; i < 0 - temp; i++)
             if (maskedDBBitset.get(i))
                 setVerify(false);
@@ -92,23 +85,19 @@ public class RSAOAEPVerify extends RSAOAEP
 
         // Step 9
         BitSet DBBitset = BitSet.valueOf(DB);
-        for (int i = 0; i < 0 - temp; i++)
+        for (int i = 7; i > 7 - temp; i--)
             DBBitset.set(i, false);
         DB = DBBitset.toByteArray();
 
         // Step 10
         temp = emLen - mHash.length - sLen - 2;
-        System.out.println("temp: "+ temp);
 
-        formatByteToStringW(DB, "DB to check");
         for (int i = 0; i < temp; i++)
-            if (DB[i] != (byte) 0x0) {
+            if (DB[i] != (byte) 0x0)
                 setVerify(false);
-                System.out.println("At position: "+i+", it has: "+DB[i]);
-            }
-        if (DB[temp] != (byte) 0x01) {
+
+        if (DB[temp] != (byte) 0x01)
             setVerify(false);
-        }
 
         byte[] Mmark;
         if (sLen > 0)
@@ -128,11 +117,7 @@ public class RSAOAEPVerify extends RSAOAEP
             stream.write( mHash );
         }
         Mmark = stream.toByteArray();
-        formatByteToStringW(Mmark, "extracted mMark");
         byte[] Hmark = sha256(Mmark);
-
-        formatByteToStringW(Hmark, "Hmark");
-        formatByteToStringW(H, "H   ");
 
         for (int j = 0; j < H.length; j++)
             if (H[j] != Hmark[j])
@@ -141,8 +126,7 @@ public class RSAOAEPVerify extends RSAOAEP
     }
     private void setVerify(boolean value)
     {
-        this.signatureVerification = value;
-        System.out.println("Signature is " + value);
+        this.signatureVerification = signatureVerification & value;
     }
     public boolean getResult() { return signatureVerification;}
 }

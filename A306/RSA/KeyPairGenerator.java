@@ -21,7 +21,9 @@ public class KeyPairGenerator extends RSAOAEP
         this.p = p;
         this.q = q;
         this.n = p.multiply(q);
-        System.out.println("N byte length: "+n.bitLength());
+        if (n.bitLength() % 8 != 0)
+            throw new IllegalArgumentException("Product of given primes is not divisable by 8.");
+
         this.publicKey = new BigInteger("65537");
         this.lambda = lcm(p.subtract(BigInteger.ONE) , q.subtract(BigInteger.ONE));
         this.privateKey = publicKey.modInverse(lambda);
@@ -41,36 +43,16 @@ public class KeyPairGenerator extends RSAOAEP
             this.p = BigInteger.probablePrime(keyBitsSize, rand);
             this.q = BigInteger.probablePrime(keyBitsSize, rand);
             this.n = p.multiply(q);
-            this.lambda = lcm(p.subtract(BigInteger.ONE), q.subtract(BigInteger.ONE));
-            this.privateKey = publicKey.modInverse(lambda);
 
-            check = testKeys();
+            if (n.bitLength() % 8 == 0) {
+                this.lambda = lcm(p.subtract(BigInteger.ONE), q.subtract(BigInteger.ONE));
+                this.privateKey = publicKey.modInverse(lambda);
+                check = true;
+            }
         }
 
     }
-    private boolean testKeys()
-    {
-        boolean check = false;
-        boolean check2 = false;
 
-        BigInteger testInt = new BigInteger("5000");
-        BigInteger testC = testInt.modPow(publicKey,n);
-        BigInteger testM = testC.modPow(privateKey,n);
-
-        if (testInt.equals(testM))
-            check = true;
-
-        testInt = new BigInteger("5000");
-        testC = testInt.modPow(privateKey,n);
-        testM = testC.modPow(publicKey,n);
-
-        if (testInt.equals(testM))
-            check2 = true;
-
-        boolean temp = check & check2;
-
-        return check & check2;
-    }
 
     // lcm (least common multiple) ved reduktion af greatest common divisor (gcd).
     private BigInteger lcm(BigInteger a, BigInteger b)

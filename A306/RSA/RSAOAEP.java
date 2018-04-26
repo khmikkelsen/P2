@@ -87,27 +87,6 @@ public class RSAOAEP
 
         return digest.digest(octet);
     }
-    public String formatByteToString (byte[] input)
-    {
-        Formatter formatter1 = new Formatter();
-        for (byte b : input)
-            formatter1.format("%02x", b);
-
-        String hex1 = formatter1.toString();
-        System.out.println(hex1);
-
-        return hex1;
-    }
-    public void formatByteToStringW (byte[] input, String byteName)
-    {
-        Formatter formatter1 = new Formatter();
-        for (byte b : input)
-            formatter1.format("%02x", b);
-
-        String hex1 = formatter1.toString();
-
-        System.out.println(byteName+ ": "+hex1);
-    }
     public int ceil(int x, int y)
     {
         return (int) Math.ceil((double) x / (double) y);

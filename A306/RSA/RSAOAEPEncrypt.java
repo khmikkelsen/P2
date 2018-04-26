@@ -81,24 +81,14 @@ public class RSAOAEPEncrypt extends RSAOAEP
      */
     private byte[] encodeOAEP() throws IOException
     {
-        System.out.println("\n\nENCODE-OAEP");
         byte[] seed = new byte[lHash.length];
         new Random().nextBytes(seed);
 
         byte[] dbMask = MGF(seed, k - lHash.length - 1, lHash.length);
         byte[] maskedDB = xorByteArrays(DB, dbMask);
 
-        formatByteToStringW(dbMask, "dbMask:        ");
-        formatByteToStringW(DB, "DB:            ");
-        formatByteToStringW(maskedDB, "DB xor dbMask: ");
-        System.out.println("\n");
-
         byte[] seedMask = MGF(maskedDB, lHash.length, lHash.length);
         byte[] maskedSeed = xorByteArrays(seed, seedMask);
-
-        formatByteToStringW(seed, "seed:              ");
-        formatByteToStringW(seedMask, "seedMask:          ");
-        formatByteToStringW(maskedSeed, "seed xor seedMask: ");
 
         byte[] EM = new byte[maskedSeed.length + maskedDB.length + 1];
         EM[0] = (byte) 0x0;
@@ -106,11 +96,6 @@ public class RSAOAEPEncrypt extends RSAOAEP
         System.arraycopy(maskedSeed, 0, EM, 1, maskedSeed.length);
         System.arraycopy(maskedDB, 0, EM, maskedSeed.length+1, maskedDB.length);
 
-        formatByteToStringW(EM, "encodedMessage: ");
-        System.out.println("EMLen: " + EM.length);
-        System.out.println("maskedDBLen:   " + maskedDB.length);
-        System.out.println("maskedSeedLen: " + maskedSeed.length);
-        System.out.println("\n\n");
         return EM;
     }
 
@@ -135,16 +120,11 @@ public class RSAOAEPEncrypt extends RSAOAEP
             DB.write( 0x01);
             DB.write( M );
         }
-        formatByteToStringW(DB.toByteArray(), "DB: ");
 
         return DB.toByteArray();
     }
     private int genPS()
     {
-        int ps = k - M.length - 2*lHash.length - 2;
-        formatByteToStringW(lHash, "Hash(l) = lHash:     ");
-        System.out.println("psLen: "+ps);
-        System.out.println("kLen: " + k);
         return k - M.length - 2*lHash.length - 2;
     }
     public byte[] getEncryptedMessage()

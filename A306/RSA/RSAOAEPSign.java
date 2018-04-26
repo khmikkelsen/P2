@@ -64,17 +64,15 @@ public class RSAOAEPSign extends RSAOAEP
     }
     private byte[] RSASignature()
     {
-        formatByteToStringW(EM,"Before sign  ");
         int emLen = modBits/8;
-        //if (modBits % 8 != 0)
-        //    throw new ArithmeticException("modBits % 8 != 0");
+        if (modBits % 8 != 0)
+            throw new ArithmeticException("modBits % 8 != 0");
 
         BigInteger m = OS2IP(EM);
         BigInteger s = m.modPow(privateKey, rsaMod);
         if (s.compareTo(rsaMod) >= 0)
             throw new ArithmeticException("Signature out of range");
         byte[] out = I2OSP(s, emLen);
-        formatByteToStringW(out, "After sign   ");
 
         return out;
     }
@@ -112,32 +110,19 @@ public class RSAOAEPSign extends RSAOAEP
 
         // Step 8
         byte[] dbMask = MGF(hHash, emLen - hLen - 1, hLen);
-        System.out.println("dbMasklen: "+dbMask.length+"\nDBlen: "+ DB.length);
-
-        formatByteToStringW(dbMask,"dbMask");
-        formatByteToStringW(DB, "DB    ");
 
         // Step 10
         byte[] maskedDB = xorByteArrays(DB, dbMask);
-        formatByteToStringW(maskedDB,"masked");
 
         // Step 11
         int temp = (8*emLen)-emBits;
 
-        formatByteToStringW(maskedDB,"maskedDB before");
-        byte[] maskedDBtoBit = new byte[1];
-        maskedDBtoBit[0] = maskedDB[0];
-        BitSet maskedDBBitset = BitSet.valueOf(maskedDBtoBit);
-        System.out.println("TEMP: "+temp);
-        for (int i = 7; i > 7 - temp; i--) {
+        BitSet maskedDBBitset = BitSet.valueOf(maskedDB);
+        for (int i = 7; i > 7 - temp; i--)
             maskedDBBitset.set(i, false);
-        }
-        formatByteToStringW(maskedDBBitset.toByteArray(), "maskedDB after");
+        maskedDB = maskedDBBitset.toByteArray();
 
         // Step 12
-        maskedDBtoBit = maskedDBBitset.toByteArray();
-        maskedDB[0] = maskedDBtoBit[0];
-
         stream.write( maskedDB );
         stream.write( hHash );
         stream.write( (byte)0xbc );
@@ -160,8 +145,6 @@ public class RSAOAEPSign extends RSAOAEP
             out = new byte[sLen];
             new Random().nextBytes(out);
         }
-        formatByteToStringW(out, "salt: ");
-
         return out;
     }
     private byte[] genM() throws IOException
@@ -178,18 +161,13 @@ public class RSAOAEPSign extends RSAOAEP
             stream.write( salt );
 
         out = stream.toByteArray();
-        formatByteToStringW(out, "generated M");
 
         return out;
     }
 
     private int genPS(int emLen)
     {
-
-        int temp = emLen - sLen - hLen - 2;
-        System.out.println("PS: "+ temp);
         return emLen - sLen - hLen - 2;
     }
     public byte[] getSignature() { return signature; }
-    public void getSignaturew(byte[] input) { formatByteToString(input);}
 }

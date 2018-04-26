@@ -57,9 +57,6 @@ public class RSAOAEPDecrypt extends RSAOAEP
     }
     private byte[] decodeOAEP() throws IOException
     {
-        System.out.println("DECODE-OAEP");
-        System.out.println("k: " + k);
-        formatByteToStringW(decryptedMessage, "decryptedMessage");
         byte[] Y = new byte[1];
         Y[0] = decryptedMessage[0];
 
@@ -68,23 +65,14 @@ public class RSAOAEPDecrypt extends RSAOAEP
         byte[] maskedDB = new byte[k - lHash.length - 1];
         System.arraycopy(decryptedMessage, maskedSeed.length + 1, maskedDB, 0, maskedDB.length);
 
-        System.out.println("maskedSeedLen: " + maskedSeed.length);
-        System.out.println("maskedDBLen:   " + maskedDB.length + "\n");
-
         byte[] seedMask = MGF(maskedDB, lHash.length, lHash.length);
         byte[] seed = xorByteArrays(maskedSeed, seedMask);
-
-        formatByteToStringW(maskedSeed, "maskedSeed: ");
-        formatByteToStringW(seedMask, "seedMask: ");
-        formatByteToStringW(seed, "seed = seedMask xor maskedSeed: ");
 
         byte[] dbMask = MGF(seed, k - lHash.length - 1, lHash.length);
         byte[] DB = xorByteArrays(maskedDB, dbMask);
 
         int j = lHash.length;
 
-        System.out.println("DBLen: " + DB.length);
-        formatByteToStringW(DB, "DB after decode");
         boolean check = false;
 
         while (!check)
@@ -103,10 +91,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
         int temp = DB.length - j;
 
-        System.out.println("amount to copy to DB: " + DB.length + " - " + j + " = " + temp);
         System.arraycopy(DB, j , M, 0, DB.length - j);
-
-        formatByteToStringW(M, "Final message: ");
 
         String mess = new String(M);
         System.out.println("And finally... :" + mess);
@@ -115,7 +100,5 @@ public class RSAOAEPDecrypt extends RSAOAEP
         return M;
     }
 
-    public String getDecryptedMessage() {
-        return formatByteToString(DM);
-    }
+    public byte[] getDecryptedMessage() { return this.DM; }
 }
