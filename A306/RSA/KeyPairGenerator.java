@@ -1,6 +1,7 @@
 package RSA;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Random;
 
 public class KeyPairGenerator extends RSAOAEP
@@ -13,21 +14,6 @@ public class KeyPairGenerator extends RSAOAEP
     private BigInteger n;
 
     // Constructor
-    public KeyPairGenerator(BigInteger p, BigInteger q) throws IllegalArgumentException
-    {
-        if (p.compareTo(BigInteger.ONE) < 0 || q.compareTo(BigInteger.ONE) < 0)
-            throw new IllegalArgumentException("Negative primes are illegal.");
-
-        this.p = p;
-        this.q = q;
-        this.n = p.multiply(q);
-        if (n.bitLength() % 8 != 0)
-            throw new IllegalArgumentException("Product of given primes is not divisable by 8.");
-
-        this.publicKey = new BigInteger("65537");
-        this.lambda = lcm(p.subtract(BigInteger.ONE) , q.subtract(BigInteger.ONE));
-        this.privateKey = publicKey.modInverse(lambda);
-    }
     public KeyPairGenerator (int keyBitSize)
     {
         this.publicKey = new BigInteger("65537");
@@ -39,7 +25,7 @@ public class KeyPairGenerator extends RSAOAEP
 
         while (!check)
         {
-            Random rand = new Random();
+            Random rand = new SecureRandom();
             this.p = BigInteger.probablePrime(keyBitsSize, rand);
             this.q = BigInteger.probablePrime(keyBitsSize, rand);
             this.n = p.multiply(q);

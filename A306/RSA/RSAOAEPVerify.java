@@ -19,7 +19,7 @@ public class RSAOAEPVerify extends RSAOAEP
 
     public boolean signatureVerification = true;
 
-    public RSAOAEPVerify (byte[] signature, byte[] message,BigInteger rsaMod, BigInteger publicKey) throws IOException
+    public RSAOAEPVerify (byte[] signature, byte[] message, BigInteger rsaMod, BigInteger publicKey) throws IOException
     {
         this.signature = signature;
         this.rsaMod = rsaMod;
@@ -75,7 +75,7 @@ public class RSAOAEPVerify extends RSAOAEP
         int temp = 8*emLen-emBits;
         BitSet maskedDBBitset = BitSet.valueOf(maskedDB);
 
-        for (int i = 0; i < 0 - temp; i++)
+        for (int i = 7; i > 7 - temp; i--)
             if (maskedDBBitset.get(i))
                 setVerify(false);
 

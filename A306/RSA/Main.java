@@ -12,10 +12,8 @@ public class Main
         //BigInteger q = BigInteger.probablePrime(1024, rand);
 
         KeyPairGenerator Alice = new KeyPairGenerator(1024);
-        System.out.println("Alice has e: "+Alice.getPublicE()+"\nAnd n: "+Alice.getPublicKey()+"\nAnd d: "+Alice.getPrivateKey());
 
-        String copypasta = "Hej jeg hedder Kaj";
-        System.out.println("Message length: " + copypasta.length());
+        String copypasta = "Hej jeg hedder Kaj.";
 
         byte[] label = new byte[]{0x0,0x1,0x02};
 

@@ -32,12 +32,14 @@ public class RSAOAEPEncrypt extends RSAOAEP
 
         this.L = new byte[]{(byte) 0x0};
         if (L.length > pow(2, 61)-1)
-            throw new ArithmeticException("Label L too long");
+            throw new IllegalArgumentException("Label L too long");
 
         this.lHash = sha256(L);
 
         if(k < lHash.length*2 + 2)
             throw new ArithmeticException("Decryption error; k less than lHash*2+2");
+        if(M.length > k - lHash.length*2 -2 )
+            throw new IllegalArgumentException("Message too long, at most k - lHash*2 - 2 bytes");
 
         this.PS = genPS();
         this.DB = genDB();
@@ -58,6 +60,8 @@ public class RSAOAEPEncrypt extends RSAOAEP
 
         if(k < lHash.length*2 + 2)
             throw new ArithmeticException("Decryption error; k less than lHash*2+2");
+        if(M.length > k - lHash.length*2 -2 )
+            throw new IllegalArgumentException("Message too long, at most k - lHash*2 - 2 bytes");
 
         this.PS = genPS();
         this.DB = genDB();
@@ -105,7 +109,6 @@ public class RSAOAEPEncrypt extends RSAOAEP
     {
         ByteArrayOutputStream DB = new ByteArrayOutputStream();
 
-        DB.write( lHash );
 
         if (PS <= 0)
         {
