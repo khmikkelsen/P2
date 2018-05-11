@@ -1,5 +1,6 @@
 package robin;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,9 +11,13 @@ public class Main {
         // write your code here
 
         DatabaseConnection db = new DatabaseConnection();
-        db.setup();
-        db.createBlockTable();
-        db.createMessageTable();
+        try {
+            db.setup();
+            db.createBlockTable();
+            db.createMessageTable();
+        } catch (SQLException exception) {
+            return;
+        }
 
         Message m = new Message("Test Mesage", "Robin Public Key", "Melanie Public Key");
         m.signMessage("RSA private key");
@@ -21,17 +26,27 @@ public class Main {
 
         List<Message> msgs = new ArrayList<>(Arrays.asList(m, m2));
 
-        Block b = new Block("prevHeadHash", Chain.getTarget().getCompactTarget(), msgs);
-        b.mineBlock();
+        Block block = new Block("prevHeadHash", Chain.getTarget().getCompactTarget(), msgs);
+        block.mineBlock();
 
-        db.addBlock(b);
+        try {
+            long newBlockId = db.addBlock(block);
 
-        Block b2 = db.getBlockByIndex(1);
-        System.out.println("Retrieved block 1 from db:");
-        System.out.println(b2 + "\n");
+            db.addMessagesToBlockId(block.getMessages(), newBlockId);
+        } catch ( SQLException exception) {
+            // The block was added, but there was an error while trying to add the messages.
 
-        Block b3 = db.getBlockByIndex(10);
-        System.out.println("Retrieved block 10 from db:");
-        System.out.println(b3 + "\n");
+        }
+        try {
+            Block b2 = db.getBlockByIndex(1);
+            System.out.println("Retrieved block 1 from db:");
+            System.out.println(b2 + "\n");
+
+            Block b3 = db.getBlockByIndex(10);
+            System.out.println("Retrieved block 10 from db:");
+            System.out.println(b3 + "\n");
+        } catch (SQLException exception) {
+            // Could not retrieve block(s).
+        }
     }
 }

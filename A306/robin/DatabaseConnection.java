@@ -1,25 +1,23 @@
 package robin;
 
 import java.sql.*;
+import java.util.List;
 
 public class DatabaseConnection {
 
     // SQLite connection string
     private static final String url = "jdbc:sqlite:C://sqlite/db/p2_blockchain.db";
 
-    private Connection connect() {
+    private Connection connect() throws SQLException {
         // SQLite connection string
         Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
+
+        conn = DriverManager.getConnection(url);
 
         return conn;
     }
 
-    public void setup() {
+    public void setup() throws SQLException {
         // SQL statement for creating a new table
         String sql = "PRAGMA foreign_keys = ON;";
 
@@ -27,12 +25,10 @@ public class DatabaseConnection {
              Statement stmt = conn.createStatement()) {
             // create a new table
             stmt.execute(sql);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
     }
 
-    public Block getBlockByIndex(int index) {
+    public Block getBlockByIndex(int index) throws SQLException {
         String query = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp from blocks where block_id = ?";
 
         try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(query)) {
@@ -53,110 +49,60 @@ public class DatabaseConnection {
 
                 return block;
             }
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
 
         return null;
     }
 
-    public void addBlock(Block b) {
+    /**
+     * Adds a block to the database and returns it's id.
+     *
+     * @param block The block to add
+     * @return Id of the added block
+     * @throws SQLException
+     */
+    public int addBlock(Block block) throws SQLException {
 
         String query = "INSERT INTO blocks (hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp) VALUES(?,?,?,?,?,?)";
 
         try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, b.calculateHash());
-            statement.setString(2, b.getPrevHeadHash());
-            statement.setString(3, b.getMerkleRootHash());
-            statement.setString(4, b.getCompactDifficulty());
-            statement.setInt(5, b.getNonce());
-            statement.setLong(6, b.getTimestamp());
+            statement.setString(1, block.calculateHash());
+            statement.setString(2, block.getPrevHeadHash());
+            statement.setString(3, block.getMerkleRootHash());
+            statement.setString(4, block.getCompactDifficulty());
+            statement.setInt(5, block.getNonce());
+            statement.setLong(6, block.getTimestamp());
             statement.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
 
+        // Block has now been inserted. Get it's id.
         query = "SELECT block_id FROM blocks ORDER BY block_id DESC LIMIT 1;";
-
-        long newBlockId = -1;
 
         try (Connection conn = this.connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
             rs.next();
-            newBlockId = rs.getInt("block_id");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            return rs.getInt("block_id");
         }
+    }
 
-//        query = "SELECT * FROM blocks ORDER BY id DESC LIMIT 1;";
-//
-//        long newBlockId = -1;
-//
-//        try (Connection conn = this.connect();
-//             Statement stmt = conn.createStatement();
-//             ResultSet rs = stmt.executeQuery(query)) {
-//
-//            rs.next();
-//
-//            System.out.println(rs.getLong("id") + "\t" +
-//                    rs.getString("previous_hash") + "\t" +
-//                    rs.getString("merkle_root_hash") + "\t" +
-//                    rs.getString("compact_difficulty") + "\t" +
-//                    rs.getInt("nonce") + "\t" +
-//                    rs.getLong("mined_timestamp"));
-//
-//            newBlockId = rs.getInt("block_id");
-//
-//
-//        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
-//        }
+    public void addMessagesToBlockId(List<Message> messages, long blockId) throws SQLException {
+         String query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
 
-        if (newBlockId == -1) {
-            return;
-        }
-
-        for (Message m : b.getMessages()) {
-            query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
-
+        for (Message m : messages) {
             try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.setString(1, m.getRecipient());
                 pstmt.setString(2, m.getSender());
                 pstmt.setString(3, m.getSignature());
                 pstmt.setString(4, m.getMessage());
-                pstmt.setLong(5, newBlockId);
+                pstmt.setLong(5, blockId);
                 pstmt.executeUpdate();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
             }
-        }
-
-        query = "SELECT * from messages;";
-
-        try (Connection conn = this.connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            // loop through the result set
-            System.out.println("id\t\t\t\trecipient\t\t\t\t\t\tsender\t\t\t\t\t\t\tsignature\t\t\t\t\tmessage\t\t\t\t\tblock_id");
-            while (rs.next()) {
-                System.out.println(rs.getInt("message_id") + "\t\t\t\t" +
-                        rs.getString("recipient") + "\t\t\t\t" +
-                        rs.getString("sender") + "\t\t\t\t" +
-                        rs.getString("signature") + "\t\t\t\t" +
-                        rs.getString("message") + "\t\t\t\t" +
-                        rs.getInt("block_id"));
-            }
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
     }
 
-    public void createBlockTable() {
+    public void createBlockTable() throws SQLException {
         // SQL statement for creating a new table
         String query = "CREATE TABLE IF NOT EXISTS blocks (\n"
                 + "	block_id integer PRIMARY KEY AUTOINCREMENT,\n"
@@ -172,12 +118,10 @@ public class DatabaseConnection {
              Statement stmt = conn.createStatement()) {
             // create a new table
             stmt.execute(query);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
     }
 
-    public void createMessageTable() {
+    public void createMessageTable() throws SQLException {
         // SQL statement for creating a new table
         String query = "CREATE TABLE IF NOT EXISTS messages (\n"
                 + "	message_id integer PRIMARY KEY AUTOINCREMENT,\n"
@@ -193,8 +137,6 @@ public class DatabaseConnection {
              Statement stmt = conn.createStatement()) {
             // create a new table
             stmt.execute(query);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
     }
 }
