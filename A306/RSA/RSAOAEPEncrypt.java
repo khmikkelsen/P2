@@ -134,10 +134,13 @@ public class RSAOAEPEncrypt extends RSAOAEP
 
         return DB.toByteArray();
     }
+    // Returns amount of 0 bytes to pad in DB, k - M.length - 2*hLen - 2 bytes
     private int genPS()
     {
         return k - M.length - 2*lHash.length - 2;
     }
+
+    // Getter
     public byte[] getEncryptedMessage()
     {
         return this.encryptedMessage;

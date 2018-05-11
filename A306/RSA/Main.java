@@ -31,9 +31,8 @@ public class Main
             byte[] signature = sign.getSignature();
             RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alice.getPublicKey(), Alice.getPublicE());
 
-            System.out.println("Signature was: " +veri.getResult());
         }
-        catch (IOException e) {e.printStackTrace();}
+        catch (IOException | BadVerificationException e) {e.printStackTrace();}
 
 
     }
