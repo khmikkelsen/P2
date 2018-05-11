@@ -12,7 +12,7 @@ public class Main
     private static List<BufferedWriter> writers = new ArrayList<>();
     private static List<Socket> sockets = new ArrayList<>();
     private static ServerSocket server;
-    private static List<String> ipAddresses = List.of("127.0.0.1");
+    private static List<String> ipAddresses = List.of(); // Add network IP addresses.
     public static int PORT = 140;
 
     // Main method
@@ -40,55 +40,51 @@ public class Main
     // Setup server connection.
     public static void getConnection(PrintWriter console) throws IOException
     {
-        Socket socketCatch = null;
-        Socket socketConnect = null;
+        Socket socketCatch;
+        Socket socketConnect;
 
         for (int i = 0; i < ipAddresses.size(); i++)
         {
             // Catching another socket. This is working as a client.
-            if (catchSocket(socketCatch, ipAddresses.get(i)))
-            {
-                sockets.add(socketCatch);
-                setupStreams();
-                console.println("Node caught.");
-                console.flush();
-            }
+            socketCatch = catchSocket(ipAddresses.get(i));
+            sockets.add(socketCatch);
+            setupStreams();
+            console.println("Node caught.");
+            console.flush();
 
             // Connecting to another server socket. This is working as a server.
-            if (connectSocket(socketConnect))
-            {
-                sockets.add(socketConnect);
-                setupStreams();
-                console.println("Node connected.");
-                console.flush();
-            }
+            socketConnect = connectSocket();
+            sockets.add(socketConnect);
+            setupStreams();
+            console.println("Node connected.");
+            console.flush();
         }
     }
 
     // Catching sockets
-    private static boolean catchSocket(Socket socketCatch, String ip) throws IOException
+    private static Socket catchSocket(String ip) throws IOException
     {
         while (true)
         {
-            socketCatch = new Socket(ip, PORT);
+            Socket socketCatch = new Socket(ip, PORT);
 
             if (socketCatch.isConnected())
             {
-                return true;
+                return socketCatch;
             }
         }
     }
 
     // Connect socket
-    private static boolean connectSocket(Socket socket) throws IOException
+    private static Socket connectSocket() throws IOException
     {
         while (true)
         {
-            socket = server.accept();
+            Socket socket = server.accept();
 
             if (socket.isConnected())
             {
-                return true;
+                return socket;
             }
         }
     }
