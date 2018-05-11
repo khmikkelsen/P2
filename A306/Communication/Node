@@ -1,0 +1,103 @@
+package p2.communication;
+
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main
+{
+    private static List<BufferedReader> readers = new ArrayList<>();
+    private static List<BufferedWriter> writers = new ArrayList<>();
+    private static List<Socket> sockets = new ArrayList<>();
+    private static ServerSocket server;
+    private static List<String> ipAddresses = List.of("127.0.0.1");
+    public static int PORT = 140;
+
+    // Main method
+    public static void main(String[] args)
+    {
+        // IO
+        PrintWriter console = new PrintWriter(System.out);
+
+        try
+        {
+            server = new ServerSocket(140);
+            console.println("Searching for nodes...");
+            console.flush();
+
+            getConnection(console);
+        }
+
+        catch (IOException e)
+        {
+            console.println("Connection failed.");
+            console.flush();
+        }
+    }
+
+    // Setup server connection.
+    public static void getConnection(PrintWriter console) throws IOException
+    {
+        Socket socketCatch = null;
+        Socket socketConnect = null;
+
+        for (int i = 0; i < ipAddresses.size(); i++)
+        {
+            // Catching another socket. This is working as a client.
+            if (catchSocket(socketCatch, ipAddresses.get(i)))
+            {
+                sockets.add(socketCatch);
+                setupStreams();
+                console.println("Node caught.");
+                console.flush();
+            }
+
+            // Connecting to another server socket. This is working as a server.
+            if (connectSocket(socketConnect))
+            {
+                sockets.add(socketConnect);
+                setupStreams();
+                console.println("Node connected.");
+                console.flush();
+            }
+        }
+    }
+
+    // Catching sockets
+    private static boolean catchSocket(Socket socketCatch, String ip) throws IOException
+    {
+        while (true)
+        {
+            socketCatch = new Socket(ip, PORT);
+
+            if (socketCatch.isConnected())
+            {
+                return true;
+            }
+        }
+    }
+
+    // Connect socket
+    private static boolean connectSocket(Socket socket) throws IOException
+    {
+        while (true)
+        {
+            socket = server.accept();
+
+            if (socket.isConnected())
+            {
+                return true;
+            }
+        }
+    }
+
+    // Setting up streams.
+    // Might be necessary to add socket as argument to make sure there is a socket to get streams from.
+    private static void setupStreams() throws IOException
+    {
+        writers.add(new BufferedWriter(new OutputStreamWriter(sockets.get(sockets.size() - 1).getOutputStream())));
+        readers.add(new BufferedReader(new InputStreamReader(sockets.get(sockets.size() - 1).getInputStream())));
+    }
+}
