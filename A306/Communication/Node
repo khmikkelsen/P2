@@ -12,7 +12,7 @@ public class Main
     private static List<BufferedWriter> writers = new ArrayList<>();
     private static List<Socket> sockets = new ArrayList<>();
     private static ServerSocket server;
-    private static List<String> ipAddresses = List.of(); // Add network IP addresses.
+    private static List<String> ipAddresses = List.of("192.168.0.101", "192.168.0.102", "192.168.0.103", "192.168.0.104", "192.168.0.105", "192.168.0.106", "192.168.0.107");
     public static int PORT = 140;
 
     // Main method
