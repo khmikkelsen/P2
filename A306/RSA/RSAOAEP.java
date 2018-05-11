@@ -1,15 +1,18 @@
 package RSA;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
 
-public class RSAOAEP
+abstract class RSAOAEP
 {
-    public byte[] MGF(byte[] seed, int maskLen, int hLen) throws IOException
+    protected byte[] MGF(byte[] seed, int maskLen, int hLen) throws IOException
     {
         byte mask[] = new byte[maskLen];
         int ceil = ceil(maskLen, hLen);
@@ -35,14 +38,12 @@ public class RSAOAEP
 
         return mask;
     }
-    public byte[] xorByteArrays(byte[] arr1, byte[] arr2)
+    protected byte[] xorByteArrays(byte[] arr1, byte[] arr2)
     {
-        byte[] out;
+        if (arr1.length != arr2.length)
+            throw new ArrayIndexOutOfBoundsException("Incompatible byte arrays");
 
-        if (arr1.length > arr2.length)
-            out = new byte[arr1.length];
-        else
-            out = new byte[arr2.length];
+        byte[] out = new byte[arr1.length];
 
         for (int i = arr1.length - 1; i >= 0; i--)
         {
@@ -50,7 +51,7 @@ public class RSAOAEP
         }
         return out;
     }
-    public byte[] I2OSP (BigInteger x, int xLen)
+    protected byte[] I2OSP (BigInteger x, int xLen)
     {
         BigInteger twofiftysix = new BigInteger("256");
         byte[] out = new byte[xLen];
@@ -64,7 +65,7 @@ public class RSAOAEP
 
         return out;
     }
-    public BigInteger OS2IP (byte[] octet)
+    protected BigInteger OS2IP (byte[] octet)
     {
         BigInteger out = new BigInteger("0");
         BigInteger twofiftysix = new BigInteger("256");
@@ -76,18 +77,18 @@ public class RSAOAEP
         return out;
     }
     // Returns input byte array as hash of said byte array
-    public byte[] sha256(byte[] octet)
+    protected byte[] sha256(byte[] octet)
     {
-        MessageDigest digest = null;
+        MessageDigest digest;
 
         try { digest = MessageDigest.getInstance("SHA-256");
             return digest.digest(octet);
         }
-        catch (NoSuchAlgorithmException e) { e.printStackTrace(); }
+        catch (NoSuchAlgorithmException | NullPointerException e) { e.printStackTrace(); }
 
-        return digest.digest(octet);
+        return null;
     }
-    public int ceil(int x, int y)
+    protected int ceil(int x, int y)
     {
         return (int) Math.ceil((double) x / (double) y);
     }
