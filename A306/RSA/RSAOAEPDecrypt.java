@@ -16,11 +16,11 @@ public class RSAOAEPDecrypt extends RSAOAEP
     private byte[] decryptedMessage;
     private byte[] DM;
 
-    public RSAOAEPDecrypt(byte[] encryptedMessage, BigInteger publicN, BigInteger publicK) throws IOException
+    public RSAOAEPDecrypt(byte[] encryptedMessage, BigInteger rsaMod, BigInteger privateKey) throws IOException
     {
-        this.nPub = publicN;
-        this.kPriv = publicK;
-        if (publicK.bitCount() % 8 != 0 || publicN.bitCount() % 8 != 0)
+        this.nPub = rsaMod;
+        this.kPriv = privateKey;
+        if (rsaMod.bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
 
         this.k = nPub.bitLength() / 8;
@@ -31,10 +31,12 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.decryptedMessage = decryptRSA(encryptedMessage);
         this.DM = decodeOAEP();
     }
-    public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, BigInteger publicN, BigInteger publicK) throws IOException
+    public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, BigInteger rsaMod, BigInteger privateKey) throws IOException
     {
-        this.nPub = publicN;
-        this.kPriv = publicK;
+        this.nPub = rsaMod;
+        this.kPriv = privateKey;
+        if (rsaMod.bitLength() % 8 != 0)
+            throw new IllegalArgumentException("Keys invalid");
         this.k = nPub.bitLength() / 8;
 
         this.L = label;
@@ -105,10 +107,6 @@ public class RSAOAEPDecrypt extends RSAOAEP
         byte[] M = new byte[DB.length - j];
 
         System.arraycopy(DB, j , M, 0, DB.length - j);
-
-        String mess = new String(M);
-        System.out.println("And finally... :" + mess);
-        System.out.println("\n");
 
         return M;
     }
