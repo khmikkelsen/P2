@@ -1,10 +1,10 @@
-package p2.communication;
+package Communication;
 
 import java.io.*;
 import java.net.Socket;
 
 // Client Main.
-public class Main
+public class Client
 {
     // Field
     private static BufferedWriter writer = null;

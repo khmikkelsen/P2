@@ -1,4 +1,4 @@
-package p2.communication;
+package Communication;
 
 public interface Tester<E>
 {

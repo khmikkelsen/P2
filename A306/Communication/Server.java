@@ -1,4 +1,4 @@
-package p2.communication;
+package Communication;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Server
-public class Main
+public class Server
 {
     // Main method.
     public static void main(String[] args)
