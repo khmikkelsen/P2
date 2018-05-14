@@ -34,7 +34,9 @@ class Message {
 
     public String calculateHash() {
         return StringUtil.applySha256(message
-                + recipient);
+                + recipient
+                + sender
+                + signature);
     }
 
     public String getRecipient() {
@@ -55,6 +57,6 @@ class Message {
 
     public void signMessage(String privateKey) {
         // TODO: Sign message
-        this.signature = "RSA signature";
+        this.signature = privateKey;
     }
 }
