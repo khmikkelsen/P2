@@ -54,4 +54,9 @@ public class KeyPairGenerator extends RSAOAEP
     public BigInteger getPublicE() { return this.publicKey; }
     public BigInteger getPrivateKey() { return this.privateKey; }
 
+    public String toString() {
+
+        return rsaMod.toString() +"-\n"+publicKey.toString()+"-\n"+privateKey.toString();
+    }
+
 }

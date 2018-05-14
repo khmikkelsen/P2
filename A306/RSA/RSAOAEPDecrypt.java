@@ -13,7 +13,6 @@ public class RSAOAEPDecrypt extends RSAOAEP
     private BigInteger kPriv;
     private int k;
 
-    private byte[] encryptedMessage;
     private byte[] decryptedMessage;
     private byte[] DM;
 
@@ -29,8 +28,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.L = new byte[]{(byte) 0x0};
         this.lHash = sha256(L);
 
-        this.encryptedMessage = encryptedMessage;
-        this.decryptedMessage = decryptRSA();
+        this.decryptedMessage = decryptRSA(encryptedMessage);
         this.DM = decodeOAEP();
     }
     public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, BigInteger publicN, BigInteger publicK) throws IOException
@@ -42,8 +40,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.L = label;
         this.lHash = sha256(L);
 
-        this.encryptedMessage = encryptedMessage;
-        this.decryptedMessage = decryptRSA();
+        this.decryptedMessage = decryptRSA(encryptedMessage);
         this.DM = decodeOAEP();
     }
     /*
@@ -52,7 +49,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
      * where k is the recipients private k, and n the corresponding RSA modulus.
      * Outputs an integer representative of k length (length of RSA modulus).
      */
-    private byte[] decryptRSA()
+    public byte[] decryptRSA(byte[] encryptedMessage)
     {
         if (encryptedMessage.length != k)
             throw new IllegalArgumentException("Encrypted message length != RSA modulus length");
@@ -115,6 +112,6 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
         return M;
     }
-
+    public byte[] getDecrypt() { return this.decryptedMessage; }
     public byte[] getDecryptedMessage() { return this.DM; }
 }

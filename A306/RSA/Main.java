@@ -1,6 +1,7 @@
 package RSA;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -17,6 +18,7 @@ public class Main
         String copypasta = "ffff";
 
         byte[] label = new byte[]{0x0,0x1,0x02};
+        System.out.println(Alice.toString());
 
         try
         {
@@ -34,6 +36,6 @@ public class Main
         }
         catch (IOException | BadVerificationException e) {e.printStackTrace();}
 
-
     }
+
 }
