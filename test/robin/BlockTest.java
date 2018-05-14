@@ -15,7 +15,7 @@ class BlockTest{
 
 
     @Test
-    void calcMerkleHashTest01() {
+    void getMerkleRootHashTest01() {
 
         Message m = new Message("Test Message", "Robin Public Key", "Melanie Public Key");
         m.signMessage("RSA private key");
@@ -24,14 +24,14 @@ class BlockTest{
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
 
-        Block hola = new Block("prevHeadhash","1f00ffff", messages);
+        Block blockTest = new Block("prevHeadhash","1f00ffff", messages);
 
-        assertEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", hola.calculateMerkleRootHash(messages));
+        assertEquals("3720e16ad9712e01705e6bfb72d31cbc3fa2999e32384e54b0cb57e1822c93dd", blockTest.getMerkleRootHash(messages));
 
     }
 
     @Test
-    void calcMerkleHashTest02() {
+    void getMerkleRootHashTest02() {
 
         Message m = new Message("Test Message", "Robin Public Key", "Melanie Public Key");
         m.signMessage("RSA private key");
@@ -42,14 +42,14 @@ class BlockTest{
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
 
-        Block hola = new Block("prevHeadhash","1f00ffff", messages);
+        Block blockTest = new Block("prevHeadhash","1f00ffff", messages);
 
-        assertNotEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", hola.calculateMerkleRootHash(messages));
+        assertNotEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", blockTest.getMerkleRootHash(messages));
 
     }
 
     @Test
-    void calcMerkleHashTest03() {
+    void getMerkleRootHashTest03() {
 
         Message m = new Message("Test Message", "Robin Public Key", "Melanie Public Key");
         m.signMessage("RSA private key");
@@ -60,10 +60,16 @@ class BlockTest{
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
 
-        Block hola = new Block("prevHeadhash","1f00ffff", messages);
+        Block blockTest = new Block("prevHeadhash","1f00ffff", messages);
 
-        assertNotEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", hola.calculateMerkleRootHash(messages));
+        assertNotEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", blockTest.getMerkleRootHash(messages));
 
     }
 
+
+    @Test
+    void mineBlockTest01() {
+
+        //TODO: Spørg Mads
+    }
 }
