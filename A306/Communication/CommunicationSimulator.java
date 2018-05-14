@@ -130,7 +130,7 @@ public class CommunicationSimulator
 
         clientSimulator(keys);
 
-        // Add nodeSimulator.
+        // Add nodeSimulator
     }
 
     private static void clientSimulator(KeyPairGenerator keys)
