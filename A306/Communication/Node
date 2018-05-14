@@ -12,53 +12,71 @@ public class Main
     private static List<BufferedWriter> writers = new ArrayList<>();
     private static List<Socket> sockets = new ArrayList<>();
     private static ServerSocket server;
-    private static List<String> ipAddresses = List.of("192.168.0.101", "192.168.0.102", "192.168.0.103", "192.168.0.104", "192.168.0.105", "192.168.0.106", "192.168.0.107");
-    public static int PORT = 140;
+    private static String FIRST_IP = "192.168.0.101";
+    private static int PORT = 140;
 
     // Main method
     public static void main(String[] args)
     {
-        // IO
-        PrintWriter console = new PrintWriter(System.out);
+        System.out.println(ipIncrement("127.0.0.1", 3));
 
         try
         {
             server = new ServerSocket(140);
-            console.println("Searching for nodes...");
-            console.flush();
+            System.out.println("Searching for nodes...");
 
-            getConnection(console);
+            getConnection(0);
         }
 
         catch (IOException e)
         {
-            console.println("Connection failed.");
-            console.flush();
+            System.out.println("Connection failed.");
         }
     }
 
     // Setup server connection.
-    public static void getConnection(PrintWriter console) throws IOException
+    public static void getConnection(int ipIncrement) throws IOException
     {
         Socket socketCatch;
         Socket socketConnect;
+        String ip = ipIncrement(FIRST_IP, ipIncrement);
 
-        for (int i = 0; i < ipAddresses.size(); i++)
+        // Catching another socket. This is working as a client.
+        socketCatch = catchSocket(ip);
+        sockets.add(socketCatch);
+        setupStreams();
+        System.out.println("Node caught.");
+
+        // Connecting to another server socket. This is working as a server.
+        socketConnect = connectSocket();
+        sockets.add(socketConnect);
+        setupStreams();
+        System.out.println("Node connected.");
+    }
+
+    // Increments IP address.
+    // Might also replace wrong numbers in IP. For example, 127.0.0.1 incremented by 4 returns 427.0.0.4. It replaces all "1" with "4".
+    public static String ipIncrement(String ip, int increment)
+    {
+        String ipEnd = ip.substring(indexOf(ip, '.') + 1);
+        int incremented = Integer.parseInt(ipEnd) + increment;
+
+        // Replace end of ip address with incremented number.
+        return ip.replaceAll(ipEnd, String.valueOf(incremented));
+    }
+
+    // Returns index in String of a specific char searching from end of String. Returns -1 if the character wasn't found.
+    public static int indexOf(String str, char character)
+    {
+        char[] text = str.toCharArray();
+
+        for (int i = str.length() - 1; i >= 0; i--)
         {
-            // Catching another socket. This is working as a client.
-            socketCatch = catchSocket(ipAddresses.get(i));
-            sockets.add(socketCatch);
-            setupStreams();
-            console.println("Node caught.");
-            console.flush();
-
-            // Connecting to another server socket. This is working as a server.
-            socketConnect = connectSocket();
-            sockets.add(socketConnect);
-            setupStreams();
-            console.println("Node connected.");
-            console.flush();
+            if (text[i] == character)
+                return i;
         }
+
+        return -1;
     }
 
     // Catching sockets

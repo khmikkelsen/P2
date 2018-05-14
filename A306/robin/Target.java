@@ -38,7 +38,7 @@ public class Target {
     public static String calculateCompactTarget(BigInteger bigIntegerTarget) {
         // This is a hex string, which is also a base 256 string if you add a space after
         // each set of 2 hex digits.
-        String base256NewTarget = DifficultyMath.zeroPadHex(bigIntegerTarget.toString(16));
+        String base256NewTarget = HexUtil.zeroPadHex(bigIntegerTarget.toString(16));
 
         // One base 256 digit is two base 16 (hex) digits.
         String firstBase256Digit = base256NewTarget.substring(0, 2); //range is exclusive
@@ -50,10 +50,10 @@ public class Target {
         int numberOfBase256Digits = base256NewTarget.length() / 2;
 
         // Take first 6 hex digits
-        String compactTarget = DifficultyMath.zeroPadHex(Integer.toString(numberOfBase256Digits, 16))
+        String compactTarget = HexUtil.zeroPadHex(Integer.toString(numberOfBase256Digits, 16))
                 + base256NewTarget.substring(0, Math.min(base256NewTarget.length(), 6));
 
-        compactTarget = DifficultyMath.appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
+        compactTarget = HexUtil.appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
 
         return compactTarget;
     }

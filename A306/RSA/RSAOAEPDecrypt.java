@@ -21,6 +21,9 @@ public class RSAOAEPDecrypt extends RSAOAEP
     {
         this.nPub = publicN;
         this.kPriv = publicK;
+        if (publicK.bitCount() % 8 != 0 || publicN.bitCount() % 8 != 0)
+            throw new IllegalArgumentException("Keys invalid");
+
         this.k = nPub.bitLength() / 8;
 
         this.L = new byte[]{(byte) 0x0};
@@ -43,9 +46,17 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.decryptedMessage = decryptRSA();
         this.DM = decodeOAEP();
     }
-
+    /*
+     * RSA Decrypt primitive
+     * Computes an integer representative of the encrypted message, c. Computes m = c^k (mod n),
+     * where k is the recipients private k, and n the corresponding RSA modulus.
+     * Outputs an integer representative of k length (length of RSA modulus).
+     */
     private byte[] decryptRSA()
     {
+        if (encryptedMessage.length != k)
+            throw new IllegalArgumentException("Encrypted message length != RSA modulus length");
+
         BigInteger c = OS2IP(encryptedMessage);
 
         if(c.compareTo(BigInteger.ZERO) <= 0 )
@@ -55,10 +66,17 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
         return I2OSP(m, k);
     }
+    /*
+     * RSAOAEP decode primitive
+     * Extract the first byte from the encrypted message, if not 0, output invalid.
+     * Extract the next lHash bytes to get maskedSeed, and the last k - lHash - 1, where k denotes length of RSA modulus
+     * to get maskedDB. Let seedMask be MGF(maskedDB) and the seed to be maskedSeed XOR seedMask. Let dbMask MGF(seed),
+     * a byte string of k - lHash - 1 length. Let DB be maskedDB XOR dbMask. Extract M from DB, and output M.
+     */
     private byte[] decodeOAEP() throws IOException
     {
-        byte[] Y = new byte[1];
-        Y[0] = decryptedMessage[0];
+        if (decryptedMessage[0] != 0)
+            throw new ArithmeticException("Leftmost byte of decrypted message != 0");
 
         byte[] maskedSeed = new byte[lHash.length];
         System.arraycopy(decryptedMessage, 1, maskedSeed, 0, maskedSeed.length);
@@ -89,13 +107,11 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
         byte[] M = new byte[DB.length - j];
 
-        int temp = DB.length - j;
-
         System.arraycopy(DB, j , M, 0, DB.length - j);
 
         String mess = new String(M);
         System.out.println("And finally... :" + mess);
-        System.out.println("\n\n");
+        System.out.println("\n");
 
         return M;
     }

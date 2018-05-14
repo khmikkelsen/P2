@@ -69,7 +69,11 @@ public class RSAOAEPEncrypt extends RSAOAEP
         this.encryptedMessage = RSAEncrypt();
     }
 
-
+    /* RSA Encryption primitive
+     * Compute for byte string EM an integer representative m. Compute c = m^e (mod n), where e is the recipient's
+     * public key and n is the recipients RSA modulus. Convert the integer c to be a k (RSA modulus length) byte string, C.
+     * Output C.
+     */
     private byte[] RSAEncrypt()
     {
         BigInteger m = OS2IP(EM);
@@ -81,7 +85,10 @@ public class RSAOAEPEncrypt extends RSAOAEP
         return C;
     }
     /* OAEP encode primitive
-     *
+     * Generates a random seed of lHash length. Maskes seed to be dbMask, a DB length (k - lHash - 1 bytes),
+     * and performs XOR on DB and dbMask, result is maskedDB. Generates seedMask from maskedDB, a byte string og lHash length.
+     * Performs XOR on original seed and seedMask to make maskedSeed. Outputs EM, a maskedSeed + maskedDB + 1 length
+     * byte string, consisting of EM = 0x0 | maskedSeed | maskedDB.
      */
     private byte[] encodeOAEP() throws IOException
     {
@@ -109,6 +116,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
     {
         ByteArrayOutputStream DB = new ByteArrayOutputStream();
 
+        DB.write( lHash );
 
         if (PS <= 0)
         {

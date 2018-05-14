@@ -6,32 +6,32 @@ import java.util.Random;
 
 public class KeyPairGenerator extends RSAOAEP
 {
-    private BigInteger p; // Skal være primtal
-    private BigInteger q; // Skal være primtal
-    private BigInteger lambda;
     private BigInteger publicKey; // Public key eksponent
     private BigInteger privateKey; // Private key eksponent
-    private BigInteger n;
+    private BigInteger rsaMod;
+    private Random rand;
 
     // Constructor
-    public KeyPairGenerator (int keyBitSize)
+    public KeyPairGenerator (int keyBitSize, Random random)
     {
         this.publicKey = new BigInteger("65537");
-        genKeys(keyBitSize);
+        this.rand = random;
+        genKeys(keyBitSize/2);
     }
     private void genKeys(int keyBitsSize)
     {
         boolean check = false;
+        BigInteger p, q, lambda;
 
         while (!check)
         {
-            Random rand = new SecureRandom();
-            this.p = BigInteger.probablePrime(keyBitsSize, rand);
-            this.q = BigInteger.probablePrime(keyBitsSize, rand);
-            this.n = p.multiply(q);
+            rand.setSeed(rand.nextLong());
+            p = BigInteger.probablePrime(keyBitsSize, rand);
+            q = BigInteger.probablePrime(keyBitsSize, rand);
+            this.rsaMod = p.multiply(q);
 
-            if (n.bitLength() % 8 == 0) {
-                this.lambda = lcm(p.subtract(BigInteger.ONE), q.subtract(BigInteger.ONE));
+            if (rsaMod.bitLength() % 8 == 0) {
+                lambda = lcm(p.subtract(BigInteger.ONE), q.subtract(BigInteger.ONE));
                 this.privateKey = publicKey.modInverse(lambda);
                 check = true;
             }
@@ -50,7 +50,7 @@ public class KeyPairGenerator extends RSAOAEP
     }
 
     // Getters
-    public BigInteger getPublicKey() { return this.n; }
+    public BigInteger getPublicKey() { return this.rsaMod; }
     public BigInteger getPublicE() { return this.publicKey; }
     public BigInteger getPrivateKey() { return this.privateKey; }
 

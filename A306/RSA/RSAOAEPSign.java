@@ -129,8 +129,8 @@ public class RSAOAEPSign extends RSAOAEP
 
         out = stream.toByteArray();
 
-        //if (out.length != modBits/8)
-        //    throw new ArithmeticException("length != modBits/8");
+        if (out.length != modBits/8)
+          throw new ArithmeticException("length != modBits/8");
 
         return out;
     }
@@ -149,7 +149,6 @@ public class RSAOAEPSign extends RSAOAEP
     }
     private byte[] genM() throws IOException
     {
-        byte[] out = new byte[8+hLen+sLen];
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
         for (int i = 0; i < 8; i++)
@@ -160,7 +159,7 @@ public class RSAOAEPSign extends RSAOAEP
         if (salt != null)
             stream.write( salt );
 
-        out = stream.toByteArray();
+        byte[] out = stream.toByteArray();
 
         return out;
     }

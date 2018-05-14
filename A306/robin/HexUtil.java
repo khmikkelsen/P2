@@ -1,6 +1,6 @@
 package robin;
 
-public class DifficultyMath {
+public class HexUtil {
 
 
     /**

@@ -54,7 +54,7 @@ public class Block {
 
     public void mineBlock() {
 
-        calcMerkleHash();
+        this.merkleRootHash = calculateMerkleRootHash(messages);
 
         while (new BigInteger(this.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
             if (nonce == Integer.MAX_VALUE) {
@@ -72,16 +72,16 @@ public class Block {
      *
      * @return Merkle root, consisting of a blocks transaction hashes
      */
-    private void calcMerkleHash() {
+    public String calculateMerkleRootHash(List<Message> messages) {
         List<String> hashedMessages = new ArrayList<>();
 
         for (Message m : messages) {
             hashedMessages.add(m.calculateHash());
         }
         // The list of hashes are given to calculateMerklerootHash function; a Merkle root is returned.
-        String merkleRootHash = calculateMerkleRootHash(hashedMessages);
+        String merkleRootHash = _calculateMerkleRootHash(hashedMessages);
 
-        this.merkleRootHash = merkleRootHash;
+        return merkleRootHash;
     }
 
     /**
@@ -98,7 +98,7 @@ public class Block {
      * @param nodes to generate a Merkle root from
      * @return nodes, or rather the newly generated merkle root , which is the first and only element in nodes list.
      */
-    private String calculateMerkleRootHash(List<String> nodes) {
+    private String _calculateMerkleRootHash(List<String> nodes) {
         if (nodes.size() > 1) {
             List<String> newNodes = new ArrayList<>();
 
@@ -114,7 +114,7 @@ public class Block {
                 newNodes.add(nodes.get(nodes.size() - 1));
             }
 
-            return calculateMerkleRootHash(newNodes);
+            return _calculateMerkleRootHash(newNodes);
         }
 
         return nodes.get(0);
