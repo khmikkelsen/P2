@@ -1,9 +1,5 @@
 package RSA;
 
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
-import org.junit.runner.notification.Failure;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -12,6 +8,10 @@ import java.security.NoSuchAlgorithmException;
 
 abstract class RSAOAEP
 {
+    /*
+     * Mask-generation function
+     * Returns a masked byte string of a desired length maskLen. hLen defines the length of output from hash function.
+     */
     protected byte[] MGF(byte[] seed, int maskLen, int hLen) throws IOException
     {
         byte mask[] = new byte[maskLen];
@@ -38,6 +38,9 @@ abstract class RSAOAEP
 
         return mask;
     }
+    /*
+     * Performs XOR operation on 2 byte arrays
+     */
     protected byte[] xorByteArrays(byte[] arr1, byte[] arr2)
     {
         if (arr1.length != arr2.length)
@@ -46,11 +49,14 @@ abstract class RSAOAEP
         byte[] out = new byte[arr1.length];
 
         for (int i = arr1.length - 1; i >= 0; i--)
-        {
             out[i] = (byte) (arr1[i] ^ arr2[i]);
-        }
+
         return out;
     }
+    /*
+     * Integer-To-Octet-String-Primitive
+     * Method returns an octet string representative of an integer of a desired length xLen.
+     */
     protected byte[] I2OSP (BigInteger x, int xLen)
     {
         BigInteger twofiftysix = new BigInteger("256");
@@ -65,6 +71,10 @@ abstract class RSAOAEP
 
         return out;
     }
+    /*
+     * Octet-String-To-Integer-Primitive
+     * Method returns an integer representative of input byte array.
+     */
     protected BigInteger OS2IP (byte[] octet)
     {
         BigInteger out = new BigInteger("0");
@@ -76,7 +86,7 @@ abstract class RSAOAEP
 
         return out;
     }
-    // Returns input byte array as hash of said byte array
+    // Method returns hash of input byte array
     protected byte[] sha256(byte[] octet)
     {
         MessageDigest digest;
@@ -88,6 +98,9 @@ abstract class RSAOAEP
 
         return null;
     }
+    /*
+     * \ceil method, returns ceiling of two integers.
+     */
     protected int ceil(int x, int y)
     {
         return (int) Math.ceil((double) x / (double) y);

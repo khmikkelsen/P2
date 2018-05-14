@@ -17,9 +17,8 @@ public class RSAOAEPVerify extends RSAOAEP
     private byte[] EM;
     private byte[] signature;
 
-    public boolean signatureVerification = true;
-
-    public RSAOAEPVerify (byte[] signature, byte[] message, BigInteger rsaMod, BigInteger publicKey) throws IOException
+    public RSAOAEPVerify (byte[] signature, byte[] message, BigInteger rsaMod, BigInteger publicKey)
+            throws IOException, BadVerificationException
     {
         this.signature = signature;
         this.rsaMod = rsaMod;
@@ -30,7 +29,8 @@ public class RSAOAEPVerify extends RSAOAEP
         this.EM = RSAVerify();
         verifyMessage(modBits-1);
     }
-    public RSAOAEPVerify (byte[] signature, byte[] message, int sLen, BigInteger rsaMod, BigInteger publicKey) throws IOException
+    public RSAOAEPVerify (byte[] signature, byte[] message, int sLen, BigInteger rsaMod, BigInteger publicKey)
+            throws IOException, BadVerificationException
     {
         this.signature = signature;
         this.rsaMod = rsaMod;
@@ -50,7 +50,7 @@ public class RSAOAEPVerify extends RSAOAEP
 
         return out;
     }
-    private void verifyMessage(int emBits) throws IOException
+    private void verifyMessage(int emBits) throws IOException, BadVerificationException
     {
         int emLen = ceil(emBits,8);
 
@@ -60,10 +60,11 @@ public class RSAOAEPVerify extends RSAOAEP
 
         // Step 3 & 4
         if (emLen < mHash.length + sLen + 2)
-            setVerify(false);
+            throw new BadVerificationException("emLen < mHashlen + sLen + 2");
+
 
         else if (EM[EM.length-1] != (byte) 0xbc)
-            setVerify(false);
+            throw new BadVerificationException("Last byte in EM != 0xbc");
 
         // Step 5
         byte[] maskedDB = new byte[emLen-mHash.length-1];
@@ -77,7 +78,7 @@ public class RSAOAEPVerify extends RSAOAEP
 
         for (int i = 7; i > 7 - temp; i--)
             if (maskedDBBitset.get(i))
-                setVerify(false);
+                throw new BadVerificationException("Left most bit in the left most byte != false");
 
         // Step 7 & 8
         byte[] dbMask = MGF(H, emLen - mHash.length - 1, mHash.length);
@@ -94,10 +95,10 @@ public class RSAOAEPVerify extends RSAOAEP
 
         for (int i = 0; i < temp; i++)
             if (DB[i] != (byte) 0x0)
-                setVerify(false);
+                throw new BadVerificationException("Left most emLen - mHashlen - sLen - 3 bytes != 0x0");
 
         if (DB[temp] != (byte) 0x01)
-            setVerify(false);
+            throw new BadVerificationException("Left most emLen - mHashlen - sLen - 2 byte != 0x01");
 
         byte[] Mmark;
         if (sLen > 0)
@@ -121,12 +122,7 @@ public class RSAOAEPVerify extends RSAOAEP
 
         for (int j = 0; j < H.length; j++)
             if (H[j] != Hmark[j])
-                setVerify(false);
+                throw new BadVerificationException("H != hMark, signature false");
 
     }
-    private void setVerify(boolean value)
-    {
-        this.signatureVerification = signatureVerification & value;
-    }
-    public boolean getResult() { return signatureVerification;}
 }

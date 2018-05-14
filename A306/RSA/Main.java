@@ -1,6 +1,7 @@
 package RSA;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -17,6 +18,7 @@ public class Main
         String copypasta = "ffff";
 
         byte[] label = new byte[]{0x0,0x1,0x02};
+        System.out.println(Alice.toString());
 
         try
         {
@@ -31,10 +33,9 @@ public class Main
             byte[] signature = sign.getSignature();
             RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alice.getPublicKey(), Alice.getPublicE());
 
-            System.out.println("Signature was: " +veri.getResult());
         }
-        catch (IOException e) {e.printStackTrace();}
-
+        catch (IOException | BadVerificationException e) {e.printStackTrace();}
 
     }
+
 }
