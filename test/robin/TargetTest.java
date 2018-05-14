@@ -6,7 +6,8 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// lav færdigt efter møde med Mads
+
+//TODO: Spørg Mads
 
 class TargetTest {
 
