@@ -54,7 +54,7 @@ public class Block {
 
     public void mineBlock() {
 
-        this.merkleRootHash = calculateMerkleRootHash(messages);
+        this.merkleRootHash = getMerkleRootHash(messages);
 
         while (new BigInteger(this.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
             if (nonce == Integer.MAX_VALUE) {
@@ -72,20 +72,20 @@ public class Block {
      *
      * @return Merkle root, consisting of a blocks transaction hashes
      */
-    public String calculateMerkleRootHash(List<Message> messages) {
+    public String getMerkleRootHash(List<Message> messages) {
         List<String> hashedMessages = new ArrayList<>();
 
         for (Message m : messages) {
             hashedMessages.add(m.calculateHash());
         }
-        // The list of hashes are given to calculateMerklerootHash function; a Merkle root is returned.
-        String merkleRootHash = _calculateMerkleRootHash(hashedMessages);
+        // The list of hashes are given to getMerkleRootHash function; a Merkle root is returned.
+        String merkleRootHash = calculateMerkleRootHash(hashedMessages);
 
         return merkleRootHash;
     }
 
     /**
-     * The function calculateMerkleRootHash: takes a list of hashes; If there is more than 1 node.
+     * The function getMerkleRootHash: takes a list of hashes; If there is more than 1 node.
      * For as long as i is less than amount of hashes, then hash i and i+1 get combined into a new hash and added to the
      * newNodes list. hashedCount iterates after a combination is made.  i is iterated by 2 beacuse 2 hashes are combined
      * each time.
@@ -98,7 +98,7 @@ public class Block {
      * @param nodes to generate a Merkle root from
      * @return nodes, or rather the newly generated merkle root , which is the first and only element in nodes list.
      */
-    private String _calculateMerkleRootHash(List<String> nodes) {
+    private String calculateMerkleRootHash(List<String> nodes) {
         if (nodes.size() > 1) {
             List<String> newNodes = new ArrayList<>();
 
@@ -114,7 +114,7 @@ public class Block {
                 newNodes.add(nodes.get(nodes.size() - 1));
             }
 
-            return _calculateMerkleRootHash(newNodes);
+            return calculateMerkleRootHash(newNodes);
         }
 
         return nodes.get(0);
