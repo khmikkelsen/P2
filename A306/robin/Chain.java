@@ -1,6 +1,7 @@
 package robin;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 
 
 /**
@@ -10,7 +11,7 @@ import java.math.BigInteger;
 public class Chain {
 
     // Two weeks (in seconds);wanted time for 2016 blocks.
-    private static final long targetTimespan = 14 * 24 * 60 * 60;
+    private static final long targetTimespan = 14 * 24 * 60 * 60 * 1000;
 
     /*BigInteger is used for large Integers, i.e greater than 64-bit
      * The BigInteger constructor: takes the string representation of a big int and the base(radix) to make a BigInteger
@@ -35,7 +36,7 @@ public class Chain {
      * The function adjustDifficulty: adjusts the difficulty based on 'if the previous 2016 blocks took more than two
      * weeks to find, the difficulty is reduced. If they took less than two weeks, the difficulty is increased. '
      */
-   public static void adjustDifficulty(Block lastBlock, Block firstBlock) {
+    public static void adjustDifficulty(Block lastBlock, Block firstBlock) {
 
         System.out.println("pow limit: " + proofOfWorkLimit.toString(16));
 
@@ -48,8 +49,10 @@ public class Chain {
 //        } else if (actualTimespan > targetTimespan * 4) {
 //            actualTimespan = targetTimespan * 4;
 //        }
-
-
+        System.out.println("Actual: "  + actualTimespan);
+        System.out.println("Target: "  + targetTimespan);
+        double factor = (double)actualTimespan / (double)targetTimespan;
+        System.out.println("Factor: " + factor);
         //
         BigInteger newBigIntegerTarget = new Target(lastBlock.getCompactDifficulty()).getBigIntegerTarget();
 
@@ -60,8 +63,8 @@ public class Chain {
         //New target for nodes; hash must be less than target
         chainTarget = new Target(newBigIntegerTarget);
 
-//        System.out.println("New target in hex: " + newTarget.getBigIntegerTarget().toString(16));
-//        System.out.println("New target in compact form: " + newTarget.getCompactTarget());
+        System.out.println("New target in hex: " + chainTarget.getBigIntegerTarget().toString(16));
+        System.out.println("New target in compact form: " + chainTarget.getCompactTarget());
 
 
     }

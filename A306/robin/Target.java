@@ -15,13 +15,13 @@ public class Target {
     //Constructor: for big to compact
     public Target(BigInteger bigIntegerTarget) {
         this.bigIntegerTarget = bigIntegerTarget;
-        this.compactTarget = calculateCompactTarget();
+        this.compactTarget = calculateCompactTarget(bigIntegerTarget);
     }
 
     //constructor for compact to big
     public Target(String compactTarget) {
         this.compactTarget = compactTarget;
-        this.bigIntegerTarget = calculateBigIntergerTarget();
+        this.bigIntegerTarget = calculateBigIntergerTarget(compactTarget);
     }
 
     /**
@@ -35,7 +35,7 @@ public class Target {
      * Third) check length of the base256 number;the length of number is then added as first digit of the compact number.
      * Fourth) Check length of compact number, bust be 4 base256 digits or 8 hex digits
      */
-    private String calculateCompactTarget() {
+    public static String calculateCompactTarget(BigInteger bigIntegerTarget) {
         // This is a hex string, which is also a base 256 string if you add a space after
         // each set of 2 hex digits.
         String base256NewTarget = HexUtil.zeroPadHex(bigIntegerTarget.toString(16));
@@ -64,7 +64,7 @@ public class Target {
      * into a BigInteger target - which is needed to compare zeros.
      *
      */
-    private BigInteger calculateBigIntergerTarget() {
+    public static BigInteger calculateBigIntergerTarget(String compactTarget) {
         int factor = Integer.valueOf(compactTarget.substring(0, 2), 16);
         BigInteger value = new BigInteger(compactTarget.substring(2, compactTarget.length()), 16);
 
