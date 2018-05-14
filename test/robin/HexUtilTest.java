@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
     AAU-mail: mselma17@student.aau.dk */
 
-     class DifficultyMathTest {
+     class HexUtilTest {
 
          @Test
          void appendZeroes() {
 
-             assertEquals("F000000000",  DifficultyMath.appendZeros("F",10));
+             assertEquals("F000000000",  HexUtil.appendZeros("F",10));
 
          }
 
@@ -21,14 +21,14 @@ import static org.junit.jupiter.api.Assertions.*;
          @Test
          void zeroPadHex1() {
 
-             assertEquals("0F", DifficultyMath.zeroPadHex("F"));
+             assertEquals("0F", HexUtil.zeroPadHex("F"));
 
          }
 
          @Test
          void zeroPadHex2() {
 
-             assertEquals("0F", DifficultyMath.zeroPadHex("0F"));
+             assertEquals("0F", HexUtil.zeroPadHex("0F"));
 
          }
      }
