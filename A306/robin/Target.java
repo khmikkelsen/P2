@@ -36,21 +36,24 @@ public class Target {
      * Fourth) Check length of compact number, bust be 4 base256 digits or 8 hex digits
      */
     private String calculateCompactTarget() {
-        String base256NewTarget = DifficultyMath.zeroPadHex(bigIntegerTarget.toString(16));
+        // This is a hex string, which is also a base 256 string if you add a space after
+        // each set of 2 hex digits.
+        String base256NewTarget = HexUtil.zeroPadHex(bigIntegerTarget.toString(16));
 
-        String firstDigit = base256NewTarget.substring(0, 2); //range is exclusive
+        // One base 256 digit is two base 16 (hex) digits.
+        String firstBase256Digit = base256NewTarget.substring(0, 2); //range is exclusive
 
-        if (Integer.valueOf(firstDigit, 16) > 127) {
+        if (Integer.valueOf(firstBase256Digit, 16) > 127) {
             base256NewTarget = "00" + base256NewTarget;
         }
 
-        int numberOfDigits = base256NewTarget.length() / 2;
+        int numberOfBase256Digits = base256NewTarget.length() / 2;
 
         // Take first 6 hex digits
-        String compactTarget = DifficultyMath.zeroPadHex(Integer.toString(numberOfDigits, 16))
+        String compactTarget = HexUtil.zeroPadHex(Integer.toString(numberOfBase256Digits, 16))
                 + base256NewTarget.substring(0, Math.min(base256NewTarget.length(), 6));
 
-        compactTarget = DifficultyMath.appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
+        compactTarget = HexUtil.appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
 
         return compactTarget;
     }
@@ -58,7 +61,7 @@ public class Target {
     /**
      * The function calculateBigIntegerTarget: uses compactTargets first digit value to find length of the BigInt
      * representation. Then, gets the value of rest of digits. This data is used in a formula to convert compact form
-     * into a BigInteger base256 target - which is needed to compare zeros.
+     * into a BigInteger target - which is needed to compare zeros.
      *
      */
     private BigInteger calculateBigIntergerTarget() {

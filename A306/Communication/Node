@@ -1,0 +1,117 @@
+package p2.communication;
+
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main
+{
+    private static List<BufferedReader> readers = new ArrayList<>();
+    private static List<BufferedWriter> writers = new ArrayList<>();
+    private static List<Socket> sockets = new ArrayList<>();
+    private static ServerSocket server;
+    private static String FIRST_IP = "192.168.0.101";
+    private static int PORT = 140;
+
+    // Main method
+    public static void main(String[] args)
+    {
+        System.out.println(ipIncrement("127.0.0.1", 3));
+
+        try
+        {
+            server = new ServerSocket(140);
+            System.out.println("Searching for nodes...");
+
+            getConnection(0);
+        }
+
+        catch (IOException e)
+        {
+            System.out.println("Connection failed.");
+        }
+    }
+
+    // Setup server connection.
+    public static void getConnection(int ipIncrement) throws IOException
+    {
+        Socket socketCatch;
+        Socket socketConnect;
+        String ip = ipIncrement(FIRST_IP, ipIncrement);
+
+        // Catching another socket. This is working as a client.
+        socketCatch = catchSocket(ip);
+        sockets.add(socketCatch);
+        setupStreams();
+        System.out.println("Node caught.");
+
+        // Connecting to another server socket. This is working as a server.
+        socketConnect = connectSocket();
+        sockets.add(socketConnect);
+        setupStreams();
+        System.out.println("Node connected.");
+    }
+
+    // Increments IP address.
+    // Might also replace wrong numbers in IP. For example, 127.0.0.1 incremented by 4 returns 427.0.0.4. It replaces all "1" with "4".
+    public static String ipIncrement(String ip, int increment)
+    {
+        String ipEnd = ip.substring(indexOf(ip, '.') + 1);
+        int incremented = Integer.parseInt(ipEnd) + increment;
+
+        // Replace end of ip address with incremented number.
+        return ip.replaceAll(ipEnd, String.valueOf(incremented));
+    }
+
+    // Returns index in String of a specific char searching from end of String. Returns -1 if the character wasn't found.
+    public static int indexOf(String str, char character)
+    {
+        char[] text = str.toCharArray();
+
+        for (int i = str.length() - 1; i >= 0; i--)
+        {
+            if (text[i] == character)
+                return i;
+        }
+
+        return -1;
+    }
+
+    // Catching sockets
+    private static Socket catchSocket(String ip) throws IOException
+    {
+        while (true)
+        {
+            Socket socketCatch = new Socket(ip, PORT);
+
+            if (socketCatch.isConnected())
+            {
+                return socketCatch;
+            }
+        }
+    }
+
+    // Connect socket
+    private static Socket connectSocket() throws IOException
+    {
+        while (true)
+        {
+            Socket socket = server.accept();
+
+            if (socket.isConnected())
+            {
+                return socket;
+            }
+        }
+    }
+
+    // Setting up streams.
+    // Might be necessary to add socket as argument to make sure there is a socket to get streams from.
+    private static void setupStreams() throws IOException
+    {
+        writers.add(new BufferedWriter(new OutputStreamWriter(sockets.get(sockets.size() - 1).getOutputStream())));
+        readers.add(new BufferedReader(new InputStreamReader(sockets.get(sockets.size() - 1).getInputStream())));
+    }
+}
