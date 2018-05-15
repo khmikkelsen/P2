@@ -128,12 +128,13 @@ public class CommunicationSimulator
     {
         KeyPairGenerator keys = new KeyPairGenerator(2048);
 
-        clientSimulator(keys);
+        String encryptedMessage = clientSimulator(keys);
 
         // Add nodeSimulator.
     }
 
-    private static void clientSimulator(KeyPairGenerator keys)
+    // Simulates a client and return encrypted message.
+    private static String clientSimulator(KeyPairGenerator keys)
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         BigInteger[] key = new BigInteger[]{keys.getPublicKey(), keys.getPublicE()};
@@ -148,11 +149,15 @@ public class CommunicationSimulator
             // Start encryption.
             RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, key[0], key[1]);
             System.out.println("\nEncrypted message: " + Arrays.toString(encrypt.getEncryptedMessage()));
+
+            return Arrays.toString(encrypt.getEncryptedMessage());
         }
 
         catch (IOException e)
         {
             System.out.println(e.getCause());
+
+            return "Error code.";
         }
     }
 
