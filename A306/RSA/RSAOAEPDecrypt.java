@@ -9,21 +9,19 @@ public class RSAOAEPDecrypt extends RSAOAEP
     private byte[] L;
     private byte[] lHash;
 
-    private BigInteger nPub;
-    private BigInteger kPriv;
+    private RSAKey recipient;
     private int k;
 
     private byte[] decryptedMessage;
     private byte[] DM;
 
-    public RSAOAEPDecrypt(byte[] encryptedMessage, BigInteger rsaMod, BigInteger privateKey) throws IOException
+    public RSAOAEPDecrypt(byte[] encryptedMessage, RSAKey recipient) throws IOException
     {
-        this.nPub = rsaMod;
-        this.kPriv = privateKey;
-        if (rsaMod.bitLength() % 8 != 0)
+        this.recipient = recipient;
+        if (recipient.getRSAMod().bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
 
-        this.k = nPub.bitLength() / 8;
+        this.k = recipient.getRSAMod().bitLength() / 8;
 
         this.L = new byte[]{(byte) 0x0};
         this.lHash = sha256(L);
@@ -31,13 +29,12 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.decryptedMessage = decryptRSA(encryptedMessage);
         this.DM = decodeOAEP();
     }
-    public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, BigInteger rsaMod, BigInteger privateKey) throws IOException
+    public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, RSAKey recipient) throws IOException
     {
-        this.nPub = rsaMod;
-        this.kPriv = privateKey;
-        if (rsaMod.bitLength() % 8 != 0)
+        this.recipient = recipient;
+        if (recipient.getRSAMod().bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
-        this.k = nPub.bitLength() / 8;
+        this.k = recipient.getRSAMod().bitLength() / 8;
 
         this.L = label;
         this.lHash = sha256(L);
@@ -61,7 +58,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
         if(c.compareTo(BigInteger.ZERO) <= 0 )
             throw new ArithmeticException();
 
-        BigInteger m = c.modPow(kPriv, nPub);
+        BigInteger m = c.modPow(recipient.getExponent(), recipient.getRSAMod());
 
         return I2OSP(m, k);
     }

@@ -9,29 +9,29 @@ public class Main
 {
     public static void main(String[] args)
     {
-        //BigInteger p = BigInteger.probablePrime(1024, rand);
-        //BigInteger q = BigInteger.probablePrime(1024, rand);
 
-        KeyPairGenerator Alice = new KeyPairGenerator(2048);
+        KeyPairGenerator generator = new KeyPairGenerator(2048);
+        RSAKey Alicepub = generator.getPublicKey();
+        RSAKey Alicepriv = generator.getPrivateKey();
 
         String copypasta = "ffff";
 
         byte[] label = new byte[]{0x0,0x1,0x02};
-        System.out.println(Alice.toString());
+        System.out.println(Alicepriv.toString());
+        System.out.println(Alicepub.toString());
 
         try
         {
-            RSAOAEPEncrypt mess = new RSAOAEPEncrypt(copypasta, Alice.getRsaMod(), Alice.getPublicE());
-            RSAOAEPDecrypt demess = new RSAOAEPDecrypt(mess.getEncryptedMessage(), Alice.getRsaMod(), Alice.getPrivateKey());
+            RSAOAEPEncrypt mess = new RSAOAEPEncrypt(copypasta, Alicepub);
+            RSAOAEPDecrypt demess = new RSAOAEPDecrypt(mess.getEncryptedMessage(), Alicepriv);
         }
         catch (IOException e){e.printStackTrace();}
 
         try
         {
-            RSAOAEPSign sign = new RSAOAEPSign(copypasta,32,Alice.getRsaMod(), Alice.getPrivateKey());
+            RSAOAEPSign sign = new RSAOAEPSign(copypasta,32,Alicepriv);
             byte[] signature = sign.getSignature();
-            RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alice.getRsaMod(), Alice.getPublicE());
-
+            RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alicepub);
         }
         catch (IOException | BadVerificationException e) {e.printStackTrace();}
 

@@ -2,7 +2,6 @@ package RSA;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Random;
 
 public class KeyPairGenerator extends RSAOAEP
 {
@@ -48,13 +47,9 @@ public class KeyPairGenerator extends RSAOAEP
     }
 
     // Getters
-    public BigInteger getRsaMod() { return this.rsaMod; }
-    public BigInteger getPublicE() { return this.publicKey; }
-    public BigInteger getPrivateKey() { return this.privateKey; }
+    public RSAKey getPublicKey() { return new RSAKey(rsaMod, publicKey); }
+    public RSAKey getPrivateKey() { return new RSAKey(rsaMod, privateKey); }
 
-    public String toString() {
 
-        return rsaMod.toString() +"-\n"+publicKey.toString()+"-\n"+privateKey.toString();
-    }
 
 }
