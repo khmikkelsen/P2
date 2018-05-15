@@ -1,17 +1,16 @@
 package Communication;
 
 import RSA.KeyPairGenerator;
+import RSA.RSAKey;
 import RSA.RSAOAEPDecrypt;
 import RSA.RSAOAEPEncrypt;
+import robin.StringUtil;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Random;
 
 public class CommunicationSimulator
 {
@@ -126,43 +125,77 @@ public class CommunicationSimulator
     // Simulates a client-node communication.
     public static void simulateCommunication()
     {
-        KeyPairGenerator keys = new KeyPairGenerator(2048);
+        KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
+        KeyPairGenerator keysSender = new KeyPairGenerator(2048);
 
-        String encryptedMessage = clientSimulator(keys);
+        String encryptedMessage = clientSimulator(keysReceiver, keysSender);
 
         // Add nodeSimulator.
     }
 
     // Simulates a client and return encrypted message.
-    private static String clientSimulator(KeyPairGenerator keys)
+    private static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-        BigInteger[] key = new BigInteger[]{keys.getPublicKey(), keys.getPublicE()};
 
-        System.out.println("Public key of receiver:\nn: " + key[0] + "\ne : " + key[1]);
+        // Receiver keys
+        RSAKey receiverPrivate = receiverKeys.getPrivateKey();
+        RSAKey receiverPublic = receiverKeys.getPublicKey();
+
+        // Sender keys
+        RSAKey senderPrivate = senderKeys.getPrivateKey();
+        RSAKey senderPublic = senderKeys.getPublicKey();
+
+        System.out.println("Public key of receiver:\nn: " + receiverPublic.getRSAMod() + "\ne : " + receiverPublic.getExponent());
         System.out.print("\nMessage: ");
 
         try
         {
             String message = input.readLine();
 
-            // Start encryption.
-            RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, key[0], key[1]);
-            System.out.println("\nEncrypted message: " + Arrays.toString(encrypt.getEncryptedMessage()));
-
-            return Arrays.toString(encrypt.getEncryptedMessage());
+            // Start preparing message to be send.
+            return prepareMessage(message, receiverKeys, senderKeys);
         }
 
         catch (IOException e)
         {
-            System.out.println(e.getCause());
-
-            return "Error code.";
+            return e.getCause().toString();
         }
     }
 
-    public static String showDecrypted(byte[] encrypted)
+    // Prepares message to be send to node.
+    private static String prepareMessage(String message, RSAKey )
     {
-        return new String(encrypted);
+        try
+        {
+            // Encrypting message.
+            RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKey.getPublicKey(), receiverKey.getPublicE());
+            System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
+
+            String hashedMessage = StringUtil.applySha256(showEncrypted(encrypt.getEncryptedMessage()) + " : " +
+                    senderKey.getPublicKey() + "-" + senderKey.getPublicE() + " : " + receiverKey.getPublicKey() + "-" + receiverKey.getPublicE());
+
+            // Class not fixed.
+            // Decryption of hashedMessage using the private key from the sender.
+            RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKey.getPublicKey(), senderKey.getPrivateKey());
+            String decryptedMessage = showDecrypted(decryption.getDecryptedMessage());
+        }
+
+        catch (IOException e)
+        {
+            return "IOException.";
+        }
+    }
+
+    // Returns a String of encrypted message.
+    private static String showEncrypted(byte[] encrypted)
+    {
+        return Arrays.toString(encrypted);
+    }
+
+    // Returns a String of decrypted message.
+    private static String showDecrypted(byte[] decrypted)
+    {
+        return new String(decrypted);
     }
 }
