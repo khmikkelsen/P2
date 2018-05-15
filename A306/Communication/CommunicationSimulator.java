@@ -176,6 +176,9 @@ public class CommunicationSimulator
             // Decryption of hashedMessage using the private key from the sender.
             RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKeys.getPrivateKey());
             String decryptedMessage = showDecrypted(decryption.getDecryptedMessage());
+
+            // Temporary return statement. Digital signature still to be added.
+            return null;
         }
 
         catch (IOException e)
