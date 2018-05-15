@@ -138,15 +138,11 @@ public class CommunicationSimulator
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
-        // Receiver keys
-        RSAKey receiverPrivate = receiverKeys.getPrivateKey();
-        RSAKey receiverPublic = receiverKeys.getPublicKey();
-
         // Sender keys
         RSAKey senderPrivate = senderKeys.getPrivateKey();
         RSAKey senderPublic = senderKeys.getPublicKey();
 
-        System.out.println("Public key of receiver:\nn: " + receiverPublic.getRSAMod() + "\ne : " + receiverPublic.getExponent());
+        System.out.println("Public key of receiver:\nn: " + receiverKeys.getPublicKey().getRSAMod() + "\ne : " + receiverKeys.getPublicKey().getExponent());
         System.out.print("\nMessage: ");
 
         try
@@ -164,20 +160,21 @@ public class CommunicationSimulator
     }
 
     // Prepares message to be send to node.
-    private static String prepareMessage(String message, RSAKey )
+    private static String prepareMessage(String message, KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
     {
         try
         {
             // Encrypting message.
-            RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKey.getPublicKey(), receiverKey.getPublicE());
+            RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
             System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
 
             String hashedMessage = StringUtil.applySha256(showEncrypted(encrypt.getEncryptedMessage()) + " : " +
-                    senderKey.getPublicKey() + "-" + senderKey.getPublicE() + " : " + receiverKey.getPublicKey() + "-" + receiverKey.getPublicE());
+                    senderKeys.getPublicKey().getRSAMod() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
+                    receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent());
 
-            // Class not fixed.
+            // Preparing not fixed.
             // Decryption of hashedMessage using the private key from the sender.
-            RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKey.getPublicKey(), senderKey.getPrivateKey());
+            RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKeys.getPrivateKey());
             String decryptedMessage = showDecrypted(decryption.getDecryptedMessage());
         }
 
