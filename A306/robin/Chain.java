@@ -38,7 +38,7 @@ public class Chain {
      */
     public static void adjustDifficulty(Block lastBlock, Block firstBlock) {
 
-        System.out.println("pow limit: " + proofOfWorkLimit.toString(16));
+        //System.out.println("pow limit: " + proofOfWorkLimit.toString(16));
 
 
         //Find the actual time it took for the 2016 blocks to be generated??
@@ -49,10 +49,10 @@ public class Chain {
 //        } else if (actualTimespan > targetTimespan * 4) {
 //            actualTimespan = targetTimespan * 4;
 //        }
-        System.out.println("Actual: "  + actualTimespan);
-        System.out.println("Target: "  + targetTimespan);
+        //System.out.println("Actual: "  + actualTimespan);
+        //System.out.println("Target: "  + targetTimespan);
         double factor = (double)actualTimespan / (double)targetTimespan;
-        System.out.println("Factor: " + factor);
+        //System.out.println("Factor: " + factor);
         //
         BigInteger newBigIntegerTarget = new Target(lastBlock.getCompactDifficulty()).getBigIntegerTarget();
 
@@ -63,8 +63,8 @@ public class Chain {
         //New target for nodes; hash must be less than target
         chainTarget = new Target(newBigIntegerTarget);
 
-        System.out.println("New target in hex: " + chainTarget.getBigIntegerTarget().toString(16));
-        System.out.println("New target in compact form: " + chainTarget.getCompactTarget());
+        //System.out.println("New target in hex: " + chainTarget.getBigIntegerTarget().toString(16));
+        //System.out.println("New target in compact form: " + chainTarget.getCompactTarget());
 
 
     }

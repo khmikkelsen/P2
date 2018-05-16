@@ -41,17 +41,18 @@ public class CommunicationSimulator
     {
         char[] keyArray = key.toCharArray();
         int amountOfDash = 0;
+        final char SEPERATOR = '_';
 
-        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == '_')
+        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == SEPERATOR)
             return false;
 
         // Checking all characters.
         for (int i = 0; i < keyArray.length; i++)
         {
-            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != '_')
+            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != SEPERATOR)
                 return false;
 
-            if (keyArray[i] == '_')
+            if (keyArray[i] == SEPERATOR)
                 amountOfDash++;
 
             if (amountOfDash > 1)
@@ -93,6 +94,24 @@ public class CommunicationSimulator
             return "0";
     }
 
+    private static String getNumber(String text, int startIndex)
+    {
+        char[] number = text.toCharArray();
+        String returnNumber = "";
+
+        for (int i = 0; i < number.length; i++)
+        {
+            if (i >= startIndex)
+                returnNumber = returnNumber + number[i];
+        }
+
+        if (returnNumber.length() > 0)
+            return returnNumber;
+
+        else
+            return "0";
+    }
+
     // Gets a number from a String searching backwards.
     private static String getNumberBackwards(String text, char startIndex)
     {
@@ -102,7 +121,7 @@ public class CommunicationSimulator
         {
             if (number[i] == startIndex)
             {
-                return getNumber(text, i, number[number.length]);
+                return getNumber(text, i);
             }
         }
 
@@ -139,9 +158,7 @@ public class CommunicationSimulator
         KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
         KeyPairGenerator keysSender = new KeyPairGenerator(2048);
 
-        clientSimulator(keysReceiver, keysSender);
-
-        //nodeSimulator(clientSimulator(keysReceiver, keysSender));
+        nodeSimulator(clientSimulator(keysReceiver, keysSender));
     }
 
     // Simulates a client and return encrypted message.
@@ -186,7 +203,7 @@ public class CommunicationSimulator
             RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
             String preparedMessage = encryptedNodeMessage  + " : " + Arrays.toString(signature.getSignature());
-            System.out.println("Prepared message: " + preparedMessage);
+            System.out.println("Prepared message with signature: " + preparedMessage);
 
             return preparedMessage;
         }
@@ -212,23 +229,23 @@ public class CommunicationSimulator
     // Simulates a node.
     public static void nodeSimulator(String message)
     {
-        System.out.println("\nNode:\n");
+        System.out.println("\n\nNode:\n");
 
         try
         {
-            RSAOAEPVerify verifySignature = new RSAOAEPVerify(getNumberBackwards(message, ' ').getBytes(), message.getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
+            RSAOAEPVerify verifySignature = new RSAOAEPVerify(getSignature(message).getBytes(), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
         }
 
         catch (IOException | BadVerificationException e)
         {
-            System.out.println("\nMessage was not verified.\n");
+            System.out.println("Message was not verified.\n");
         }
     }
 
     // Gets a sender key N.
     private static BigInteger getSenderN(String message)
     {
-        String number = getNumber(message, getCharStart(message, ':', 2), '-');
+        String number = getNumber(message, getCharStart(message, ':', 2), '_');
         return new BigInteger(number);
     }
 
@@ -251,5 +268,44 @@ public class CommunicationSimulator
     {
         String number = getNumber(message, getCharStart(message, '_', 1), ' ');
         return new BigInteger(number);
+    }
+
+    // Returns a signature of a message.
+    private static String getSignature(String message)
+    {
+        return getNumberBackwards(message, '[');
+    }
+
+    // Returns message without signature.
+    private static String messageNoSignature(String message)    // Not done.
+    {
+        char[] messageArray = message.toCharArray();
+        String result = "";
+        boolean isSignature = false;
+
+        for (int i = 0; i < messageArray.length; i++)
+        {
+            if (messageArray[i] == '[' && i > 0)
+                isSignature = true;
+
+            if (!isSignature)
+                result = result + messageArray[i];
+        }
+
+        return removeEndSeparator(result);
+    }
+
+    // Removes separator at end of String.
+    private static String removeEndSeparator(String text)
+    {
+        String result = "";
+        char[] textCopy = text.toCharArray();
+
+        for (int i = 0; i < text.length() - 3; i++)
+        {
+            result = result + textCopy[i];
+        }
+
+        return result;
     }
 }
