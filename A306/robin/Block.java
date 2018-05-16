@@ -57,7 +57,7 @@ public class Block {
         while (new BigInteger(this.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
             if (nonce == Integer.MAX_VALUE) {
                 nonce = 0;
-                setTimestamp(new Date().getTime());
+                this.timestamp = new Date().getTime();
             } else {
                 nonce++;
             }
@@ -136,10 +136,6 @@ public class Block {
 
     public List<Message> getMessages() {
         return messages;
-    }
-
-    private void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     @Override
