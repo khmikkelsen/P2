@@ -2,30 +2,27 @@ package RSA;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Random;
 
 public class KeyPairGenerator extends RSAOAEP
 {
     private BigInteger publicKey; // Public key eksponent
     private BigInteger privateKey; // Private key eksponent
     private BigInteger rsaMod;
-    private Random rand;
 
     // Constructor
-    public KeyPairGenerator (int keyBitSize, Random random)
+    public KeyPairGenerator (int keyBitSize)
     {
         this.publicKey = new BigInteger("65537");
-        this.rand = random;
         genKeys(keyBitSize/2);
     }
     private void genKeys(int keyBitsSize)
     {
         boolean check = false;
         BigInteger p, q, lambda;
+        SecureRandom rand = new SecureRandom();
 
         while (!check)
         {
-            rand.setSeed(rand.nextLong());
             p = BigInteger.probablePrime(keyBitsSize, rand);
             q = BigInteger.probablePrime(keyBitsSize, rand);
             this.rsaMod = p.multiply(q);
@@ -50,13 +47,9 @@ public class KeyPairGenerator extends RSAOAEP
     }
 
     // Getters
-    public BigInteger getPublicKey() { return this.rsaMod; }
-    public BigInteger getPublicE() { return this.publicKey; }
-    public BigInteger getPrivateKey() { return this.privateKey; }
+    public RSAKey getPublicKey() { return new RSAKey(rsaMod, publicKey); }
+    public RSAKey getPrivateKey() { return new RSAKey(rsaMod, privateKey); }
 
-    public String toString() {
 
-        return rsaMod.toString() +"-\n"+publicKey.toString()+"-\n"+privateKey.toString();
-    }
 
 }

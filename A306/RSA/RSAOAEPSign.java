@@ -21,15 +21,13 @@ public class RSAOAEPSign extends RSAOAEP
     private int modBits;
     private byte[] EM;
 
-    private BigInteger rsaMod;
-    private BigInteger privateKey;
+    private RSAKey sender;
 
     private byte[] signature;
 
-    public RSAOAEPSign(String message, BigInteger rsaMod, BigInteger privateKey) throws IOException
+    public RSAOAEPSign(String message, RSAKey sender) throws IOException
     {
-        this.rsaMod = rsaMod;
-        this.privateKey = privateKey;
+        this.sender = sender;
 
         this.message = message.getBytes();
         this.mHash = sha256(this.message);
@@ -38,16 +36,15 @@ public class RSAOAEPSign extends RSAOAEP
         this.sLen = 0;
         this.salt = genSalt();
 
-        this.modBits = rsaMod.bitLength();
+        this.modBits = sender.getRSAMod().bitLength();
         this.M = genM();
 
         this.EM = encodeMessage(modBits-1);
         this.signature = RSASignature();
     }
-    public RSAOAEPSign(String message, int sLength, BigInteger rsaMod, BigInteger privateKey) throws IOException
+    public RSAOAEPSign(String message, int sLength, RSAKey sender) throws IOException
     {
-        this.rsaMod = rsaMod;
-        this.privateKey = privateKey;
+        this.sender = sender;
 
         this.message = message.getBytes();
         this.mHash = sha256(this.message); // Step 2
@@ -56,7 +53,7 @@ public class RSAOAEPSign extends RSAOAEP
         this.sLen = sLength;
         this.salt = genSalt(); // Step 4
 
-        this.modBits = rsaMod.bitLength();
+        this.modBits = sender.getRSAMod().bitLength();
         this.M = genM(); // Step 5
 
         this.EM = encodeMessage(modBits-1);
@@ -69,12 +66,11 @@ public class RSAOAEPSign extends RSAOAEP
             throw new ArithmeticException("modBits % 8 != 0");
 
         BigInteger m = OS2IP(EM);
-        BigInteger s = m.modPow(privateKey, rsaMod);
-        if (s.compareTo(rsaMod) >= 0)
+        BigInteger s = m.modPow(sender.getExponent(), sender.getRSAMod());
+        if (s.compareTo(sender.getRSAMod()) >= 0)
             throw new ArithmeticException("Signature out of range");
-        byte[] out = I2OSP(s, emLen);
 
-        return out;
+        return I2OSP(s, emLen);
     }
 
     private byte[] encodeMessage(int emBits) throws IOException

@@ -7,8 +7,7 @@ import java.util.BitSet;
 
 public class RSAOAEPVerify extends RSAOAEP
 {
-    private BigInteger rsaMod;
-    private BigInteger publicKey;
+    private RSAKey sender;
     private int modBits;
 
     private byte[] M;
@@ -17,27 +16,25 @@ public class RSAOAEPVerify extends RSAOAEP
     private byte[] EM;
     private byte[] signature;
 
-    public RSAOAEPVerify (byte[] signature, byte[] message, BigInteger rsaMod, BigInteger publicKey)
+    public RSAOAEPVerify (byte[] signature, byte[] message, RSAKey sender)
             throws IOException, BadVerificationException
     {
         this.signature = signature;
-        this.rsaMod = rsaMod;
-        this.publicKey = publicKey;
+        this.sender = sender;
         this.M = message;
         this.sLen = 0;
-        this.modBits = rsaMod.bitLength();
+        this.modBits = sender.getRSAMod().bitLength();
         this.EM = RSAVerify();
         verifyMessage(modBits-1);
     }
-    public RSAOAEPVerify (byte[] signature, byte[] message, int sLen, BigInteger rsaMod, BigInteger publicKey)
+    public RSAOAEPVerify (byte[] signature, byte[] message, int sLen, RSAKey sender)
             throws IOException, BadVerificationException
     {
         this.signature = signature;
-        this.rsaMod = rsaMod;
-        this.publicKey = publicKey;
+        this.sender = sender;
         this.M = message;
         this.sLen = sLen;
-        this.modBits = rsaMod.bitLength();
+        this.modBits = sender.getRSAMod().bitLength();
         this.EM = RSAVerify();
         verifyMessage(modBits-1);
     }
@@ -45,7 +42,7 @@ public class RSAOAEPVerify extends RSAOAEP
     {
         int emLen = ceil(modBits-1,8);
         BigInteger s = OS2IP(signature);
-        BigInteger m = s.modPow(publicKey, rsaMod);
+        BigInteger m = s.modPow(sender.getExponent(), sender.getRSAMod());
         byte[] out = I2OSP(m, emLen);
 
         return out;
