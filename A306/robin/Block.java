@@ -54,7 +54,7 @@ public class Block {
 
     public void mineBlock() {
 
-        this.merkleRootHash = getMerkleRootHash(messages);
+        this.merkleRootHash = getMerkleRootHash();
 
         while (new BigInteger(this.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
             if (nonce == Integer.MAX_VALUE) {
@@ -72,7 +72,7 @@ public class Block {
      *
      * @return Merkle root, consisting of a blocks transaction hashes
      */
-    public String getMerkleRootHash(List<Message> messages) {
+    public String getMerkleRootHash() {
         List<String> hashedMessages = new ArrayList<>();
 
         for (Message m : messages) {
@@ -130,10 +130,6 @@ public class Block {
 
     public String getCompactDifficulty() {
         return compactDifficulty;
-    }
-
-    public String getMerkleRootHash() {
-        return merkleRootHash;
     }
 
     public String getPrevHeadHash() {
