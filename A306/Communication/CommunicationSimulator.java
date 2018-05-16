@@ -128,13 +128,11 @@ public class CommunicationSimulator
         KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
         KeyPairGenerator keysSender = new KeyPairGenerator(2048);
 
-        String encryptedMessage = clientSimulator(keysReceiver, keysSender);
-
-        // Add nodeSimulator.
+        nodeSimulator(clientSimulator(keysReceiver, keysSender));
     }
 
     // Simulates a client and return encrypted message.
-    private static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
+    public static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
@@ -200,5 +198,11 @@ public class CommunicationSimulator
     private static String showDecrypted(byte[] decrypted)
     {
         return new String(decrypted);
+    }
+
+    // Simulates a node.
+    public static void nodeSimulator(String message)
+    {
+
     }
 }
