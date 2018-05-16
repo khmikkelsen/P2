@@ -5,21 +5,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-//Prøver bare en anden måde at lave blok
-
 public class Block {
-    String prevHeadhash;
-    String compactDifficulty;
-    int nonce = 0; //nonce starts at zero and is incremented at each hash
-    String merkleRootHash;
-    long timestamp;
-    int index;
+    private String prevHeadhash;
+    private String compactDifficulty;
+    private int nonce = 0; //nonce starts at zero and is incremented at each hash
+    private String merkleRootHash;
+    private long timestamp;
+    private int index;
 
-    String hash;
+    private String hash;
     private List<Message> messages;
 
     public Block(String prevHeadhash, String compactDifficulty, List<Message> messages) {
-        timestamp = new Date().getTime();
+        this.timestamp = new Date().getTime();
         this.prevHeadhash = prevHeadhash;
         this.compactDifficulty = compactDifficulty;
         this.messages = messages;
