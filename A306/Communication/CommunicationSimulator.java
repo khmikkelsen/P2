@@ -166,17 +166,18 @@ public class CommunicationSimulator
             RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
             System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
 
-            String nodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
+            String encryptedNodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
                     senderKeys.getPublicKey().getRSAMod() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
                     receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent();
 
-            String hashedMessage = StringUtil.applySha256(nodeMessage);
+            // Hashing encrypted message.
+            String hashedMessage = StringUtil.applySha256(encryptedNodeMessage );
 
             // Decryption of hashedMessage using the private key from the sender.
             RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKeys.getPrivateKey());
             String decryptedHashedMessage = showDecrypted(decryption.getDecryptedMessage());
 
-            String preparedMessage = nodeMessage + " : " + decryptedHashedMessage;
+            String preparedMessage = encryptedNodeMessage  + " : " + decryptedHashedMessage;
             System.out.println(preparedMessage);
 
             return preparedMessage;
@@ -203,6 +204,6 @@ public class CommunicationSimulator
     // Simulates a node.
     public static void nodeSimulator(String message)
     {
-
+        System.out.println("\nNode:\n");
     }
 }
