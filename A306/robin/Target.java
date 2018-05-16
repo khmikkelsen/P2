@@ -69,9 +69,9 @@ public class Target {
         BigInteger value = new BigInteger(compactTarget.substring(2, compactTarget.length()), 16);
 
         BigInteger two = new BigInteger("2", 10);
-        BigInteger result = value.multiply(two.pow(8 * (factor - 3)));
+        BigInteger bigIntegerTarget = value.multiply(two.pow(8 * (factor - 3)));
 
-        return result;
+        return bigIntegerTarget;
     }
 
     public BigInteger getBigIntegerTarget() {
