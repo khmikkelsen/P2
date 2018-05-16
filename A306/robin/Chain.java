@@ -1,7 +1,6 @@
 package robin;
 
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 
 
 /**
@@ -54,7 +53,7 @@ public class Chain {
         double factor = (double)actualTimespan / (double)targetTimespan;
         System.out.println("Factor: " + factor);
         //
-        BigInteger newBigIntegerTarget = new Target(lastBlock.getCompactDifficulty()).getBigIntegerTarget();
+        BigInteger newBigIntegerTarget = new Target(lastBlock.getCompactTarget()).getBigIntegerTarget();
 
         //Calculate new target
         newBigIntegerTarget = newBigIntegerTarget.multiply(BigInteger.valueOf(actualTimespan));

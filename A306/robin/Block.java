@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Block {
     private String prevHeadhash;
-    private String compactDifficulty;
+    private String compactTarget;
     private int nonce = 0; //nonce starts at zero and is incremented at each hash
     private String merkleRootHash;
     private long timestamp;
@@ -16,21 +16,22 @@ public class Block {
     private String hash;
     private List<Message> messages;
 
-    public Block(String prevHeadhash, String compactDifficulty, List<Message> messages) {
+    public Block(String prevHeadhash, String compactTarget, List<Message> messages) {
         this.timestamp = new Date().getTime();
         this.prevHeadhash = prevHeadhash;
-        this.compactDifficulty = compactDifficulty;
+        this.compactTarget = compactTarget;
         this.messages = messages;
     }
 
-    public Block(String hash, String prevHeadhash, String compactDifficulty, int index, long timestamp, String merkleRootHash, int nonce) {
+    public Block(String hash, String prevHeadhash, String compactTarget, int nonce, String merkleRootHash, long timestamp,  int index, List<Message> messages) {
         this.hash = hash;
         this.prevHeadhash = prevHeadhash;
-        this.compactDifficulty = compactDifficulty;
+        this.compactTarget = compactTarget;
         this.index = index;
         this.timestamp = timestamp;
         this.merkleRootHash = merkleRootHash;
         this.nonce = nonce;
+        this.messages = messages;
     }
 
     /**
@@ -44,7 +45,7 @@ public class Block {
                         + Long.toString(timestamp)
                         + merkleRootHash
                         + Integer.toString(nonce)
-                        + compactDifficulty
+                        + compactTarget
                         + index
 
         );
@@ -126,8 +127,8 @@ public class Block {
         return timestamp;
     }
 
-    public String getCompactDifficulty() {
-        return compactDifficulty;
+    public String getCompactTarget() {
+        return compactTarget;
     }
 
     public String getPrevHeadHash() {
@@ -138,11 +139,19 @@ public class Block {
         return messages;
     }
 
+    private int getIndex() {
+        return index;
+    }
+
+    private String getHash() {
+        return hash;
+    }
+
     @Override
     public String toString() {
         return "Block{" +
                 "prevHeadhash='" + prevHeadhash + '\'' +
-                ", compactDifficulty='" + compactDifficulty + '\'' +
+                ", compactTarget='" + compactTarget + '\'' +
                 ", nonce=" + nonce +
                 ", merkleRootHash='" + merkleRootHash + '\'' +
                 ", timestamp=" + timestamp +

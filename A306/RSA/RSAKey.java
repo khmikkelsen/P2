@@ -13,9 +13,15 @@ public class RSAKey
         this.exponent = exponent;
     }
 
+    public RSAKey(String key) {
+        // TODO: Convert String to modulus and exponent.
+    }
+
+
     public BigInteger getRSAMod() { return n; }
     public BigInteger getExponent() { return exponent; }
 
+    @Override
     public String toString() {
         return n.toString() +"-\n"+exponent.toString();
     }
