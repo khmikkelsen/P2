@@ -1,9 +1,6 @@
 package Communication;
 
-import RSA.KeyPairGenerator;
-import RSA.RSAKey;
-import RSA.RSAOAEPDecrypt;
-import RSA.RSAOAEPEncrypt;
+import RSA.*;
 import robin.StringUtil;
 
 import java.io.BufferedReader;
@@ -45,16 +42,16 @@ public class CommunicationSimulator
         char[] keyArray = key.toCharArray();
         int amountOfDash = 0;
 
-        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == '-')
+        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == '_')
             return false;
 
         // Checking all characters.
         for (int i = 0; i < keyArray.length; i++)
         {
-            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != '-')
+            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != '_')
                 return false;
 
-            if (keyArray[i] == '-')
+            if (keyArray[i] == '_')
                 amountOfDash++;
 
             if (amountOfDash > 1)
@@ -74,7 +71,6 @@ public class CommunicationSimulator
         char[] number = text.toCharArray();
         String returnNumber = "";
         boolean indexFound = false;
-        int j = 0;
 
         for (int i = 0; i < number.length; i++)
         {
@@ -87,7 +83,6 @@ public class CommunicationSimulator
             if (indexFound)
             {
                 returnNumber = returnNumber + number[i];
-                j++;
             }
         }
 
@@ -96,6 +91,22 @@ public class CommunicationSimulator
 
         else
             return "0";
+    }
+
+    // Gets a number from a String searching backwards.
+    private static String getNumberBackwards(String text, char startIndex)
+    {
+        char[] number = text.toCharArray();
+
+        for (int i = number.length - 1; i >= 0; i--)
+        {
+            if (number[i] == startIndex)
+            {
+                return getNumber(text, i, number[number.length]);
+            }
+        }
+
+        return null;
     }
 
     // Copy of previous getNumber, but using int as index.
@@ -128,7 +139,9 @@ public class CommunicationSimulator
         KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
         KeyPairGenerator keysSender = new KeyPairGenerator(2048);
 
-        nodeSimulator(clientSimulator(keysReceiver, keysSender));
+        clientSimulator(keysReceiver, keysSender);
+
+        //nodeSimulator(clientSimulator(keysReceiver, keysSender));
     }
 
     // Simulates a client and return encrypted message.
@@ -167,18 +180,13 @@ public class CommunicationSimulator
             System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
 
             String encryptedNodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getRSAMod() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent();
+                    senderKeys.getPublicKey().getRSAMod() + "_" + senderKeys.getPublicKey().getExponent() + " : " +
+                    receiverKeys.getPublicKey().getRSAMod() + "_" + receiverKeys.getPublicKey().getExponent();
 
-            // Hashing encrypted message.
-            String hashedMessage = StringUtil.applySha256(encryptedNodeMessage );
+            RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
-            // Decryption of hashedMessage using the private key from the sender.
-            RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKeys.getPrivateKey());
-            String decryptedHashedMessage = showDecrypted(decryption.getDecryptedMessage());
-
-            String preparedMessage = encryptedNodeMessage  + " : " + decryptedHashedMessage;
-            System.out.println(preparedMessage);
+            String preparedMessage = encryptedNodeMessage  + " : " + Arrays.toString(signature.getSignature());
+            System.out.println("Prepared message: " + preparedMessage);
 
             return preparedMessage;
         }
@@ -205,5 +213,43 @@ public class CommunicationSimulator
     public static void nodeSimulator(String message)
     {
         System.out.println("\nNode:\n");
+
+        try
+        {
+            RSAOAEPVerify verifySignature = new RSAOAEPVerify(getNumberBackwards(message, ' ').getBytes(), message.getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
+        }
+
+        catch (IOException | BadVerificationException e)
+        {
+            System.out.println("\nMessage was not verified.\n");
+        }
+    }
+
+    // Gets a sender key N.
+    private static BigInteger getSenderN(String message)
+    {
+        String number = getNumber(message, getCharStart(message, ':', 2), '-');
+        return new BigInteger(number);
+    }
+
+    // Gets start index of N in sender's key pair.
+    private static int getCharStart(String message, char c, int range)
+    {
+        char[] messageArray = message.toCharArray();
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            if (messageArray[i] == c)
+                return i + range;
+        }
+
+        return 0;
+    }
+
+    // Gets a sender key E.
+    private static BigInteger getSenderE(String message)
+    {
+        String number = getNumber(message, getCharStart(message, '_', 1), ' ');
+        return new BigInteger(number);
     }
 }

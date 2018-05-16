@@ -9,6 +9,6 @@ class CommunicationSimulatorTest
     @Test
     void testValidKey()
     {
-        assertEquals(CommunicationSimulator.isKeyValid("127-44"), true);
+        assertEquals(CommunicationSimulator.isKeyValid("127_44"), true);
     }
 }
