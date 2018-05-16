@@ -168,17 +168,20 @@ public class CommunicationSimulator
             RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
             System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
 
-            String hashedMessage = StringUtil.applySha256(showEncrypted(encrypt.getEncryptedMessage()) + " : " +
+            String nodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
                     senderKeys.getPublicKey().getRSAMod() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent());
+                    receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent();
 
-            // Preparing not fixed.
+            String hashedMessage = StringUtil.applySha256(nodeMessage);
+
             // Decryption of hashedMessage using the private key from the sender.
             RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKeys.getPrivateKey());
-            String decryptedMessage = showDecrypted(decryption.getDecryptedMessage());
+            String decryptedHashedMessage = showDecrypted(decryption.getDecryptedMessage());
 
-            // Temporary return statement. Digital signature still to be added.
-            return null;
+            String preparedMessage = nodeMessage + " : " + decryptedHashedMessage;
+            System.out.println(preparedMessage);
+
+            return preparedMessage;
         }
 
         catch (IOException e)
