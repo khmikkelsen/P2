@@ -1,5 +1,7 @@
 package robin;
 
+import RSA.RSAKey;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,9 +21,9 @@ public class Main {
             return;
         }
 
-        Message m = new Message("Test Mesage", "Robin Public Key", "Melanie Public Key");
+        Message m = new Message("Test Mesage", new RSAKey("Robin Public Key"), new RSAKey("Melanie Public Key"));
         m.signMessage("RSA private key");
-        Message m2 = new Message("Du er dum", "Martin Public Key", "Kasper Public Key");
+        Message m2 = new Message("Du er dum", new RSAKey("Martin Public Key"), new RSAKey("Kasper Public Key"));
         m2.signMessage("RSA private key");
 
         List<Message> msgs = new ArrayList<>(Arrays.asList(m, m2));
@@ -33,7 +35,7 @@ public class Main {
             long newBlockId = db.addBlock(block);
 
             db.addMessagesToBlockId(block.getMessages(), newBlockId);
-        } catch ( SQLException exception) {
+        } catch (SQLException exception) {
             // The block was added, but there was an error while trying to add the messages.
 
         }
