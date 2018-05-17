@@ -38,11 +38,11 @@ public class Main {
 
         }
         try {
-            Block b2 = db.getBlockByIndex(1);
+            Block b2 = db.getBlockById(1);
             System.out.println("Retrieved block 1 from db:");
             System.out.println(b2 + "\n");
 
-            Block b3 = db.getBlockByIndex(10);
+            Block b3 = db.getBlockById(10);
             System.out.println("Retrieved block 10 from db:");
             System.out.println(b3 + "\n");
         } catch (SQLException exception) {

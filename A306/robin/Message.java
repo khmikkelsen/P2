@@ -1,6 +1,8 @@
 
 package robin;
 
+import RSA.RSAKey;
+
 //Is message signed or unsigned, and is sender/receiver public keys? is it the message encrypted before signing?
 /* Signing message and public key encryption:
  * 1) hash message, fx sha256
@@ -15,17 +17,17 @@ package robin;
  */
 class Message {
     private String message;
-    private String sender;
-    private String recipient;
+    private RSAKey sender;
+    private RSAKey recipient;
     private String signature;
 
-    public Message(String message, String sender, String recipient) {
+    public Message(String message, RSAKey sender, RSAKey recipient) {
         this.message = message;
         this.sender = sender;
         this.recipient = recipient;
     }
 
-    public Message(String message, String sender, String recipient, String signature) {
+    public Message(String message, RSAKey sender, RSAKey recipient, String signature) {
         this.message = message;
         this.sender = sender;
         this.recipient = recipient;
@@ -39,11 +41,11 @@ class Message {
                 + signature);
     }
 
-    public String getRecipient() {
+    public RSAKey getRecipient() {
         return recipient;
     }
 
-    public String getSender() {
+    public RSAKey getSender() {
         return sender;
     }
 
