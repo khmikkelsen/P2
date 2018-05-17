@@ -1,7 +1,9 @@
 package robin;
 
+import RSA.InvalidRSAKeyException;
 import RSA.RSAKey;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +43,18 @@ public class DatabaseConnection {
             ResultSet rs = statement.executeQuery();
 
             while (rs.next()) {
-                RSAKey recipient = new RSAKey(rs.getString("recipient"));
-                RSAKey sender = new RSAKey(rs.getString("sender"));
-                String signature = rs.getString("signature");
-                String message = rs.getString("message");
+                try {
+                    RSAKey recipient = new RSAKey(rs.getString("recipient"));
+                    RSAKey sender = new RSAKey(rs.getString("sender"));
+                    String signature = rs.getString("signature");
+                    String message = rs.getString("message");
 
-                Message m = new Message(message, sender, recipient, signature);
+                    Message m = new Message(message, sender, recipient, signature);
 
-                messages.add(m);
+                    messages.add(m);
+                } catch (IOException | InvalidRSAKeyException e) {
+                    System.out.println(e.getStackTrace());
+                }
             }
         }
 

@@ -18,10 +18,10 @@ public class RSAOAEPDecrypt extends RSAOAEP
     public RSAOAEPDecrypt(byte[] encryptedMessage, RSAKey recipient) throws IOException
     {
         this.recipient = recipient;
-        if (recipient.getRSAMod().bitLength() % 8 != 0)
+        if (recipient.getModulus().bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
 
-        this.k = recipient.getRSAMod().bitLength() / 8;
+        this.k = recipient.getModulus().bitLength() / 8;
 
         this.L = new byte[]{(byte) 0x0};
         this.lHash = sha256(L);
@@ -32,9 +32,9 @@ public class RSAOAEPDecrypt extends RSAOAEP
     public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, RSAKey recipient) throws IOException
     {
         this.recipient = recipient;
-        if (recipient.getRSAMod().bitLength() % 8 != 0)
+        if (recipient.getModulus().bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
-        this.k = recipient.getRSAMod().bitLength() / 8;
+        this.k = recipient.getModulus().bitLength() / 8;
 
         this.L = label;
         this.lHash = sha256(L);
@@ -58,7 +58,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
         if(c.compareTo(BigInteger.ZERO) <= 0 )
             throw new ArithmeticException();
 
-        BigInteger m = c.modPow(recipient.getExponent(), recipient.getRSAMod());
+        BigInteger m = c.modPow(recipient.getExponent(), recipient.getModulus());
 
         return I2OSP(m, k);
     }

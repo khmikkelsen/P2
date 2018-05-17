@@ -9,7 +9,6 @@ import robin.StringUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
 import java.util.Arrays;
 
 public class CommunicationSimulator
@@ -142,7 +141,7 @@ public class CommunicationSimulator
         RSAKey senderPrivate = senderKeys.getPrivateKey();
         RSAKey senderPublic = senderKeys.getPublicKey();
 
-        System.out.println("Public key of receiver:\nn: " + receiverKeys.getPublicKey().getRSAMod() + "\ne : " + receiverKeys.getPublicKey().getExponent());
+        System.out.println("Public key of receiver:\nn: " + receiverKeys.getPublicKey().getModulus() + "\ne : " + receiverKeys.getPublicKey().getExponent());
         System.out.print("\nMessage: ");
 
         try
@@ -169,8 +168,8 @@ public class CommunicationSimulator
             System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
 
             String nodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getRSAMod() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent();
+                    senderKeys.getPublicKey().getModulus() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
+                    receiverKeys.getPublicKey().getModulus() + "-" + receiverKeys.getPublicKey().getExponent();
 
             String hashedMessage = StringUtil.applySha256(nodeMessage);
 
