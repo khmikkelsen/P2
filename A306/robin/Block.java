@@ -23,7 +23,7 @@ public class Block {
         this.messages = messages;
     }
 
-    public Block(String hash, String prevHeadhash, String compactTarget, int nonce, String merkleRootHash, long timestamp,  int index, List<Message> messages) {
+    public Block(String hash, String prevHeadhash, String compactTarget, int nonce, String merkleRootHash, long timestamp, int index, List<Message> messages) {
         this.hash = hash;
         this.prevHeadhash = prevHeadhash;
         this.compactTarget = compactTarget;
@@ -33,6 +33,7 @@ public class Block {
         this.nonce = nonce;
         this.messages = messages;
     }
+
 
     /**
      * The method calculateHash: creates a hashed header of the block.
