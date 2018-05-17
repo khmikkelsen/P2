@@ -234,16 +234,18 @@ public class CommunicationSimulator
         try
         {
             RSAOAEPVerify verifySignature = new RSAOAEPVerify(getSignature(message).getBytes(), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
+            System.out.println("Message verified.");
         }
 
         catch (IOException | BadVerificationException e)
         {
-            System.out.println("Message was not verified.\n");
+            System.out.println("Message not verified.");
+            e.printStackTrace();
         }
     }
 
-    // Gets a sender key N.
-    private static BigInteger getSenderN(String message)
+    // Gets the sender key N.
+    public static BigInteger getSenderN(String message)
     {
         String number = getNumber(message, getCharStart(message, ':', 2), '_');
         return new BigInteger(number);
@@ -263,21 +265,21 @@ public class CommunicationSimulator
         return 0;
     }
 
-    // Gets a sender key E.
-    private static BigInteger getSenderE(String message)
+    // Gets the sender key E.
+    public static BigInteger getSenderE(String message)
     {
         String number = getNumber(message, getCharStart(message, '_', 1), ' ');
         return new BigInteger(number);
     }
 
-    // Returns a signature of a message.
-    private static String getSignature(String message)
+    // Returns the signature of a message.
+    public static String getSignature(String message)
     {
         return getNumberBackwards(message, '[');
     }
 
     // Returns message without signature.
-    private static String messageNoSignature(String message)    // Not done.
+    public static String messageNoSignature(String message)
     {
         char[] messageArray = message.toCharArray();
         String result = "";
