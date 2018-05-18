@@ -194,15 +194,15 @@ public class CommunicationSimulator
         {
             // Encrypting message.
             RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
-            System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
+            System.out.println("\nEncrypted message: " + bytesToString(encrypt.getEncryptedMessage()) + "\n");
 
-            String encryptedNodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
+            String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
                     senderKeys.getPublicKey().getRSAMod() + "_" + senderKeys.getPublicKey().getExponent() + " : " +
                     receiverKeys.getPublicKey().getRSAMod() + "_" + receiverKeys.getPublicKey().getExponent();
 
             RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
-            String preparedMessage = encryptedNodeMessage  + " : " + Arrays.toString(signature.getSignature());
+            String preparedMessage = encryptedNodeMessage  + " : " + bytesToString(signature.getSignature());
             System.out.println("Prepared message with signature: " + preparedMessage);
 
             return preparedMessage;
@@ -214,18 +214,6 @@ public class CommunicationSimulator
         }
     }
 
-    // Returns a String of encrypted message.
-    private static String showEncrypted(byte[] encrypted)
-    {
-        return Arrays.toString(encrypted);
-    }
-
-    // Returns a String of decrypted message.
-    private static String showDecrypted(byte[] decrypted)
-    {
-        return new String(decrypted);
-    }
-
     // Simulates a node.
     public static void nodeSimulator(String message)
     {
@@ -233,7 +221,7 @@ public class CommunicationSimulator
 
         try
         {
-            RSAOAEPVerify verifySignature = new RSAOAEPVerify(getSignature(message).getBytes(), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
+            RSAOAEPVerify verifySignature = new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
             System.out.println("Message verified.");
         }
 
@@ -283,15 +271,13 @@ public class CommunicationSimulator
     {
         char[] messageArray = message.toCharArray();
         String result = "";
-        boolean isSignature = false;
 
         for (int i = 0; i < messageArray.length; i++)
         {
             if (messageArray[i] == '[' && i > 0)
-                isSignature = true;
+                break;
 
-            if (!isSignature)
-                result = result + messageArray[i];
+            result = result + messageArray[i];
         }
 
         return removeEndSeparator(result);
@@ -306,6 +292,37 @@ public class CommunicationSimulator
         for (int i = 0; i < text.length() - 3; i++)
         {
             result = result + textCopy[i];
+        }
+
+        return result;
+    }
+
+    // Converts byte array into a String.
+    public static String bytesToString(byte[] array)
+    {
+        String result = "[";
+
+        for (int i = 0; i < array.length; i++)
+        {
+            result = result + String.valueOf(array[i]) + ",";
+        }
+
+        return result + "]";
+    }
+
+    // Converts byte array String to byte array.
+    public static byte[] stringToByte(String array)
+    {
+        byte[] result = new byte[array.length() - 2];
+        char[] charArray = array.toCharArray();
+
+        for (int i = 0, j = 0; i < array.length() - 2; i++)
+        {
+            if (charArray[i] == '[' || charArray[i] == ',')
+            {
+                result[j] = (byte) Integer.parseInt(getNumber(array, i + 1, ','));
+                j++;
+            }
         }
 
         return result;
