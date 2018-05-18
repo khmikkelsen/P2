@@ -1,12 +1,11 @@
 package robin;
 
-import RSA.InvalidRSAKeyException;
+import RSA.KeyPairGenerator;
 import RSA.RSAKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,67 +13,103 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-
 class BlockTest {
+    private RSAKey key1Public;
+    private RSAKey key1Private;
+    private RSAKey key2Public;
+    private RSAKey key2Private;
 
-    private final String validBase64RSAKey = "MIIBCgKCAQEA61BjmfXGEvWmegnBGSuS+rU9soUg2FnODva32D1AqhwdziwHINFaD1MVlcrYG6XRKfkcxnaXGfFDWHLEvNBSEVCgJjtHAGZIm5GL/KA86KDp/CwDFMSwluowcXwDwoyinmeOY9eKyh6aY72xJh7noLBBq1N0bWi1e2i+83txOCg4yV2oVXhBo8pYEJ8LT3el6Smxol3C1oFMVdwPgc0vTl25XucMcG/ALE/KNY6pqC2AQ6R2ERlVgPiUWOPatVkt7+Bs3h5Ramxh7XjBOXeulmCpGSynXNcpZ/06+vofGi/2MlpQZNhHAo8eayMp6FcvNucIpUndo1X8dKMv3Y26ZQIDAQAB";
-    private RSAKey validRSAKey;
+    private RSAKey key1FalsePrivate;
 
     @BeforeEach
-    void generateRSAKey() throws IOException, InvalidRSAKeyException {
-        validRSAKey = new RSAKey(validBase64RSAKey);
+    void generateKeys() throws IOException {
+        KeyPairGenerator k1 = new KeyPairGenerator(2048);
+        KeyPairGenerator k2 = new KeyPairGenerator(2048);
+
+        KeyPairGenerator k1false = new KeyPairGenerator(2048);
+
+
+        key1Public = k1.getPublicKey();
+        key1Private = k1.getPrivateKey();
+
+        key2Public = k2.getPublicKey();
+        key2Private = k2.getPrivateKey();
+
+        key1FalsePrivate = k1false.getPrivateKey();
     }
 
     @Test
-    void getMerkleRootHashTest01() throws IOException, InvalidRSAKeyException {
+    void getMerkleRootHashTest01() {
 
-        Message m = new Message("Test Message", validRSAKey, validRSAKey);
-        m.signMessage("RSA private key");
-        Message m2 = new Message("Test", validRSAKey, validRSAKey);
-        m2.signMessage("RSA private key");
+        Message m = new Message("Test Message", key1Public, key2Public);
+        m.signMessage(key1Private);
+        Message m2 = new Message("Test", key2Public, key1Public);
+        m2.signMessage(key2Private);
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
 
         Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
 
-        assertEquals("f705d73203d26809942140c76e14412ec03042add36534e68c980ba4c05c44f4", blockTest.getMerkleRootHash());
+        assertEquals("3720e16ad9712e01705e6bfb72d31cbc3fa2999e32384e54b0cb57e1822c93dd", blockTest.getMerkleRootHash());
 
     }
 
     @Test
-    void getMerkleRootHashTest02() throws IOException, InvalidRSAKeyException {
+    void getMerkleRootHashTest02() {
 
-        Message m = new Message("Test Message", validRSAKey, validRSAKey);
-        m.signMessage("RSA private key");
+        Message m = new Message("Test Message", key1Public, key2Public);
+        m.signMessage(key1Private);
+
         // "Test" changed to "Test2"
-        Message m2 = new Message("Test2", validRSAKey, validRSAKey);
-        m2.signMessage("RSA private key");
+        Message m2 = new Message("Test2", key2Public, key1Public);
+        m2.signMessage(key2Private);
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
 
         Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
 
-        assertNotEquals("50866b3a574df909a36594876d2281df9a188352f67ff3976bbf3a52ceb87a02", blockTest.getMerkleRootHash());
+        assertNotEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", blockTest.getMerkleRootHash());
+
     }
 
     @Test
-    void getMerkleRootHashTest03() throws IOException, InvalidRSAKeyException {
-        Message m = new Message("Test Message", validRSAKey, validRSAKey);
-        m.signMessage("RSA private key");
-        Message m2 = new Message("Test", validRSAKey, validRSAKey);
-        //Signature test. Changed "private to falseprivate" //
-        m2.signMessage("RSA falseprivate key");
+    void getMerkleRootHashTest03() {
+
+        Message m = new Message("Test Message", key1Public, key2Public);
+        m.signMessage(key1Private);
+        Message m2 = new Message("Test", key2Public, key1Public);
+        m2.signMessage(key2Public);
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
 
         Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
 
-        assertNotEquals("50866b3a574df909a36594876d2281df9a188352f67ff3976bbf3a52ceb87a02", blockTest.getMerkleRootHash());
+        String merkleRootHash01 = blockTest.getMerkleRootHash();
+
+        //Signature test. Changed a private key to a "False Private" key //
+        m2.signMessage(key1FalsePrivate);
+
+        String merkleRootHash02 = blockTest.getMerkleRootHash();
+        assertNotEquals(merkleRootHash01, merkleRootHash02);
     }
 
     @Test
-    void mineBlockTest01() {
+    void getMerkleRootHashTest04() {
 
-        //TODO: Spørg Mads
+        //Test "getMerkleRootHash" is 64.//
+
+        Message m = new Message("Test Message", key1Public, key2Public);
+        m.signMessage(key1Private);
+        Message m2 = new Message("Test", key2Public, key1Public);
+        m2.signMessage(key2Public);
+
+        List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
+
+
+        Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
+
+        assertEquals(64, blockTest.getMerkleRootHash().length());
+
+
     }
 }
