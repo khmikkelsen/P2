@@ -23,7 +23,7 @@ public class RSAOAEPVerify extends RSAOAEP
         this.sender = sender;
         this.M = message;
         this.sLen = 0;
-        this.modBits = sender.getRSAMod().bitLength();
+        this.modBits = sender.getModulus().bitLength();
         this.EM = RSAVerify();
         verifyMessage(modBits-1);
     }
@@ -34,7 +34,7 @@ public class RSAOAEPVerify extends RSAOAEP
         this.sender = sender;
         this.M = message;
         this.sLen = sLen;
-        this.modBits = sender.getRSAMod().bitLength();
+        this.modBits = sender.getModulus().bitLength();
         this.EM = RSAVerify();
         verifyMessage(modBits-1);
     }
@@ -42,7 +42,7 @@ public class RSAOAEPVerify extends RSAOAEP
     {
         int emLen = ceil(modBits-1,8);
         BigInteger s = OS2IP(signature);
-        BigInteger m = s.modPow(sender.getExponent(), sender.getRSAMod());
+        BigInteger m = s.modPow(sender.getExponent(), sender.getModulus());
         byte[] out = I2OSP(m, emLen);
 
         return out;

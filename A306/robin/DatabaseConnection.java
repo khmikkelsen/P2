@@ -1,6 +1,11 @@
 package robin;
 
+import RSA.InvalidRSAKeyException;
+import RSA.RSAKey;
+
+import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseConnection {
@@ -21,18 +26,42 @@ public class DatabaseConnection {
         // SQL statement for creating a new table
         String sql = "PRAGMA foreign_keys = ON;";
 
-        try (Connection conn = DriverManager.getConnection(url);
-             Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()) {
             // create a new table
             stmt.execute(sql);
         }
     }
 
-    public Block getBlockByIndex(int index) throws SQLException {
-        String query = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp from blocks where block_id = ?";
+    public Block getBlockById(int blockId) throws SQLException {
+        String messageQuery = "SELECT recipient, sender, signature, message from messages where block_id = ?";
 
-        try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setInt(1, index);
+        List<Message> messages = new ArrayList<>();
+
+        try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(messageQuery)) {
+            statement.setInt(1, blockId);
+
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                try {
+                    RSAKey recipient = new RSAKey(rs.getString("recipient"));
+                    RSAKey sender = new RSAKey(rs.getString("sender"));
+                    String signature = rs.getString("signature");
+                    String message = rs.getString("message");
+
+                    Message m = new Message(message, sender, recipient, signature);
+
+                    messages.add(m);
+                } catch (IOException | InvalidRSAKeyException e) {
+                    System.out.println(e.getStackTrace());
+                }
+            }
+        }
+
+        String blockQuery = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp from blocks where block_id = ?";
+
+        try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(blockQuery)) {
+            statement.setInt(1, blockId);
 
             ResultSet rs = statement.executeQuery();
 
@@ -41,11 +70,11 @@ public class DatabaseConnection {
                 String hash = rs.getString("hash");
                 String previousHash = rs.getString("previous_hash");
                 String merkleRootHash = rs.getString("merkle_root_hash");
-                String compactDifficulty = rs.getString("compact_difficulty");
+                String compactTarget = rs.getString("compact_difficulty");
                 int nonce = rs.getInt("nonce");
-                Long minedTimestamp = rs.getLong("mined_timestamp");
+                long minedTimestamp = rs.getLong("mined_timestamp");
 
-                Block block = new Block(hash, previousHash, compactDifficulty, blockIndex, minedTimestamp, merkleRootHash, nonce);
+                Block block = new Block(hash, previousHash, compactTarget, nonce, merkleRootHash, minedTimestamp, blockIndex, messages);
 
                 return block;
             }
@@ -69,7 +98,7 @@ public class DatabaseConnection {
             statement.setString(1, block.calculateHash());
             statement.setString(2, block.getPrevHeadHash());
             statement.setString(3, block.getMerkleRootHash());
-            statement.setString(4, block.getCompactDifficulty());
+            statement.setString(4, block.getCompactTarget());
             statement.setInt(5, block.getNonce());
             statement.setLong(6, block.getTimestamp());
             statement.executeUpdate();
@@ -88,12 +117,12 @@ public class DatabaseConnection {
     }
 
     public void addMessagesToBlockId(List<Message> messages, long blockId) throws SQLException {
-         String query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
+        String query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
 
         for (Message m : messages) {
             try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, m.getRecipient());
-                pstmt.setString(2, m.getSender());
+                pstmt.setString(1, m.getRecipient().toString());
+                pstmt.setString(2, m.getSender().toString());
                 pstmt.setString(3, m.getSignature());
                 pstmt.setString(4, m.getMessage());
                 pstmt.setLong(5, blockId);

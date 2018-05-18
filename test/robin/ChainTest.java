@@ -20,8 +20,8 @@ class ChainTest {
     @Test
     void adjustDifficultyTest01() {
 
-        Block b1 = new Block("hash", "prevHash", "1f00ffff", 2, 0, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 38100);
-        Block b2 = new Block("hash", "prevHash", "1f00ffff", 2, 2419200000L, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 52400);
+        Block b1 = new Block("hash", "prevHash", "1f00ffff", 38100, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 0L, 2, null);
+        Block b2 = new Block("hash", "prevHash", "1f00ffff", 52400, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 2419200000L, 2, null);
 
         Chain.adjustDifficulty(b2, b1);
 
@@ -33,7 +33,7 @@ class ChainTest {
                 new BigDecimal(oldTarget), 4, RoundingMode.HALF_UP
         );
 
-        BigDecimal expectedFactor =new BigDecimal("2");
+        BigDecimal expectedFactor = new BigDecimal("2");
 
         assertTrue(expectedFactor.compareTo(factor) == 0);
 
@@ -45,9 +45,8 @@ class ChainTest {
     @Test
     void adjustDifficultyTest02() {
 
-
-        Block b1 = new Block("hash", "prevHash", "1f00ffff", 2, 0, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 38100);
-        Block b2 = new Block("hash", "prevHash", "1f00ffff", 2, 604800000, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 52400);
+        Block b1 = new Block("hash", "prevHash", "1f00ffff", 38100, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 0L, 2, null);
+        Block b2 = new Block("hash", "prevHash", "1f00ffff", 52400, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 604800000L, 2, null);
 
         Chain.adjustDifficulty(b2, b1);
 
@@ -59,12 +58,11 @@ class ChainTest {
                 new BigDecimal(oldTarget), 4, RoundingMode.HALF_UP
         );
 
-        BigDecimal expectedFactor =new BigDecimal("0.5");
+        BigDecimal expectedFactor = new BigDecimal("0.5");
 
         assertTrue(expectedFactor.compareTo(factor) == 0);
 
     }
-
 
 
     // Hit the exact target
@@ -72,8 +70,8 @@ class ChainTest {
     @Test
     void adjustDifficultyTest03() {
 
-        Block b1 = new Block("hash", "prevHash", "1f00ffff", 2, 0, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 38100);
-        Block b2 = new Block("hash", "prevHash", "1f00ffff", 2, 1209600000, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 52400);
+        Block b1 = new Block("hash", "prevHash", "1f00ffff", 38100, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 0L, 2, null);
+        Block b2 = new Block("hash", "prevHash", "1f00ffff", 52400, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 1209600000L, 2, null);
 
         Chain.adjustDifficulty(b2, b1);
 
@@ -85,7 +83,7 @@ class ChainTest {
                 new BigDecimal(oldTarget), 4, RoundingMode.HALF_UP
         );
 
-        BigDecimal expectedFactor =new BigDecimal("1");
+        BigDecimal expectedFactor = new BigDecimal("1");
 
         assertTrue(expectedFactor.compareTo(factor) == 0);
 

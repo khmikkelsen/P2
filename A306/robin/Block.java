@@ -5,35 +5,35 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-//Prøver bare en anden måde at lave blok
-
 public class Block {
-    String prevHeadhash;
-    String compactDifficulty;
-    int nonce = 0; //nonce starts at zero and is incremented at each hash
-    String merkleRootHash;
-    long timestamp;
-    int index;
+    private String prevHeadhash;
+    private String compactTarget;
+    private int nonce = 0; //nonce starts at zero and is incremented at each hash
+    private String merkleRootHash;
+    private long timestamp;
+    private int index;
 
-    String hash;
+    private String hash;
     private List<Message> messages;
 
-    public Block(String prevHeadhash, String compactDifficulty, List<Message> messages) {
-        timestamp = new Date().getTime();
+    public Block(String prevHeadhash, String compactTarget, List<Message> messages) {
+        this.timestamp = new Date().getTime();
         this.prevHeadhash = prevHeadhash;
-        this.compactDifficulty = compactDifficulty;
+        this.compactTarget = compactTarget;
         this.messages = messages;
     }
 
-    public Block(String hash, String prevHeadhash, String compactDifficulty, int index, long timestamp, String merkleRootHash, int nonce) {
+    public Block(String hash, String prevHeadhash, String compactTarget, int nonce, String merkleRootHash, long timestamp, int index, List<Message> messages) {
         this.hash = hash;
         this.prevHeadhash = prevHeadhash;
-        this.compactDifficulty = compactDifficulty;
+        this.compactTarget = compactTarget;
         this.index = index;
         this.timestamp = timestamp;
         this.merkleRootHash = merkleRootHash;
         this.nonce = nonce;
+        this.messages = messages;
     }
+
 
     /**
      * The method calculateHash: creates a hashed header of the block.
@@ -46,7 +46,7 @@ public class Block {
                         + Long.toString(timestamp)
                         + merkleRootHash
                         + Integer.toString(nonce)
-                        + compactDifficulty
+                        + compactTarget
                         + index
 
         );
@@ -59,7 +59,7 @@ public class Block {
         while (new BigInteger(this.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
             if (nonce == Integer.MAX_VALUE) {
                 nonce = 0;
-                setTimestamp(new Date().getTime());
+                this.timestamp = new Date().getTime();
             } else {
                 nonce++;
             }
@@ -128,8 +128,8 @@ public class Block {
         return timestamp;
     }
 
-    public String getCompactDifficulty() {
-        return compactDifficulty;
+    public String getCompactTarget() {
+        return compactTarget;
     }
 
     public String getPrevHeadHash() {
@@ -140,15 +140,19 @@ public class Block {
         return messages;
     }
 
-    private void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    private int getIndex() {
+        return index;
+    }
+
+    private String getHash() {
+        return hash;
     }
 
     @Override
     public String toString() {
         return "Block{" +
                 "prevHeadhash='" + prevHeadhash + '\'' +
-                ", compactDifficulty='" + compactDifficulty + '\'' +
+                ", compactTarget='" + compactTarget + '\'' +
                 ", nonce=" + nonce +
                 ", merkleRootHash='" + merkleRootHash + '\'' +
                 ", timestamp=" + timestamp +

@@ -1,9 +1,6 @@
 package Communication;
 
-import RSA.KeyPairGenerator;
-import RSA.RSAKey;
-import RSA.RSAOAEPDecrypt;
-import RSA.RSAOAEPEncrypt;
+import RSA.*;
 import robin.StringUtil;
 
 import java.io.BufferedReader;
@@ -44,17 +41,18 @@ public class CommunicationSimulator
     {
         char[] keyArray = key.toCharArray();
         int amountOfDash = 0;
+        final char SEPERATOR = '_';
 
-        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == '-')
+        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == SEPERATOR)
             return false;
 
         // Checking all characters.
         for (int i = 0; i < keyArray.length; i++)
         {
-            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != '-')
+            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != SEPERATOR)
                 return false;
 
-            if (keyArray[i] == '-')
+            if (keyArray[i] == SEPERATOR)
                 amountOfDash++;
 
             if (amountOfDash > 1)
@@ -74,7 +72,6 @@ public class CommunicationSimulator
         char[] number = text.toCharArray();
         String returnNumber = "";
         boolean indexFound = false;
-        int j = 0;
 
         for (int i = 0; i < number.length; i++)
         {
@@ -87,7 +84,6 @@ public class CommunicationSimulator
             if (indexFound)
             {
                 returnNumber = returnNumber + number[i];
-                j++;
             }
         }
 
@@ -96,6 +92,40 @@ public class CommunicationSimulator
 
         else
             return "0";
+    }
+
+    private static String getNumber(String text, int startIndex)
+    {
+        char[] number = text.toCharArray();
+        String returnNumber = "";
+
+        for (int i = 0; i < number.length; i++)
+        {
+            if (i >= startIndex)
+                returnNumber = returnNumber + number[i];
+        }
+
+        if (returnNumber.length() > 0)
+            return returnNumber;
+
+        else
+            return "0";
+    }
+
+    // Gets a number from a String searching backwards.
+    private static String getNumberBackwards(String text, char startIndex)
+    {
+        char[] number = text.toCharArray();
+
+        for (int i = number.length - 1; i >= 0; i--)
+        {
+            if (number[i] == startIndex)
+            {
+                return getNumber(text, i);
+            }
+        }
+
+        return null;
     }
 
     // Copy of previous getNumber, but using int as index.
@@ -128,13 +158,11 @@ public class CommunicationSimulator
         KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
         KeyPairGenerator keysSender = new KeyPairGenerator(2048);
 
-        String encryptedMessage = clientSimulator(keysReceiver, keysSender);
-
-        // Add nodeSimulator.
+        nodeSimulator(clientSimulator(keysReceiver, keysSender));
     }
 
     // Simulates a client and return encrypted message.
-    private static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
+    public static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
@@ -166,20 +194,16 @@ public class CommunicationSimulator
         {
             // Encrypting message.
             RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
-            System.out.println("\nEncrypted message: " + showEncrypted(encrypt.getEncryptedMessage()) + "\n");
+            System.out.println("\nEncrypted message: " + bytesToString(encrypt.getEncryptedMessage()) + "\n");
 
-            String nodeMessage = showEncrypted(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getRSAMod() + "-" + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getRSAMod() + "-" + receiverKeys.getPublicKey().getExponent();
+            String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
+                    senderKeys.getPublicKey().getRSAMod() + "_" + senderKeys.getPublicKey().getExponent() + " : " +
+                    receiverKeys.getPublicKey().getRSAMod() + "_" + receiverKeys.getPublicKey().getExponent();
 
-            String hashedMessage = StringUtil.applySha256(nodeMessage);
+            RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
-            // Decryption of hashedMessage using the private key from the sender.
-            RSAOAEPDecrypt decryption = new RSAOAEPDecrypt(hashedMessage.getBytes(), new byte[]{1, 2}, senderKeys.getPrivateKey());
-            String decryptedHashedMessage = showDecrypted(decryption.getDecryptedMessage());
-
-            String preparedMessage = nodeMessage + " : " + decryptedHashedMessage;
-            System.out.println(preparedMessage);
+            String preparedMessage = encryptedNodeMessage  + " : " + bytesToString(signature.getSignature());
+            System.out.println("Prepared message with signature: " + preparedMessage);
 
             return preparedMessage;
         }
@@ -190,15 +214,117 @@ public class CommunicationSimulator
         }
     }
 
-    // Returns a String of encrypted message.
-    private static String showEncrypted(byte[] encrypted)
+    // Simulates a node.
+    public static void nodeSimulator(String message)
     {
-        return Arrays.toString(encrypted);
+        System.out.println("\n\nNode:\n");
+
+        try
+        {
+            RSAOAEPVerify verifySignature = new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
+            System.out.println("Message verified.");
+        }
+
+        catch (IOException | BadVerificationException e)
+        {
+            System.out.println("Message not verified.");
+            e.printStackTrace();
+        }
     }
 
-    // Returns a String of decrypted message.
-    private static String showDecrypted(byte[] decrypted)
+    // Gets the sender key N.
+    public static BigInteger getSenderN(String message)
     {
-        return new String(decrypted);
+        String number = getNumber(message, getCharStart(message, ':', 2), '_');
+        return new BigInteger(number);
+    }
+
+    // Gets start index of N in sender's key pair.
+    private static int getCharStart(String message, char c, int range)
+    {
+        char[] messageArray = message.toCharArray();
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            if (messageArray[i] == c)
+                return i + range;
+        }
+
+        return 0;
+    }
+
+    // Gets the sender key E.
+    public static BigInteger getSenderE(String message)
+    {
+        String number = getNumber(message, getCharStart(message, '_', 1), ' ');
+        return new BigInteger(number);
+    }
+
+    // Returns the signature of a message.
+    public static String getSignature(String message)
+    {
+        return getNumberBackwards(message, '[');
+    }
+
+    // Returns message without signature.
+    public static String messageNoSignature(String message)
+    {
+        char[] messageArray = message.toCharArray();
+        String result = "";
+
+        for (int i = 0; i < messageArray.length; i++)
+        {
+            if (messageArray[i] == '[' && i > 0)
+                break;
+
+            result = result + messageArray[i];
+        }
+
+        return removeEndSeparator(result);
+    }
+
+    // Removes separator at end of String.
+    private static String removeEndSeparator(String text)
+    {
+        String result = "";
+        char[] textCopy = text.toCharArray();
+
+        for (int i = 0; i < text.length() - 3; i++)
+        {
+            result = result + textCopy[i];
+        }
+
+        return result;
+    }
+
+    // Converts byte array into a String.
+    public static String bytesToString(byte[] array)
+    {
+        String result = "[";
+
+        for (int i = 0; i < array.length; i++)
+        {
+            result = result + String.valueOf(array[i]) + ",";
+        }
+
+        return result + "]";
+    }
+
+    // Converts byte array String to byte array.
+    public static byte[] stringToByte(String array)
+    {
+        byte[] result = new byte[array.length() - 2];
+        char[] charArray = array.toCharArray();
+
+        for (int i = 0, j = 0; i < array.length() - 2; i++)
+        {
+            if (charArray[i] == '[' || charArray[i] == ',')
+            {
+                result[j] = (byte) Integer.parseInt(getNumber(array, i + 1, ','));
+                j++;
+            }
+        }
+
+        return result;
     }
 }
