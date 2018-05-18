@@ -36,15 +36,16 @@ class TargetTest {
     }
 
 
+
     // Calculate the compact target from a hex value
     @Test
     void calculateCompactTargetTest03() {
 
-        BigInteger num = new BigInteger("ffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+        BigInteger num = new BigInteger("130E0000000000000000000000000000000000000000000", 16);
 
         String compactTarget = Target.calculateCompactTarget(num);
 
-        assertEquals("1d00ffff", Target.calculateCompactTarget(num));
+        assertEquals("180130e0", Target.calculateCompactTarget(num));
 
 
     }
