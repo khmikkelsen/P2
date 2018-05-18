@@ -151,6 +151,7 @@ public class CommunicationSimulator
     // Main method
     public static void main(String[] args)
     {
+        // Verification test.
         /*final String message = "Hej";
 
         try
@@ -160,7 +161,7 @@ public class CommunicationSimulator
 
             Message m = new Message(message, senderKey.getPublicKey(), receiverKey.getPublicKey());
 
-            // Signing
+            // Signing and verifying.
             RSAOAEPSign signature = new RSAOAEPSign(m.calculateHash(), senderKey.getPrivateKey());
             RSAOAEPVerify verify = new RSAOAEPVerify(signature.getSignature(), m.calculateHash().getBytes(), senderKey.getPublicKey());
 
@@ -196,10 +197,6 @@ public class CommunicationSimulator
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
-        // Sender keys
-        RSAKey senderPrivate = senderKeys.getPrivateKey();
-        RSAKey senderPublic = senderKeys.getPublicKey();
-
         System.out.println("Public key of receiver:\nn: " + receiverKeys.getPublicKey().getModulus() + "\ne : " + receiverKeys.getPublicKey().getExponent());
         System.out.print("\nMessage: ");
 
@@ -227,9 +224,10 @@ public class CommunicationSimulator
             System.out.println("\nEncrypted message: " + bytesToString(encrypt.getEncryptedMessage()) + "\n");
 
             String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getModulus() + "_" + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getModulus() + "_" + receiverKeys.getPublicKey().getExponent();
+                    senderKeys.getPublicKey().getModulus() + KEYSEPERATOR + senderKeys.getPublicKey().getExponent() + " : " +
+                    receiverKeys.getPublicKey().getModulus() + KEYSEPERATOR + receiverKeys.getPublicKey().getExponent();
 
+            // Singing message.
             RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
             String preparedMessage = encryptedNodeMessage  + " : " + bytesToString(signature.getSignature());
@@ -286,7 +284,7 @@ public class CommunicationSimulator
     // Gets the sender key E.
     public static BigInteger getSenderE(String message)
     {
-        String number = getNumber(message, getCharStart(message, '_', 1), ' ');
+        String number = getNumber(message, getCharStart(message, KEYSEPERATOR, 1), ' ');
         return new BigInteger(number);
     }
 
@@ -343,7 +341,7 @@ public class CommunicationSimulator
     // Converts byte array String to byte array.
     public static byte[] stringToByte(String array)
     {
-        byte[] result = new byte[array.length() - 2];
+        byte[] result = new byte[stringByteArraySize(array)];
         char[] charArray = array.toCharArray();
 
         for (int i = 0, j = 0; i < array.length() - 2; i++)
@@ -356,5 +354,19 @@ public class CommunicationSimulator
         }
 
         return result;
+    }
+
+    // Returns amount of commas in String byte array.
+    public static int stringByteArraySize(String array)
+    {
+        int commas = 0;
+
+        for (int i = 0; i < array.length(); i++)
+        {
+            if (array.charAt(i) == ',')
+                commas++;
+        }
+
+        return commas;
     }
 }

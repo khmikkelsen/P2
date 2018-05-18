@@ -75,4 +75,12 @@ class CommunicationSimulatorTest
         assertEquals(resultArray[1], 40);
         assertEquals(resultArray[2], -61);
     }
+
+    // Tests the method that returns the size of byte array formatted as a String.
+    @Test
+    void testStringByteArraySize()
+    {
+        String byteArray = "[11, 12, 13, 14, 15, -16, -17, -18, -19, -20,]";
+        assertEquals(CommunicationSimulator.stringByteArraySize(byteArray), 10);
+    }
 }
