@@ -36,8 +36,8 @@ class Message {
 
     public String calculateHash() {
         return StringUtil.applySha256(message
-                + recipient
-                + sender
+                + recipient.toString()
+                + sender.toString()
                 + signature);
     }
 

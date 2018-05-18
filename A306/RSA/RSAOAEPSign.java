@@ -36,7 +36,7 @@ public class RSAOAEPSign extends RSAOAEP
         this.sLen = 0;
         this.salt = genSalt();
 
-        this.modBits = sender.getRSAMod().bitLength();
+        this.modBits = sender.getModulus().bitLength();
         this.M = genM();
 
         this.EM = encodeMessage(modBits-1);
@@ -53,7 +53,7 @@ public class RSAOAEPSign extends RSAOAEP
         this.sLen = sLength;
         this.salt = genSalt(); // Step 4
 
-        this.modBits = sender.getRSAMod().bitLength();
+        this.modBits = sender.getModulus().bitLength();
         this.M = genM(); // Step 5
 
         this.EM = encodeMessage(modBits-1);
@@ -66,8 +66,8 @@ public class RSAOAEPSign extends RSAOAEP
             throw new ArithmeticException("modBits % 8 != 0");
 
         BigInteger m = OS2IP(EM);
-        BigInteger s = m.modPow(sender.getExponent(), sender.getRSAMod());
-        if (s.compareTo(sender.getRSAMod()) >= 0)
+        BigInteger s = m.modPow(sender.getExponent(), sender.getModulus());
+        if (s.compareTo(sender.getModulus()) >= 0)
             throw new ArithmeticException("Signature out of range");
 
         return I2OSP(s, emLen);

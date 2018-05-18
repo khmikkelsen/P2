@@ -26,7 +26,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
     {
         this.recipient = recipient;
         this.M = message.getBytes();
-        this.k = recipient.getRSAMod().bitLength() / 8;
+        this.k = recipient.getModulus().bitLength() / 8;
 
         this.L = new byte[]{(byte) 0x0};
         if (L.length > pow(2, 61)-1)
@@ -48,7 +48,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
     {
         this.recipient = recipient;
         this.M = message.getBytes();
-        this.k = recipient.getRSAMod().bitLength() / 8;
+        this.k = recipient.getModulus().bitLength() / 8;
         this.L = label;
         if (L.length > pow(2, 61)-1)
             throw new ArithmeticException("Label L too long");
@@ -74,7 +74,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
     private byte[] RSAEncrypt()
     {
         BigInteger m = OS2IP(EM);
-        BigInteger c = m.modPow(recipient.getExponent(), recipient.getRSAMod());
+        BigInteger c = m.modPow(recipient.getExponent(), recipient.getModulus());
         byte[] C = I2OSP(c, k);
         if (C.length != k)
             throw new ArithmeticException("Ciphertext length not equal to RSA Modulus length");
