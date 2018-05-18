@@ -15,7 +15,7 @@ import RSA.RSAKey;
  * "The result is known as: ORIGINAL HASH-VALUE, which is the hash value of message before signing(digest)"
  * 3.3) Compare CURRENT HASH_VALUE and ORIGINAL HASH_VALUE - must be identical.
  */
-class Message {
+public class Message {
     private String message;
     private RSAKey sender;
     private RSAKey recipient;

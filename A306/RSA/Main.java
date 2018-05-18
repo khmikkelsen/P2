@@ -9,10 +9,19 @@ public class Main
 {
     public static void main(String[] args)
     {
+        KeyPairGenerator generator = null;
+        RSAKey Alicepub = null;
+        RSAKey Alicepriv = null;
 
-        KeyPairGenerator generator = new KeyPairGenerator(2048);
-        RSAKey Alicepub = generator.getPublicKey();
-        RSAKey Alicepriv = generator.getPrivateKey();
+        try{
+            generator = new KeyPairGenerator(2048);
+            Alicepub = generator.getPublicKey();
+            Alicepriv = generator.getPrivateKey();
+        }
+
+        catch (IOException e){
+            //Empty.
+        }
 
         String copypasta = "ffff";
 
