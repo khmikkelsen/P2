@@ -2,6 +2,7 @@ package Communication;
 
 import RSA.*;
 import robin.StringUtil;
+import robin.Message;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.util.Arrays;
 
 public class CommunicationSimulator
 {
+    private static final char KEYSEPERATOR = '_';
+
     // Entering receivers public key as address.
     public static int[] receiveKey(BufferedReader reader)
     {
@@ -26,7 +29,7 @@ public class CommunicationSimulator
 
             else
             {
-                return new int[]{Integer.parseInt(getNumber(key, 0, '-')), Integer.parseInt(getNumber(key, '-'))};
+                return new int[]{Integer.parseInt(getNumber(key, 0, KEYSEPERATOR)), Integer.parseInt(getNumber(key, KEYSEPERATOR))};
             }
         }
 
@@ -41,18 +44,17 @@ public class CommunicationSimulator
     {
         char[] keyArray = key.toCharArray();
         int amountOfDash = 0;
-        final char SEPERATOR = '_';
 
-        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == SEPERATOR)
+        if (keyArray[0] == '-' || keyArray[keyArray.length - 1] == KEYSEPERATOR)
             return false;
 
         // Checking all characters.
         for (int i = 0; i < keyArray.length; i++)
         {
-            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != SEPERATOR)
+            if (((int) keyArray[i] < 48 || (int) keyArray[i] > 57) && keyArray[i] != KEYSEPERATOR)
                 return false;
 
-            if (keyArray[i] == SEPERATOR)
+            if (keyArray[i] == KEYSEPERATOR)
                 amountOfDash++;
 
             if (amountOfDash > 1)
@@ -149,16 +151,44 @@ public class CommunicationSimulator
     // Main method
     public static void main(String[] args)
     {
+        /*final String message = "Hej";
+
+        try
+        {
+            KeyPairGenerator senderKey = new KeyPairGenerator(2048);
+            KeyPairGenerator receiverKey = new KeyPairGenerator(2048);
+
+            Message m = new Message(message, senderKey.getPublicKey(), receiverKey.getPublicKey());
+
+            // Signing
+            RSAOAEPSign signature = new RSAOAEPSign(m.calculateHash(), senderKey.getPrivateKey());
+            RSAOAEPVerify verify = new RSAOAEPVerify(signature.getSignature(), m.calculateHash().getBytes(), senderKey.getPublicKey());
+
+            System.out.println("Verified.");
+        }
+
+        catch (IOException | BadVerificationException e)
+        {
+            System.out.println("Not verified.");
+        }*/
+
         simulateCommunication();
     }
 
     // Simulates a client-node communication.
     public static void simulateCommunication()
     {
-        KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
-        KeyPairGenerator keysSender = new KeyPairGenerator(2048);
+        try
+        {
+            KeyPairGenerator keysReceiver = new KeyPairGenerator(2048);
+            KeyPairGenerator keysSender = new KeyPairGenerator(2048);
+            nodeSimulator(clientSimulator(keysReceiver, keysSender));
+        }
 
-        nodeSimulator(clientSimulator(keysReceiver, keysSender));
+        catch (IOException e)
+        {
+            System.out.println("Keys could not be generated.");
+        }
     }
 
     // Simulates a client and return encrypted message.
@@ -170,15 +200,15 @@ public class CommunicationSimulator
         RSAKey senderPrivate = senderKeys.getPrivateKey();
         RSAKey senderPublic = senderKeys.getPublicKey();
 
-        System.out.println("Public key of receiver:\nn: " + receiverKeys.getPublicKey().getRSAMod() + "\ne : " + receiverKeys.getPublicKey().getExponent());
+        System.out.println("Public key of receiver:\nn: " + receiverKeys.getPublicKey().getModulus() + "\ne : " + receiverKeys.getPublicKey().getExponent());
         System.out.print("\nMessage: ");
 
         try
         {
-            String message = input.readLine();
+            Message m = new Message(input.readLine(), senderKeys.getPublicKey(), receiverKeys.getPublicKey());
 
             // Start preparing message to be send.
-            return prepareMessage(message, receiverKeys, senderKeys);
+            return prepareMessage(m.calculateHash(), receiverKeys, senderKeys);
         }
 
         catch (IOException e)
@@ -197,8 +227,8 @@ public class CommunicationSimulator
             System.out.println("\nEncrypted message: " + bytesToString(encrypt.getEncryptedMessage()) + "\n");
 
             String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getRSAMod() + "_" + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getRSAMod() + "_" + receiverKeys.getPublicKey().getExponent();
+                    senderKeys.getPublicKey().getModulus() + "_" + senderKeys.getPublicKey().getExponent() + " : " +
+                    receiverKeys.getPublicKey().getModulus() + "_" + receiverKeys.getPublicKey().getExponent();
 
             RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
