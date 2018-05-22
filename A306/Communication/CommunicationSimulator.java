@@ -1,6 +1,7 @@
 package Communication;
 
 import RSA.*;
+import robin.Block;
 import robin.StringUtil;
 import robin.Message;
 
@@ -8,7 +9,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class CommunicationSimulator
 {
@@ -130,6 +133,21 @@ public class CommunicationSimulator
         return null;
     }
 
+    private static String getNumberBackwards(String text, char startIndex, char endIndex)
+    {
+        char[] number = text.toCharArray();
+
+        for (int i = number.length - 1; i >= 0; i--)
+        {
+            if (number[i] == startIndex)
+            {
+                return getNumber(text, i, endIndex);
+            }
+        }
+
+        return null;
+    }
+
     // Copy of previous getNumber, but using int as index.
     private static String getNumber(String text, int startIndex, char endIndex)
     {
@@ -151,28 +169,6 @@ public class CommunicationSimulator
     // Main method
     public static void main(String[] args)
     {
-        // Verification test.
-        /*final String message = "Hej";
-
-        try
-        {
-            KeyPairGenerator senderKey = new KeyPairGenerator(2048);
-            KeyPairGenerator receiverKey = new KeyPairGenerator(2048);
-
-            Message m = new Message(message, senderKey.getPublicKey(), receiverKey.getPublicKey());
-
-            // Signing and verifying.
-            RSAOAEPSign signature = new RSAOAEPSign(m.calculateHash(), senderKey.getPrivateKey());
-            RSAOAEPVerify verify = new RSAOAEPVerify(signature.getSignature(), m.calculateHash().getBytes(), senderKey.getPublicKey());
-
-            System.out.println("Verified.");
-        }
-
-        catch (IOException | BadVerificationException e)
-        {
-            System.out.println("Not verified.");
-        }*/
-
         simulateCommunication();
     }
 
@@ -221,7 +217,6 @@ public class CommunicationSimulator
         {
             // Encrypting message.
             RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
-            System.out.println("\nEncrypted message: " + bytesToString(encrypt.getEncryptedMessage()) + "\n");
 
             String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
                     senderKeys.getPublicKey().getModulus() + KEYSEPERATOR + senderKeys.getPublicKey().getExponent() + " : " +
@@ -231,7 +226,6 @@ public class CommunicationSimulator
             RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
 
             String preparedMessage = encryptedNodeMessage  + " : " + bytesToString(signature.getSignature());
-            System.out.println("Prepared message with signature: " + preparedMessage);
 
             return preparedMessage;
         }
@@ -245,12 +239,27 @@ public class CommunicationSimulator
     // Simulates a node.
     public static void nodeSimulator(String message)
     {
+        // Blocks
+        List<Block> blocks = new ArrayList<>();
+        blocks.add(new Block("0", "Compact target", new ArrayList<>()));    // genesis block.
+
+        System.out.println("Prepared message: " + message + "\n");
         System.out.println("\n\nNode:\n");
 
         try
         {
-            RSAOAEPVerify verifySignature = new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
+            // Verifying only entered message.
+            new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
             System.out.println("Message verified.");
+
+            // Creating a block.
+            List<Message> messages = addBlocks();
+
+            RSAKey senderKey = new RSAKey(getSenderN(message), getSenderE(message));
+            RSAKey receiverKey = new RSAKey(getReceiverN(message), getReceiverE(message));
+            messages.add(new Message(getNumber(message, 0, ' '), senderKey, receiverKey));
+
+            blocks.add(new Block("Hash", "Compact target", messages));
         }
 
         catch (IOException | BadVerificationException e)
@@ -286,6 +295,40 @@ public class CommunicationSimulator
     {
         String number = getNumber(message, getCharStart(message, KEYSEPERATOR, 1), ' ');
         return new BigInteger(number);
+    }
+
+    // Returns receiver's key N.
+    public static BigInteger getReceiverN(String message)
+    {
+        int colonCounter = 0;
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            if (message.charAt(i) == ':')
+                colonCounter++;
+
+            if (colonCounter == 2)
+                return new BigInteger(getNumber(message, i + 2, '_'));
+        }
+
+        return null;
+    }
+
+    // Returns receiver's key E.
+    public static BigInteger getReceiverE(String message)
+    {
+        int underscoreCounter = 0;
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            if (message.charAt(i) == '_')
+                underscoreCounter++;
+
+            if (underscoreCounter == 2)
+                return new BigInteger(getNumber(message, i + 1, ' '));
+        }
+
+        return null;
     }
 
     // Returns the signature of a message.
@@ -368,5 +411,29 @@ public class CommunicationSimulator
         }
 
         return commas;
+    }
+
+    // Adds some blocks to a list.
+    private static List<Message> addBlocks() throws IOException
+    {
+        String m1 = "Hej";
+        String m2 = "Hvordan går det?";
+        String m3 = "Giv os lige 12 her til eksamen.";
+
+        // Keys for each message.
+        KeyPairGenerator m1Key = new KeyPairGenerator(2048);
+        KeyPairGenerator m2Key = new KeyPairGenerator(2048);
+        KeyPairGenerator m3Key = new KeyPairGenerator(2048);
+
+        // Sending messages to each other.
+        String m1Prepared = prepareMessage(m1, m2Key, m1Key);
+        String m2Prepared = prepareMessage(m2, m3Key, m2Key);
+        String m3Prepared = prepareMessage(m3, m1Key, m3Key);
+
+        Message m1Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m1Prepared), getSenderE(m1Prepared)), new RSAKey(getReceiverN(m1Prepared), getReceiverE(m1Prepared)));
+        Message m2Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m2Prepared), getSenderE(m2Prepared)), new RSAKey(getReceiverN(m2Prepared), getReceiverE(m2Prepared)));
+        Message m3Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m3Prepared), getSenderE(m3Prepared)), new RSAKey(getReceiverN(m3Prepared), getReceiverE(m3Prepared)));
+
+        return List.of(m1Message, m2Message, m3Message);
     }
 }
