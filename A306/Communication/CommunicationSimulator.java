@@ -2,6 +2,7 @@ package Communication;
 
 import RSA.*;
 import robin.Block;
+import robin.Chain;
 import robin.StringUtil;
 import robin.Message;
 
@@ -239,9 +240,12 @@ public class CommunicationSimulator
     // Simulates a node.
     public static void nodeSimulator(String message)
     {
+        // Chain
+        Chain mainChain = new Chain();
+
         // Blocks
         List<Block> blocks = new ArrayList<>();
-        blocks.add(new Block("0", "Compact target", new ArrayList<>()));    // genesis block.
+        blocks.add(new Block("0", mainChain.getTarget().getCompactTarget(), new ArrayList<>()));    // genesis block.
 
         System.out.println("Prepared message: " + message + "\n");
         System.out.println("\n\nNode:\n");
@@ -253,13 +257,15 @@ public class CommunicationSimulator
             System.out.println("Message verified.");
 
             // Creating a block.
-            List<Message> messages = addBlocks();
-
+            List<Message> messages = getMessages();
             RSAKey senderKey = new RSAKey(getSenderN(message), getSenderE(message));
             RSAKey receiverKey = new RSAKey(getReceiverN(message), getReceiverE(message));
             messages.add(new Message(getNumber(message, 0, ' '), senderKey, receiverKey));
 
-            blocks.add(new Block("Hash", "Compact target", messages));
+            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), mainChain.getTarget().getCompactTarget(), messages));
+
+            // Adjusting difficulty.
+            mainChain.adjustDifficulty(blocks.get(1), blocks.get(0));
         }
 
         catch (IOException | BadVerificationException e)
@@ -414,7 +420,7 @@ public class CommunicationSimulator
     }
 
     // Adds some blocks to a list.
-    private static List<Message> addBlocks() throws IOException
+    private static List<Message> getMessages() throws IOException
     {
         String m1 = "Hej";
         String m2 = "Hvordan går det?";
