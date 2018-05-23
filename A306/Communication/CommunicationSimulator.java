@@ -374,7 +374,7 @@ public class CommunicationSimulator
         return result;
     }
 
-    // Converts byte array into a String.
+    // Converts byte array into a String array.
     public static String bytesToString(byte[] array)
     {
         String result = "[";
@@ -400,6 +400,19 @@ public class CommunicationSimulator
                 result[j] = (byte) Integer.parseInt(getNumber(array, i + 1, ','));
                 j++;
             }
+        }
+
+        return result;
+    }
+
+    // Converts byte array to String.
+    public static String toString(byte[] array)
+    {
+        String result = "";
+
+        for (int i = 0; i < array.length; i++)
+        {
+            result = result + (char) array[i];
         }
 
         return result;

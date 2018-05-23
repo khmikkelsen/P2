@@ -97,4 +97,12 @@ class CommunicationSimulatorTest
     {
         assertEquals(CommunicationSimulator.getReceiverE(this.messageExample), new BigInteger("65537"));
     }
+
+    // Tests method that converts a byte array into a String.
+    @Test
+    void testToString()
+    {
+        String message = "Hello";
+        assertEquals(CommunicationSimulator.toString(message.getBytes()), message);
+    }
 }
