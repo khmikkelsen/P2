@@ -257,12 +257,11 @@ public class CommunicationSimulator
             System.out.println("Message verified.");
 
             // Creating a block.
-            List<Message> messages = getMessages();
+            List<Message> blockMessages = getMessages();
             RSAKey senderKey = new RSAKey(getSenderN(message), getSenderE(message));
             RSAKey receiverKey = new RSAKey(getReceiverN(message), getReceiverE(message));
-            messages.add(new Message(getNumber(message, 0, ' '), senderKey, receiverKey));
-
-            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), messages));
+            blockMessages.add(new Message(getNumber(message, 0, ' '), senderKey, receiverKey));
+            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), blockMessages));
 
             // Adjusting difficulty.
             chain.adjustDifficulty(blocks.get(1), blocks.get(0));
@@ -273,6 +272,9 @@ public class CommunicationSimulator
             // Mining all blocks and prints results.
             mineBlocks(blocks);
             printMerkleHashesAndNonce(blocks);
+
+            // Validating all messages in all blocks.
+            System.out.println("Validating messages in all blocks...\nResult: " + (validateBlocks(blocks) ?  "validated" : "not validated"));
         }
 
         catch (IOException | BadVerificationException e)
@@ -479,6 +481,29 @@ public class CommunicationSimulator
         {
             System.out.println("Block " + (i + 1) + " merkle root hash: " + blocks.get(i).getMerkleRootHash());
             System.out.println("Nonce: " + blocks.get(i).getNonce() + "\n");
+        }
+    }
+
+    // Validates all messages in all blocks.
+    private static boolean validateBlocks(List<Block> blocks)
+    {
+        try
+        {
+            for (int i = 0; i < blocks.size(); i++)
+            {
+                for (int j = 0; j < blocks.get(i).getMessages().size(); j++)
+                {
+                    String blockMessage = blocks.get(i).getMessages().get(j).getMessage();
+                    new RSAOAEPVerify(stringToByte(getSignature(blockMessage)), messageNoSignature(blockMessage).getBytes(), new RSAKey(getSenderN(blockMessage), getSenderE(blockMessage)));
+                }
+            }
+
+            return true;
+        }
+
+        catch (IOException | BadVerificationException e)
+        {
+            return false;
         }
     }
 }
