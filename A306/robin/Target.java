@@ -4,7 +4,6 @@ import java.math.BigInteger;
 
 /**
  * This class is for Target conversion. From compact to base256 and vice versa.
- *
  */
 
 public class Target {
@@ -25,13 +24,13 @@ public class Target {
     }
 
     /**
-     *The function calculateCompactTarget: First) uses toString to make the BigInt base256; is then
+     * The function calculateCompactTarget: First) uses toString to make the BigInt base256; is then
      * represented as a base16 string.
-     *. Also, zeroPadHex is used to check if hex string length is a multiple of two, else a leading zero is added;
-     *
-     *Second) extracts the first two hex digits and puts in firstDigit. If the two digits have a value greater than
-     *127, then add(prepend) a base256  zero digit
-     *
+     * . Also, zeroPadHex is used to check if hex string length is a multiple of two, else a leading zero is added;
+     * <p>
+     * Second) extracts the first two hex digits and puts in firstDigit. If the two digits have a value greater than
+     * 127, then add(prepend) a base256  zero digit
+     * <p>
      * Third) check length of the base256 number;the length of number is then added as first digit of the compact number.
      * Fourth) Check length of compact number, bust be 4 base256 digits or 8 hex digits
      */
@@ -39,13 +38,6 @@ public class Target {
         // This is a hex string, which is also a base 256 string if you add a space after
         // each set of 2 hex digits.
         String base256NewTarget = HexUtil.zeroPadHex(bigIntegerTarget.toString(16));
-
-        // One base 256 digit is two base 16 (hex) digits.
-        String firstBase256Digit = base256NewTarget.substring(0, 2); //range is exclusive
-
-        if (Integer.valueOf(firstBase256Digit, 16) > 127) {
-            base256NewTarget = "00" + base256NewTarget;
-        }
 
         int numberOfBase256Digits = base256NewTarget.length() / 2;
 
@@ -62,14 +54,23 @@ public class Target {
      * The function calculateBigIntegerTarget: uses compactTargets first digit value to find length of the BigInt
      * representation. Then, gets the value of rest of digits. This data is used in a formula to convert compact form
      * into a BigInteger target - which is needed to compare zeros.
-     *
      */
     public static BigInteger calculateBigIntergerTarget(String compactTarget) {
-        int factor = Integer.valueOf(compactTarget.substring(0, 2), 16);
-        BigInteger value = new BigInteger(compactTarget.substring(2, compactTarget.length()), 16);
+        if (compactTarget.length() != 8) {
+            throw new IllegalArgumentException("A compact target is 8 hex digits long");
+        }
 
-        BigInteger two = new BigInteger("2", 10);
-        BigInteger bigIntegerTarget = value.multiply(two.pow(8 * (factor - 3)));
+        int exponent = Integer.valueOf(compactTarget.substring(0, 2), 16);
+
+        // Take the fewest number of bytes (minimum of "exponent bytes" and all remaining bytes), e.g. 01003456 -> 00
+        String significandHex = compactTarget.substring(2, Math.min(2 + exponent * 2, compactTarget.length()));
+        BigInteger significand = new BigInteger(significandHex, 16);
+
+        BigInteger base = new BigInteger("256", 10);
+
+        // Convert to bytes (2 digits = 1 byte).
+        int significandByteLength = significandHex.length() / 2;
+        BigInteger bigIntegerTarget = significand.multiply(base.pow(exponent - significandByteLength));
 
         return bigIntegerTarget;
     }
@@ -78,7 +79,7 @@ public class Target {
         return bigIntegerTarget;
     }
 
-    public  String getCompactTarget() {
+    public String getCompactTarget() {
         return compactTarget;
     }
 }
