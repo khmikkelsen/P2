@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -155,7 +156,7 @@ public class CommunicationSimulator
         char[] number = text.toCharArray();
         String returnNumber = "";
 
-        for (int i = startIndex; i < number.length && number[i] != endIndex; i++)
+        for (int i = startIndex; i < number.length && (number[i] != endIndex && number[i] != ']'); i++)
         {
             returnNumber = returnNumber + number[i];
         }
@@ -190,7 +191,7 @@ public class CommunicationSimulator
     }
 
     // Simulates a client and return encrypted message.
-    public static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
+    public static Message clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
@@ -207,81 +208,78 @@ public class CommunicationSimulator
 
         catch (IOException e)
         {
-            return e.getCause().toString();
+            return null;
         }
     }
 
     // Prepares message to be send to node.
-    private static String prepareMessage(String message, KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
+    public static Message prepareMessage(String message, KeyPairGenerator receiver, KeyPairGenerator sender)
     {
         try
         {
-            // Encrypting message.
-            RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
+            String encryptedMessage = bytesToString(new RSAOAEPEncrypt(message, receiver.getPublicKey()).getEncryptedMessage());
+            Message returnMessage = new Message(encryptedMessage, sender.getPublicKey(), receiver.getPublicKey());
+            String signedMessage = bytesToString(new RSAOAEPSign(encryptedMessage, sender.getPrivateKey()).getSignature());
+            returnMessage.signMessage(signedMessage);
 
-            String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getModulus() + KEYSEPERATOR + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getModulus() + KEYSEPERATOR + receiverKeys.getPublicKey().getExponent();
-
-            // Singing message.
-            RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
-
-            String preparedMessage = encryptedNodeMessage  + " : " + bytesToString(signature.getSignature());
-
-            return preparedMessage;
+            return returnMessage;
         }
 
         catch (IOException e)
         {
-            return "IOException.";
+            return null;
         }
     }
 
     // Simulates a node.
-    public static void nodeSimulator(String message)
+    public static void nodeSimulator(Message message)
     {
         // Chain
         Chain chain = new Chain();
 
         // Blocks
         List<Block> blocks = new ArrayList<>();
-        blocks.add(new Block("0", chain.getTarget().getCompactTarget(), new ArrayList<>()));    // Genesis block.
 
-        System.out.println("Prepared message: " + message + "\n");
-        System.out.println("\n\nNode:\n");
+        System.out.println("Encrypted message: " + message.getMessage());
+        System.out.println("Signature of message: " + message.getSignature() + "\n");
+        System.out.println("\nNode:\n");
 
         try
         {
-            // Verifying only entered message. Might be removed.
-            new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
-            System.out.println("Message verified.");
+            // Genesis block
+            blocks.add(new Block("0", chain.getTarget().getCompactTarget(), List.of(prepareMessage("Hello, world", new KeyPairGenerator(2048), new KeyPairGenerator(2048)))));
+            blocks.get(blocks.size() - 1).mineBlock();
 
-            // Creating a block.
-            List<Message> blockMessages = getMessages();
-            RSAKey senderKey = new RSAKey(getSenderN(message), getSenderE(message));
-            RSAKey receiverKey = new RSAKey(getReceiverN(message), getReceiverE(message));
-            blockMessages.add(new Message(getNumber(message, 0, ' '), senderKey, receiverKey));
-            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), blockMessages));
+            // Creating second block.
+            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), List.of(message)));
+            blocks.get(blocks.size() - 1).mineBlock();
 
             // Adjusting difficulty.
-            chain.adjustDifficulty(blocks.get(1), blocks.get(0));
+            //chain.adjustDifficulty(blocks.get(blocks.size() - 1), blocks.get(0));
 
-            // Creating third block.
-            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), getMessages()));
+            // Third block as incoming block.
+            blocks.add(incomingBlock(chain, blocks.get(blocks.size() - 1).calculateHash()));
 
-            // Mining all blocks and prints results.
-            mineBlocks(blocks);
+            // Mining genesis and newly created blocks and prints results.
             printMerkleHashesAndNonce(blocks);
 
-            // Validating all messages in all blocks.
-            System.out.println("Validating messages in all blocks...\nResult: " + (validateBlocks(blocks) ?  "validated" : "not validated"));
+            // Validating all incoming blocks.
+            System.out.println("Validating incoming blocks...\nResult: " + (validateBlocks(List.of(blocks.get(blocks.size() - 1))) ?  "validated" : "not validated"));
         }
 
-        catch (IOException | BadVerificationException e)
+        catch (IOException e)
         {
             System.out.println("Message not verified.");
             e.printStackTrace();
         }
+    }
+
+    // Returns an incoming block.
+    private static Block incomingBlock(Chain chain, String previousHash) throws IOException
+    {
+        Block minedBlock = new Block(previousHash, chain.getTarget().getCompactTarget(), getMessages());
+        minedBlock.mineBlock();
+        return minedBlock;
     }
 
     // Gets the sender key N.
@@ -390,7 +388,13 @@ public class CommunicationSimulator
 
         for (int i = 0; i < array.length; i++)
         {
-            result = result + String.valueOf(array[i]) + ",";
+            if (i == array.length - 1)
+            {
+                result = result + String.valueOf(array[i]);
+                continue;
+            }
+
+            result = result + String.valueOf(array[i]) + ", ";
         }
 
         return result + "]";
@@ -399,16 +403,31 @@ public class CommunicationSimulator
     // Converts byte array String to byte array.
     public static byte[] stringToByte(String array)
     {
-        byte[] result = new byte[stringByteArraySize(array)];
-        char[] charArray = array.toCharArray();
+        String arrayNoSpaces = removeSpaces(array);
+        byte[] result = new byte[stringByteArraySize(arrayNoSpaces)];
+        char[] charArray = arrayNoSpaces.toCharArray();
 
-        for (int i = 0, j = 0; i < array.length() - 2; i++)
+        for (int i = 0, j = 0; i < arrayNoSpaces.length() - 2; i++)
         {
             if (charArray[i] == '[' || charArray[i] == ',')
             {
-                result[j] = (byte) Integer.parseInt(getNumber(array, i + 1, ','));
+                result[j] = (byte) Integer.parseInt(getNumber(arrayNoSpaces, i + 1, ','));
                 j++;
             }
+        }
+
+        return result;
+    }
+
+    // Removes spaces from a String.
+    private static String removeSpaces(String str)
+    {
+        String result = "";
+
+        for (int i = 0; i < str.length(); i++)
+        {
+            if (str.charAt(i) != ' ')
+                result = result + str.charAt(i);
         }
 
         return result;
@@ -438,7 +457,7 @@ public class CommunicationSimulator
                 commas++;
         }
 
-        return commas;
+        return commas + 1;
     }
 
     // Adds some blocks to a list.
@@ -454,19 +473,15 @@ public class CommunicationSimulator
         KeyPairGenerator m3Key = new KeyPairGenerator(2048);
 
         // Sending messages to each other.
-        String m1Prepared = prepareMessage(m1, m2Key, m1Key);
-        String m2Prepared = prepareMessage(m2, m3Key, m2Key);
-        String m3Prepared = prepareMessage(m3, m1Key, m3Key);
+        Message m1Prepared = prepareMessage(m1, m2Key, m1Key);
+        Message m2Prepared = prepareMessage(m2, m3Key, m2Key);
+        Message m3Prepared = prepareMessage(m3, m1Key, m3Key);
 
-        Message m1Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m1Prepared), getSenderE(m1Prepared)), new RSAKey(getReceiverN(m1Prepared), getReceiverE(m1Prepared)));
-        Message m2Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m2Prepared), getSenderE(m2Prepared)), new RSAKey(getReceiverN(m2Prepared), getReceiverE(m2Prepared)));
-        Message m3Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m3Prepared), getSenderE(m3Prepared)), new RSAKey(getReceiverN(m3Prepared), getReceiverE(m3Prepared)));
-
-        return List.of(m1Message, m2Message, m3Message);
+        return List.of(m1Prepared, m2Prepared, m3Prepared);
     }
 
     // Mines all blocks on a node.
-    private static void mineBlocks(List<Block> blocks)
+    public static void mineBlocks(List<Block> blocks)
     {
         for (int i = 0; i < blocks.size(); i++)
         {
@@ -475,7 +490,7 @@ public class CommunicationSimulator
     }
 
     // Prints merkle root hashes for all blocks.
-    private static void printMerkleHashesAndNonce(List<Block> blocks)
+    public static void printMerkleHashesAndNonce(List<Block> blocks)
     {
         for (int i = 0; i < blocks.size(); i++)
         {
@@ -485,7 +500,7 @@ public class CommunicationSimulator
     }
 
     // Validates all messages in all blocks.
-    private static boolean validateBlocks(List<Block> blocks)
+    public static boolean validateBlocks(List<Block> blocks)
     {
         try
         {
@@ -493,8 +508,8 @@ public class CommunicationSimulator
             {
                 for (int j = 0; j < blocks.get(i).getMessages().size(); j++)
                 {
-                    String blockMessage = blocks.get(i).getMessages().get(j).getMessage();
-                    new RSAOAEPVerify(stringToByte(getSignature(blockMessage)), messageNoSignature(blockMessage).getBytes(), new RSAKey(getSenderN(blockMessage), getSenderE(blockMessage)));
+                    Message message = blocks.get(i).getMessages().get(j);
+                    new RSAOAEPVerify(stringToByte(message.getSignature()), message.getMessage().getBytes(), message.getSender());
                 }
             }
 

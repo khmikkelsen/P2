@@ -61,14 +61,14 @@ class CommunicationSimulatorTest
     void testByteToString()
     {
         byte[] testArray = new byte[]{2, 4, 6};
-        assertEquals(CommunicationSimulator.bytesToString(testArray), "[2,4,6,]");
+        assertEquals(CommunicationSimulator.bytesToString(testArray), "[2, 4, 6]");
     }
 
     // Tests method that return a byte array from a String.
     @Test
     void testStringToByte()
     {
-        String array = "[2,40,-61,]";
+        String array = "[2, 40, -61]";
         byte[] resultArray = CommunicationSimulator.stringToByte(array);
 
         assertEquals(resultArray[0], 2);
@@ -80,7 +80,7 @@ class CommunicationSimulatorTest
     @Test
     void testStringByteArraySize()
     {
-        String byteArray = "[11, 12, 13, 14, 15, -16, -17, -18, -19, -20,]";
+        String byteArray = "[11, 12, 13, 14, 15, -16, -17, -18, -19, -20]";
         assertEquals(CommunicationSimulator.stringByteArraySize(byteArray), 10);
     }
 
