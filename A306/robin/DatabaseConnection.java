@@ -112,11 +112,16 @@ public class DatabaseConnection {
              ResultSet rs = stmt.executeQuery(query)) {
 
             rs.next();
-            return rs.getInt("block_id");
+
+            int blockId = rs.getInt("block_id");
+
+            addMessagesToBlockId(block.getMessages(), blockId);
+
+            return blockId;
         }
     }
 
-    public void addMessagesToBlockId(List<Message> messages, long blockId) throws SQLException {
+    private void addMessagesToBlockId(List<Message> messages, int blockId) throws SQLException {
         String query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
 
         for (Message m : messages) {

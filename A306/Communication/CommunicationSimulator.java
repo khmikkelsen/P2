@@ -1,16 +1,14 @@
 package Communication;
 
 import RSA.*;
-import robin.Block;
-import robin.Chain;
-import robin.StringUtil;
-import robin.Message;
+import robin.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.Key;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -254,9 +252,6 @@ public class CommunicationSimulator
             blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), List.of(message)));
             blocks.get(blocks.size() - 1).mineBlock();
 
-            // Adjusting difficulty.
-            //chain.adjustDifficulty(blocks.get(blocks.size() - 1), blocks.get(0));
-
             // Third block as incoming block.
             blocks.add(incomingBlock(chain, blocks.get(blocks.size() - 1).calculateHash()));
 
@@ -265,9 +260,12 @@ public class CommunicationSimulator
 
             // Validating all incoming blocks.
             System.out.println("Validating incoming blocks...\nResult: " + (validateBlocks(List.of(blocks.get(blocks.size() - 1))) ?  "validated" : "not validated"));
+
+            // Start writing to database after incoming block.
+            writeToDatabase(blocks);
         }
 
-        catch (IOException e)
+        catch (IOException | SQLException e)
         {
             System.out.println("Message not verified.");
             e.printStackTrace();
@@ -519,6 +517,21 @@ public class CommunicationSimulator
         catch (IOException | BadVerificationException e)
         {
             return false;
+        }
+    }
+
+    // Writes a list of blocks to a database.
+    public static void writeToDatabase(List<Block> blocks) throws SQLException
+    {
+        DatabaseConnection database = new DatabaseConnection();
+
+        database.setup();
+        database.createBlockTable();
+        database.createMessageTable();
+
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            database.addBlock(blocks.get(i));
         }
     }
 }
