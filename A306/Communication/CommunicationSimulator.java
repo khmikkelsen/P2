@@ -241,18 +241,18 @@ public class CommunicationSimulator
     public static void nodeSimulator(String message)
     {
         // Chain
-        Chain mainChain = new Chain();
+        Chain chain = new Chain();
 
         // Blocks
         List<Block> blocks = new ArrayList<>();
-        blocks.add(new Block("0", mainChain.getTarget().getCompactTarget(), new ArrayList<>()));    // genesis block.
+        blocks.add(new Block("0", chain.getTarget().getCompactTarget(), new ArrayList<>()));    // Genesis block.
 
         System.out.println("Prepared message: " + message + "\n");
         System.out.println("\n\nNode:\n");
 
         try
         {
-            // Verifying only entered message.
+            // Verifying only entered message. Might be removed.
             new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
             System.out.println("Message verified.");
 
@@ -262,10 +262,17 @@ public class CommunicationSimulator
             RSAKey receiverKey = new RSAKey(getReceiverN(message), getReceiverE(message));
             messages.add(new Message(getNumber(message, 0, ' '), senderKey, receiverKey));
 
-            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), mainChain.getTarget().getCompactTarget(), messages));
+            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), messages));
 
             // Adjusting difficulty.
-            mainChain.adjustDifficulty(blocks.get(1), blocks.get(0));
+            chain.adjustDifficulty(blocks.get(1), blocks.get(0));
+
+            // Creating third block.
+            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), getMessages()));
+
+            // Mining all blocks and prints results.
+            mineBlocks(blocks);
+            printMerkleHashesAndNonce(blocks);
         }
 
         catch (IOException | BadVerificationException e)
@@ -454,5 +461,24 @@ public class CommunicationSimulator
         Message m3Message = new Message(getNumber(m1Prepared, 0, ' '), new RSAKey(getSenderN(m3Prepared), getSenderE(m3Prepared)), new RSAKey(getReceiverN(m3Prepared), getReceiverE(m3Prepared)));
 
         return List.of(m1Message, m2Message, m3Message);
+    }
+
+    // Mines all blocks on a node.
+    private static void mineBlocks(List<Block> blocks)
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            blocks.get(i).mineBlock();
+        }
+    }
+
+    // Prints merkle root hashes for all blocks.
+    private static void printMerkleHashesAndNonce(List<Block> blocks)
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            System.out.println("Block " + (i + 1) + " merkle root hash: " + blocks.get(i).getMerkleRootHash());
+            System.out.println("Nonce: " + blocks.get(i).getNonce() + "\n");
+        }
     }
 }
