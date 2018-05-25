@@ -1,6 +1,12 @@
 package Communication;
 
+import RSA.RSAKey;
+import robin.Block;
+import robin.Chain;
+import robin.Message;
+
 import java.io.*;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,21 +28,22 @@ public class Server
 
         try
         {
-            console.println("Starting server...");
+            console.println("Starting node...");
             ServerSocket server = new ServerSocket(140);
-            console.println("Server started.");
+            console.println("Node started.");
             connectCommunicate(e -> e, true, server, sockets, readers, writers, console);
         }
 
         catch (IOException e)
         {
-            console.println("Server not setup: " + e.getMessage());
+            console.println("Node not setup: " + e.getMessage());
         }
     }
 
     // Searches after connections.
     private static <T> void connectCommunicate(Tester<T> tester, T t, ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
     {
+        // At least one connection is needed.
         connectSocket(server, sockets, readers, writers, console);
 
         while (tester.test(t))
@@ -77,15 +84,20 @@ public class Server
 
         catch (IOException e)
         {
-            // Empty.
+            return;
         }
     }
 
     // Receive messages and send.
     private static void communicate(ServerSocket server, List<Socket> sockets, List<BufferedWriter> writers, List<BufferedReader> readers, PrintWriter console)
     {
+        Chain chain = new Chain();
+        List<Block> blocks = new ArrayList<>();
+        blocks.add(new Block("0", chain.getTarget().getCompactTarget(), List.of(makeMessage("Genesis message"))));    // Genesis block.
+
+        List<Message> messages = new ArrayList<>();
         String message;
-        int amountOfSockets = sockets.size();
+        int amountOfSockets = sockets.size();   // Optimization.
 
         for (int i = 0; i < amountOfSockets; i++)
         {
@@ -97,13 +109,24 @@ public class Server
                 {
                     message = readers.get(i).readLine();
                     System.out.println(message);
-                    sendMessage(writers, sockets.get(i).getInetAddress().getHostName() + ": " + message);
+
+                    // Add mining and validation.
+                    if (messages.size() < 10)
+                        messages.add(makeMessage(message));
+
+                    else
+                    {
+                        blocks.add(createBlock(blocks.get(blocks.size()).calculateHash(), chain.getTarget().getCompactTarget(), messages));
+                        messages.clear();
+                    }
+
+                    sendMessage(writers, message);
                 }
             }
 
             catch (IOException e)
             {
-                // Empty.
+                continue;   // Nothing.
             }
         }
     }
@@ -122,8 +145,32 @@ public class Server
 
             catch (IOException e)
             {
-                // Empty.
+                continue;   // Nothing.
             }
         }
+    }
+
+    // Creates a new message instance.
+    private static Message makeMessage(String message)
+    {
+        try
+        {
+            Message m = new Message(CommunicationSimulator.getNumber(message, 0, ']') + "]",
+                    new RSAKey(CommunicationSimulator.getSenderN(message), CommunicationSimulator.getSenderE(message)),
+                    new RSAKey(CommunicationSimulator.getReceiverN(message), CommunicationSimulator.getReceiverE(message)));
+
+            return m;
+        }
+
+        catch (IOException e)
+        {
+            return null;
+        }
+    }
+
+    // Creates a new block.
+    private static Block createBlock(String previousHash, String compactTarget, List<Message> messages)
+    {
+        return new Block(previousHash, compactTarget, messages);
     }
 }
