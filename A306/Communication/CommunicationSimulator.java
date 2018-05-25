@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CommunicationSimulator
 {
-    private static final char KEYSEPERATOR = '_';
+    public static final char KEYSEPERATOR = '_';
 
     // Entering receivers public key as address.
     public static BigInteger[] receiveKey(BufferedReader reader)
@@ -461,7 +461,7 @@ public class CommunicationSimulator
     {
         String m1 = "Hej";
         String m2 = "Hvordan går det?";
-        String m3 = "Giv os lige 12 her til eksamen.";
+        String m3 = "A306.";
 
         // Keys for each message.
         KeyPairGenerator m1Key = new KeyPairGenerator(2048);
