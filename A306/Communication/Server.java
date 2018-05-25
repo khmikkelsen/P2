@@ -1,6 +1,12 @@
 package Communication;
 
+import RSA.RSAKey;
+import robin.Block;
+import robin.Chain;
+import robin.Message;
+
 import java.io.*;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -85,6 +91,11 @@ public class Server
     // Receive messages and send.
     private static void communicate(ServerSocket server, List<Socket> sockets, List<BufferedWriter> writers, List<BufferedReader> readers, PrintWriter console)
     {
+        Chain chain = new Chain();
+        List<Block> blocks = new ArrayList<>();
+        blocks.add(new Block("0", chain.getTarget().getCompactTarget(), List.of(makeMessage("Genesis message"))));    // Genesis block.
+
+        List<Message> messages = new ArrayList<>();
         String message;
         int amountOfSockets = sockets.size();   // Optimization.
 
@@ -99,7 +110,15 @@ public class Server
                     message = readers.get(i).readLine();
                     System.out.println(message);
 
-                    // Start acting as a node before sending it.
+                    // Add mining and validation.
+                    if (messages.size() < 10)
+                        messages.add(makeMessage(message));
+
+                    else
+                    {
+                        blocks.add(createBlock(blocks.get(blocks.size()).calculateHash(), chain.getTarget().getCompactTarget(), messages));
+                        messages.clear();
+                    }
 
                     sendMessage(writers, message);
                 }
@@ -129,5 +148,29 @@ public class Server
                 continue;   // Nothing.
             }
         }
+    }
+
+    // Creates a new message instance.
+    private static Message makeMessage(String message)
+    {
+        try
+        {
+            Message m = new Message(CommunicationSimulator.getNumber(message, 0, ']') + "]",
+                    new RSAKey(CommunicationSimulator.getSenderN(message), CommunicationSimulator.getSenderE(message)),
+                    new RSAKey(CommunicationSimulator.getReceiverN(message), CommunicationSimulator.getReceiverE(message)));
+
+            return m;
+        }
+
+        catch (IOException e)
+        {
+            return null;
+        }
+    }
+
+    // Creates a new block.
+    private static Block createBlock(String previousHash, String compactTarget, List<Message> messages)
+    {
+        return new Block(previousHash, compactTarget, messages);
     }
 }
