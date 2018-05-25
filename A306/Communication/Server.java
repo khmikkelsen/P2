@@ -123,6 +123,7 @@ public class Server
                     continue;   // Nothing.
                 }
 
+                // Must connect to new streams trying to connect to node.
                 //connectSocket(server, sockets, readers, writers, console);
             }
         }
