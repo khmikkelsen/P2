@@ -22,21 +22,22 @@ public class Server
 
         try
         {
-            console.println("Starting server...");
+            console.println("Starting node...");
             ServerSocket server = new ServerSocket(140);
-            console.println("Server started.");
+            console.println("Node started.");
             connectCommunicate(e -> e, true, server, sockets, readers, writers, console);
         }
 
         catch (IOException e)
         {
-            console.println("Server not setup: " + e.getMessage());
+            console.println("Node not setup: " + e.getMessage());
         }
     }
 
     // Searches after connections.
     private static <T> void connectCommunicate(Tester<T> tester, T t, ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
     {
+        // At least one connection is needed.
         connectSocket(server, sockets, readers, writers, console);
 
         while (tester.test(t))
@@ -77,7 +78,7 @@ public class Server
 
         catch (IOException e)
         {
-            // Empty.
+            return;
         }
     }
 
@@ -85,7 +86,7 @@ public class Server
     private static void communicate(ServerSocket server, List<Socket> sockets, List<BufferedWriter> writers, List<BufferedReader> readers, PrintWriter console)
     {
         String message;
-        int amountOfSockets = sockets.size();
+        int amountOfSockets = sockets.size();   // Optimization.
 
         for (int i = 0; i < amountOfSockets; i++)
         {
@@ -97,13 +98,16 @@ public class Server
                 {
                     message = readers.get(i).readLine();
                     System.out.println(message);
-                    sendMessage(writers, sockets.get(i).getInetAddress().getHostName() + ": " + message);
+
+                    // Start acting as a node before sending it.
+
+                    sendMessage(writers, message);
                 }
             }
 
             catch (IOException e)
             {
-                // Empty.
+                continue;   // Nothing.
             }
         }
     }
@@ -122,7 +126,7 @@ public class Server
 
             catch (IOException e)
             {
-                // Empty.
+                continue;   // Nothing.
             }
         }
     }
