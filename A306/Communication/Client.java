@@ -115,7 +115,7 @@ public class Client
         int[] keyPair = new int[2];
 
         // Entering address.
-        console.print("Address (format: xxx-xxx): ");
+        console.print("Address (format: xxx_xxx): ");
         keyPair = CommunicationSimulator.receiveKey(input);
 
         while (true)
@@ -124,7 +124,7 @@ public class Client
             {
                 console.print(": ");
                 console.flush();
-                message = input.readLine();     // Reads String from console.
+                message = input.readLine();
 
                 // Start encryption and hashing.
 
