@@ -11,7 +11,7 @@ public class Block {
     private int nonce = 0; //nonce starts at zero and is incremented at each hash
     private String merkleRootHash;
     private long timestamp;
-    private int index;
+    private Long index; // Can be null.
 
     private String hash;
     private List<Message> messages;
@@ -23,7 +23,7 @@ public class Block {
         this.messages = messages;
     }
 
-    public Block(String hash, String prevHeadhash, String compactTarget, int nonce, String merkleRootHash, long timestamp, int index, List<Message> messages) {
+    public Block(String hash, String prevHeadhash, String compactTarget, int nonce, String merkleRootHash, long timestamp, long index, List<Message> messages) {
         this.hash = hash;
         this.prevHeadhash = prevHeadhash;
         this.compactTarget = compactTarget;
@@ -120,6 +120,8 @@ public class Block {
         return nodes.get(0);
     }
 
+
+
     public int getNonce() {
         return nonce;
     }
@@ -140,11 +142,11 @@ public class Block {
         return messages;
     }
 
-    private int getIndex() {
+    public Long getIndex() {
         return index;
     }
 
-    private String getHash() {
+    public String getHash() {
         return hash;
     }
 
