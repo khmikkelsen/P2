@@ -7,10 +7,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.security.Key;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CommunicationSimulator
@@ -18,7 +16,7 @@ public class CommunicationSimulator
     private static final char KEYSEPERATOR = '_';
 
     // Entering receivers public key as address.
-    public static int[] receiveKey(BufferedReader reader)
+    public static BigInteger[] receiveKey(BufferedReader reader)
     {
         String key;
 
@@ -32,13 +30,13 @@ public class CommunicationSimulator
 
             else
             {
-                return new int[]{Integer.parseInt(getNumber(key, 0, KEYSEPERATOR)), Integer.parseInt(getNumber(key, KEYSEPERATOR))};
+                return new BigInteger[]{new BigInteger(getNumber(key, 0, KEYSEPERATOR)), new BigInteger(getNumber(key, KEYSEPERATOR))};
             }
         }
 
         catch (IOException e)
         {
-            return new int[]{0, 0};
+            return new BigInteger[]{new BigInteger("0"), new BigInteger("0")};
         }
     }
 
@@ -99,7 +97,7 @@ public class CommunicationSimulator
             return "0";
     }
 
-    private static String getNumber(String text, int startIndex)
+    public static String getNumber(String text, int startIndex)
     {
         char[] number = text.toCharArray();
         String returnNumber = "";
@@ -118,7 +116,7 @@ public class CommunicationSimulator
     }
 
     // Gets a number from a String searching backwards.
-    private static String getNumberBackwards(String text, char startIndex)
+    public static String getNumberBackwards(String text, char startIndex)
     {
         char[] number = text.toCharArray();
 
@@ -133,7 +131,7 @@ public class CommunicationSimulator
         return null;
     }
 
-    private static String getNumberBackwards(String text, char startIndex, char endIndex)
+    public static String getNumberBackwards(String text, char startIndex, char endIndex)
     {
         char[] number = text.toCharArray();
 
@@ -149,7 +147,7 @@ public class CommunicationSimulator
     }
 
     // Copy of previous getNumber, but using int as index.
-    private static String getNumber(String text, int startIndex, char endIndex)
+    public static String getNumber(String text, int startIndex, char endIndex)
     {
         char[] number = text.toCharArray();
         String returnNumber = "";
