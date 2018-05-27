@@ -9,8 +9,10 @@ import java.math.BigInteger;
  */
 public class Chain {
 
-    // Two weeks (in seconds);wanted time for 2016 blocks.
-    private static final long targetTimespan = 14 * 24 * 60 * 60 * 1000;
+    private static int targetAdjustInterval = 20;
+
+    // Two weeks (in seconds);wanted time for 20 blocks = 20 minutes.
+    private static final long targetTimespan = 20 * 60 * 1000;
 
     /*BigInteger is used for large Integers, i.e greater than 64-bit
      * The BigInteger constructor: takes the string representation of a big int and the base(radix) to make a BigInteger
@@ -26,6 +28,10 @@ public class Chain {
         return chainTarget;
     }
 
+    public static long getTargetAdjustInterval() {
+        return targetAdjustInterval;
+    }
+
 
     public BigInteger getProofOfWorkLimit() {
         return proofOfWorkLimit;
@@ -35,36 +41,30 @@ public class Chain {
      * The function adjustDifficulty: adjusts the difficulty based on 'if the previous 2016 blocks took more than two
      * weeks to find, the difficulty is reduced. If they took less than two weeks, the difficulty is increased. '
      */
-    public static void adjustDifficulty(Block lastBlock, Block firstBlock) {
-
-        //System.out.println("pow limit: " + proofOfWorkLimit.toString(16));
-
-
-        //Find the actual time it took for the 2016 blocks to be generated??
-        long actualTimespan = lastBlock.getTimestamp() - firstBlock.getTimestamp();
+    public static void adjustDifficulty(Block newBlock, Block firstBlock) {
+        //Find the actual time it took for the 20 blocks to be generated??
+        long actualTimespan = newBlock.getTimestamp() - firstBlock.getTimestamp();
 
 //        if (actualTimespan < targetTimespan / 4) {
 //            actualTimespan = targetTimespan / 4;
 //        } else if (actualTimespan > targetTimespan * 4) {
 //            actualTimespan = targetTimespan * 4;
 //        }
-        //System.out.println("Actual: "  + actualTimespan);
-        //System.out.println("Target: "  + targetTimespan);
-        double factor = (double)actualTimespan / (double)targetTimespan;
-        //System.out.println("Factor: " + factor);
-        //
-        BigInteger newBigIntegerTarget = new Target(lastBlock.getCompactTarget()).getBigIntegerTarget();
+
+        double factor = (double) actualTimespan / (double) targetTimespan;
+
+        BigInteger newBigIntegerTarget = new Target(newBlock.getCompactTarget()).getBigIntegerTarget();
 
         //Calculate new target
         newBigIntegerTarget = newBigIntegerTarget.multiply(BigInteger.valueOf(actualTimespan));
         newBigIntegerTarget = newBigIntegerTarget.divide(BigInteger.valueOf(targetTimespan));
 
+        // Don't allow target to exceed limit.
+        if (newBigIntegerTarget.compareTo(proofOfWorkLimit) > 0) {
+            newBigIntegerTarget = proofOfWorkLimit;
+        }
+
         //New target for nodes; hash must be less than target
         chainTarget = new Target(newBigIntegerTarget);
-
-        //System.out.println("New target in hex: " + chainTarget.getBigIntegerTarget().toString(16));
-        //System.out.println("New target in compact form: " + chainTarget.getCompactTarget());
-
-
     }
 }
