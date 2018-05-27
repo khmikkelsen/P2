@@ -507,7 +507,7 @@ public class CommunicationSimulator
                 for (int j = 0; j < blocks.get(i).getMessages().size(); j++)
                 {
                     Message message = blocks.get(i).getMessages().get(j);
-                    new RSAOAEPVerify(stringToByte(message.getSignature()), message.getMessage().getBytes(), message.getSender());
+                    new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSender());
                 }
             }
 
