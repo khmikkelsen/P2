@@ -37,17 +37,15 @@ public class Target {
     public static String calculateCompactTarget(BigInteger bigIntegerTarget) {
         // This is a hex string, which is also a base 256 string if you add a space after
         // each set of 2 hex digits.
-        String base256NewTarget = HexUtil.zeroPadHex(bigIntegerTarget.toString(16));
+        String base256 = bigIntegerTarget.toString(16);
 
-        int numberOfBase256Digits = base256NewTarget.length() / 2;
+        int exponent = (base256.length() + 2 - 1) / 2;
 
-        // Take first 6 hex digits
-        String compactTarget = HexUtil.zeroPadHex(Integer.toString(numberOfBase256Digits, 16))
-                + base256NewTarget.substring(0, Math.min(base256NewTarget.length(), 6));
+        // Take first 3 base 256 hex digits
+        String compactTarget = HexUtil.zeroPadHex(Integer.toString(exponent, 16))
+                + HexUtil.zeroPadHex(base256.substring(0, Math.min(base256.length(), 6)));
 
-        compactTarget = HexUtil.appendZeros(compactTarget, 8); // compact target must be at least 4 base256 digits
-
-        return compactTarget;
+        return HexUtil.appendZeros(compactTarget, 8); // compact target must be 4 base 256 digits.
     }
 
     /**
@@ -62,7 +60,7 @@ public class Target {
 
         int exponent = Integer.valueOf(compactTarget.substring(0, 2), 16);
 
-        // Take the fewest number of bytes (minimum of "exponent bytes" and all remaining bytes), e.g. 01003456 -> 00
+        // Take the fewest number of digits (minimum of "exponent bytes" and all remaining digits), e.g. 01003456 -> 00
         String significandHex = compactTarget.substring(2, Math.min(2 + exponent * 2, compactTarget.length()));
         BigInteger significand = new BigInteger(significandHex, 16);
 
