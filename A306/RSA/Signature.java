@@ -1,0 +1,26 @@
+package RSA;
+
+import java.util.Base64;
+
+public class Signature {
+    private byte[] bytes;
+    private String base64String;
+
+    public Signature(String base64String) {
+        this.bytes = Base64.getDecoder().decode(base64String);
+        this.base64String = base64String;
+    }
+
+    public Signature(byte[] bytes) {
+        this.bytes = bytes;
+        this.base64String = Base64.getEncoder().encodeToString(bytes);
+    }
+
+    public String getBase64String() {
+        return base64String;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+}
