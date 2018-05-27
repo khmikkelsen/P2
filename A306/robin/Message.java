@@ -69,7 +69,7 @@ public class Message {
         }
 
         catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
