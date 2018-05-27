@@ -2,6 +2,7 @@ package robin;
 
 import RSA.InvalidRSAKeyException;
 import RSA.RSAKey;
+import RSA.Signature;
 
 import java.io.IOException;
 import java.sql.*;
@@ -32,13 +33,13 @@ public class DatabaseConnection {
         }
     }
 
-    public Block getBlockById(int blockId) throws SQLException {
+    public Block getBlockByIndex(long blockIndex) throws SQLException {
         String messageQuery = "SELECT recipient, sender, signature, message from messages where block_id = ?";
 
         List<Message> messages = new ArrayList<>();
 
         try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(messageQuery)) {
-            statement.setInt(1, blockId);
+            statement.setLong(1, blockIndex + 1);
 
             ResultSet rs = statement.executeQuery();
 
@@ -46,14 +47,14 @@ public class DatabaseConnection {
                 try {
                     RSAKey recipient = new RSAKey(rs.getString("recipient"));
                     RSAKey sender = new RSAKey(rs.getString("sender"));
-                    String signature = rs.getString("signature");
+                    Signature signature = new Signature(rs.getString("signature"));
                     String message = rs.getString("message");
 
                     Message m = new Message(message, sender, recipient, signature);
 
                     messages.add(m);
                 } catch (IOException | InvalidRSAKeyException e) {
-                    System.out.println(e.getStackTrace());
+                    System.out.println(e.getMessage());
                 }
             }
         }
@@ -61,12 +62,11 @@ public class DatabaseConnection {
         String blockQuery = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp from blocks where block_id = ?";
 
         try (Connection conn = this.connect(); PreparedStatement statement = conn.prepareStatement(blockQuery)) {
-            statement.setInt(1, blockId);
+            statement.setLong(1, blockIndex + 1);
 
             ResultSet rs = statement.executeQuery();
 
             if (rs.next()) {
-                int blockIndex = rs.getInt("block_id");
                 String hash = rs.getString("hash");
                 String previousHash = rs.getString("previous_hash");
                 String merkleRootHash = rs.getString("merkle_root_hash");
@@ -87,10 +87,10 @@ public class DatabaseConnection {
      * Adds a block to the database and returns it's id.
      *
      * @param block The block to add
-     * @return Id of the added block
+     * @return Index of the added block
      * @throws SQLException
      */
-    public int addBlock(Block block) throws SQLException {
+    public long addBlock(Block block) throws SQLException {
 
         String query = "INSERT INTO blocks (hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp) VALUES(?,?,?,?,?,?)";
 
@@ -113,24 +113,60 @@ public class DatabaseConnection {
 
             rs.next();
 
-            int blockId = rs.getInt("block_id");
+            long blockIndex = rs.getLong("block_id") - 1;
 
-            addMessagesToBlockId(block.getMessages(), blockId);
+            addMessages(block.getMessages(), blockIndex);
 
-            return blockId;
+            // Return index, not "id"
+            return blockIndex;
         }
     }
 
-    private void addMessagesToBlockId(List<Message> messages, int blockId) throws SQLException {
+
+    public long getBlockCount() throws SQLException {
+        // Block has now been inserted. Get it's id.
+        String query = "SELECT block_id FROM blocks ORDER BY block_id DESC LIMIT 1;";
+
+        try (Connection conn = this.connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            rs.next();
+
+            long blockCount = rs.getLong("block_id");
+
+            // Block count is equal to block_id since it is 1-based.
+            return blockCount;
+        }
+    }
+//
+//    public Block getLatestBlock() {
+//        // Block has now been inserted. Get it's id.
+//        String query = "SELECT block_id FROM blocks ORDER BY block_id DESC LIMIT 1;";
+//
+//        try (Connection conn = this.connect();
+//             Statement stmt = conn.createStatement();
+//             ResultSet rs = stmt.executeQuery(query)) {
+//
+//            rs.next();
+//
+//            long blockCount = rs.getLong("block_id");
+//
+//            // Block count is equal to block_id since it is 1-based.
+//            return blockCount;
+//        }
+//    }
+
+    private void addMessages(List<Message> messages, long blockIndex) throws SQLException {
         String query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
 
         for (Message m : messages) {
             try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, m.getRecipient().toString());
-                pstmt.setString(2, m.getSender().toString());
-                pstmt.setString(3, m.getSignature());
+                pstmt.setString(1, m.getRecipient().getBase64String());
+                pstmt.setString(2, m.getSender().getBase64String());
+                pstmt.setString(3, m.getSignature().getBase64String());
                 pstmt.setString(4, m.getMessage());
-                pstmt.setLong(5, blockId);
+                pstmt.setLong(5, blockIndex + 1);
                 pstmt.executeUpdate();
             }
         }
