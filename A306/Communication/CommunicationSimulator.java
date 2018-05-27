@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CommunicationSimulator
 {
-    private static final char KEYSEPERATOR = '_';
+    public static final char KEYSEPERATOR = '_';
 
     // Entering receivers public key as address.
     public static BigInteger[] receiveKey(BufferedReader reader)
@@ -257,13 +257,15 @@ public class CommunicationSimulator
             printMerkleHashesAndNonce(blocks);
 
             // Validating all incoming blocks.
-            System.out.println("Validating incoming blocks...\nResult: " + (validateBlocks(List.of(blocks.get(blocks.size() - 1))) ?  "validated" : "not validated"));
+            System.out.println("Validating incoming blocks...\nResult: " +
+                    (validateBlocks(List.of(blocks.get(blocks.size() - 1)), chain.getTarget().getCompactTarget()) &&
+                            validateBlockMessages(List.of(blocks.get(blocks.size() - 1))) ?  "validated" : "not validated"));
 
             // Start writing to database after incoming block.
-            writeToDatabase(blocks);
+            //writeToDatabase(blocks);
         }
 
-        catch (IOException | SQLException e)
+        catch (IOException e)
         {
             System.out.println("Message not verified.");
             e.printStackTrace();
@@ -461,7 +463,7 @@ public class CommunicationSimulator
     {
         String m1 = "Hej";
         String m2 = "Hvordan går det?";
-        String m3 = "Giv os lige 12 her til eksamen.";
+        String m3 = "A306.";
 
         // Keys for each message.
         KeyPairGenerator m1Key = new KeyPairGenerator(2048);
@@ -496,7 +498,7 @@ public class CommunicationSimulator
     }
 
     // Validates all messages in all blocks.
-    public static boolean validateBlocks(List<Block> blocks)
+    public static boolean validateBlockMessages(List<Block> blocks)
     {
         try
         {
@@ -516,6 +518,19 @@ public class CommunicationSimulator
         {
             return false;
         }
+    }
+
+    // Validates a block.
+    public static boolean validateBlocks(List<Block> blocks, String compactTarget)
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            if (new BigInteger(blocks.get(i).calculateHash(), 16).compareTo(Target.calculateBigIntergerTarget(compactTarget)) == 1 ||
+                    !BlockUtil.calculateMerkleRootHash(blocks.get(i).getMessages()).equals(blocks.get(i).getMerkleRootHash()))
+                return false;
+        }
+
+        return true;
     }
 
     // Writes a list of blocks to a database.

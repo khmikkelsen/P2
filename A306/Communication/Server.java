@@ -31,7 +31,7 @@ public class Server
             console.println("Starting node...");
             ServerSocket server = new ServerSocket(140);
             console.println("Node started.");
-            connectCommunicate(e -> e, true, server, sockets, readers, writers, console);
+            connectCommunicate(server, sockets, readers, writers, console);
         }
 
         catch (IOException e)
@@ -41,15 +41,11 @@ public class Server
     }
 
     // Searches after connections.
-    private static <T> void connectCommunicate(Tester<T> tester, T t, ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
+    private static <T> void connectCommunicate(ServerSocket server, List<Socket> sockets, List<BufferedReader> readers, List<BufferedWriter> writers, PrintWriter console)
     {
         // At least one connection is needed.
         connectSocket(server, sockets, readers, writers, console);
-
-        while (tester.test(t))
-        {
-            communicate(server, sockets, writers, readers, console);
-        }
+        communicate(server, sockets, writers, readers, console);
     }
 
     // Sets up a single connection and a stream.
@@ -63,7 +59,7 @@ public class Server
             {
                 sockets.add(s);
                 setupStreams(s, readers, writers);
-                console.println("Client connected.");
+                console.println("Client connected.\n");
             }
         }
 
@@ -93,45 +89,47 @@ public class Server
     {
         Chain chain = new Chain();
         List<Block> blocks = new ArrayList<>();
-        blocks.add(new Block("0", chain.getTarget().getCompactTarget(), List.of(makeMessage("Genesis message"))));    // Genesis block.
+        blocks.add(new Block("0", chain.getTarget().getCompactTarget(), List.of(makeMessage("[1] : 1_1 : 1_1 : [2]"))));    // Genesis block.
 
         List<Message> messages = new ArrayList<>();
         String message;
         int amountOfSockets = sockets.size();   // Optimization.
 
-        for (int i = 0; i < amountOfSockets; i++)
+        while (true)
         {
-            connectSocket(server, sockets, readers, writers, console);
-
-            try
+            for (int i = 0; i < amountOfSockets; i++)
             {
-                if (readers.get(i) != null)
+                try
                 {
-                    message = readers.get(i).readLine();
-                    System.out.println(message);
-
-                    // Add mining and validation.
-                    if (messages.size() < 10)
-                        messages.add(makeMessage(message));
-
-                    else
+                    if (readers.get(i) != null)
                     {
-                        blocks.add(createBlock(blocks.get(blocks.size()).calculateHash(), chain.getTarget().getCompactTarget(), messages));
-                        messages.clear();
+                        message = readers.get(i).readLine();
+                        System.out.println(message);
+
+                        // Add mining and validation.
+                        if (messages.size() < 10)
+                            messages.add(makeMessage(message));
+
+                        else
+                        {
+                            blocks.add(createBlock(blocks.get(blocks.size()).calculateHash(), chain.getTarget().getCompactTarget(), messages));
+                            messages.clear();
+                        }
                     }
-
-                    sendMessage(writers, message);
                 }
-            }
 
-            catch (IOException e)
-            {
-                continue;   // Nothing.
+                catch (IOException e)
+                {
+                    continue;   // Nothing.
+                }
+
+                // Must connect to new streams trying to connect to node.
+                //connectSocket(server, sockets, readers, writers, console);
             }
         }
     }
 
-    // Send message to connected clients.
+    // Send message to connected streams.
     private static void sendMessage(List<BufferedWriter> writers, String message)
     {
         for (int i = 0; i < writers.size(); i++)

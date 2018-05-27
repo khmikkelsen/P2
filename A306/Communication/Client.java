@@ -14,8 +14,8 @@ import java.net.Socket;
 public class Client
 {
     // Field
-    private static DataOutput writer = null;
-    private static DataInput reader = null;
+    private static BufferedWriter writer = null;
+    private static BufferedReader reader = null;
     private static Socket connection = null;
 
     // Main method.
@@ -58,6 +58,8 @@ public class Client
             if (connection != null && reader != null && writer != null)
             {
                 connection.close();
+                reader.close();
+                writer.close();
             }
         }
 
@@ -88,8 +90,8 @@ public class Client
     {
         try
         {
-            writer = new DataOutputStream(connection.getOutputStream());
-            reader = new DataInputStream(connection.getInputStream());
+            writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         }
 
         catch (IOException e)
@@ -102,13 +104,15 @@ public class Client
     // chatting with server.
     private static void serverWrite(Message message) throws IOException
     {
-        writer.writeChars(message.getMessage() + " : " + message.getSender().getModulus().toString() + "_" +
-                message.getSender().getExponent().toString() + " : " + message.getRecipient().getModulus().toString() +
+        writer.write(message.getMessage() + " : " + message.getSender().getModulus().toString() + CommunicationSimulator.KEYSEPERATOR+
+                message.getSender().getExponent().toString() + " : " + message.getRecipient().getModulus().toString() + CommunicationSimulator.KEYSEPERATOR +
                 message.getRecipient().getExponent().toString() + " : " + message.getSignature());
+        writer.newLine();
+        writer.flush();
     }
 
     // Receive message from server.
-    private static Message getMessage() throws IOException
+    private static Message nodeMessage() throws IOException
     {
         Message message;
         String receiverMessage;
@@ -137,10 +141,12 @@ public class Client
 
         // Entering address.
         console.print("Your address (format xxx_xxx): ");
+        console.flush();
         senderKey = CommunicationSimulator.receiveKey(input);
         RSAKey sender = new RSAKey(senderKey[0], senderKey[1]);
 
-        console.print("\nAddress (format: xxx_xxx): ");
+        console.print("\nReceiver address (format xxx_xxx): ");
+        console.flush();
         keyPair = CommunicationSimulator.receiveKey(input);
         RSAKey receiver = new RSAKey(keyPair[0], keyPair[1]);
 
@@ -157,12 +163,11 @@ public class Client
                 RSAOAEPEncrypt encryptedMessage = new RSAOAEPEncrypt(message, new RSAKey(keyPair[0], keyPair[1]));
                 preparedMessage = new Message(CommunicationSimulator.bytesToString(encryptedMessage.getEncryptedMessage()), sender, receiver);
                 preparedMessage.signMessage(CommunicationSimulator.bytesToString(new RSAOAEPSign(preparedMessage.getMessage(), sender).getSignature()));
+                serverWrite(preparedMessage);
 
-                if (message.length() > 0)
-                    serverWrite(preparedMessage);
-
-                // Decrypt this.
-                console.println(getMessage().getMessage());
+                // Printing received message from node. First decrypt before printing.
+                /*console.println(nodeMessage().getMessage());
+                console.flush();*/
             }
 
             catch (IOException e)
