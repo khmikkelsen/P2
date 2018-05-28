@@ -122,4 +122,8 @@ public class RSAOAEPVerify extends RSAOAEP
                 throw new BadVerificationException("H != hMark, signature false");
 
     }
+
+    public byte[] getSignature() {
+        return signature;
+    }
 }

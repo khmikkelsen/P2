@@ -1,7 +1,14 @@
 package robin;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.DERSequence;
+import robin.json.JsonUtil;
+
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -110,6 +117,10 @@ public class Block {
                 ", hash='" + hash + '\'' +
                 ", messages=" + messages +
                 '}';
+    }
+    public String getJSon ()
+    {
+        return JsonUtil.getParser().toJson(this);
     }
 }
 

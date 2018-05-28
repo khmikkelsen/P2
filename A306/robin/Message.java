@@ -43,7 +43,16 @@ public class Message {
         return StringUtil.applySha256(message
                 + recipient.getBase64String()
                 + sender.getBase64String()
-                + signature.getBase64String());
+                + signature);
+    }
+    public int sizeOfBytes ()
+    {
+        byte[] bytes = recipient.getBase64String().getBytes();
+        byte[] bytes1 = message.getBytes();
+        byte[] bytes2 = sender.getBase64String().getBytes();
+        byte[] bytes3 = signature.getBytes();
+
+        return bytes.length + bytes1.length + bytes2.length + bytes3.length;
     }
 
     public RSAKey getRecipient() {
