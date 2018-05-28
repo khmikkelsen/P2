@@ -19,9 +19,9 @@ public class TargetUtil {
      * The proofOfWorkLimit : is maximum target, and is what difficulty 1 sets the hash block
      * target as. (the bits field  is compact difficulty)
      */
-    private static final Target proofOfWorkLimit = new Target(new BigInteger("0000FFFFFFFF0000000000000000000000000000000000000000000000000000", 16)); // Very high target (difficulty less than 1).
+//    private static final String limit = new Target(new BigInteger("00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16)).getCompactTarget();
+    private static final Target proofOfWorkLimit = new Target(new BigInteger("0000100000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16)); // Very high target (difficulty less than 1).
     //private static final Target proofOfWorkLimit = new Target("00000000FFFF0000000000000000000000000000000000000000000000000000"); // Highest target (difficulty 1)
-
 
     public static long getTargetAdjustInterval() {
         return targetAdjustInterval;

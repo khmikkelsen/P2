@@ -1,23 +1,18 @@
-package UserClient;
+package userclient;
 
 import RSA.*;
-import com.google.gson.JsonSyntaxException;
 import robin.Message;
-import robin.NetworkRequestHandler;
+import robin.Simulator;
 import robin.commands.SendMessage;
 import robin.json.JsonUtil;
-import robin.node.NodeClient;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.Base64;
 import java.util.Scanner;
-
-import static java.nio.file.Files.exists;
 
 public class UserClient {
     /*static KeyPairGenerator newSenderKeys;
@@ -30,15 +25,11 @@ public class UserClient {
 
     private RSAKeyPair keyPair;
 
-    public static void main(String args[]) {
-        UserClient userClient = new UserClient();
+    private Simulator simulator;
 
-        userClient.readMessages();
-//        userClient.readMessages();
-//        u.genCopyKeys();
-    }
+    public UserClient(Simulator simulator) {
+        this.simulator = simulator;
 
-    public UserClient() {
         keyPair = getSavedKeys();
 
         if (keyPair == null) {
@@ -46,6 +37,22 @@ public class UserClient {
 
             saveKeys(keyPair);
         }
+
+        Message message = getUserMessage();
+
+        broadcastMessage(message);
+    }
+
+    /**
+     * Implementation uses simulator to broadcast send message request to nodes.
+     */
+    private void broadcastMessage(Message message) {
+
+        SendMessage command = new SendMessage(message);
+        String commandString = JsonUtil.getParser().toJson(command);
+
+        // Broadcast message to nodes (through simulator)
+        simulator.broadcastMessage(commandString);
     }
 
     private void readMessages() {
@@ -62,7 +69,7 @@ public class UserClient {
         }
     }
 
-    private void start() {
+    private Message getUserMessage() {
         Scanner scanner = new Scanner(System.in);
 
         String messageText = null;
@@ -96,12 +103,8 @@ public class UserClient {
             Message message = new Message(Base64.getEncoder().encodeToString(encryptedMessage), keyPair.getPublicKey(), recipientPublicKey);
             message.signMessage(keyPair.getPrivateKey());
 
-            SendMessage command = new SendMessage(message);
-            String commandString = JsonUtil.getParser().toJson(command);
+            return message;
 
-            NetworkRequestHandler networkRequestHandler = new NetworkRequestHandler(new NodeClient());
-
-            networkRequestHandler.handleIncomingRequest(commandString);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
