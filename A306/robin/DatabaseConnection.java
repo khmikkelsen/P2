@@ -223,8 +223,8 @@ public class DatabaseConnection {
 
         for (Message m : messages) {
             try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.setString(1, m.getRecipient().getBase64String());
-                pstmt.setString(2, m.getSender().getBase64String());
+                pstmt.setString(1, m.getRecipientPublicKey().getBase64String());
+                pstmt.setString(2, m.getSenderPublicKey().getBase64String());
                 pstmt.setString(3, m.getSignature().getBase64String());
                 pstmt.setString(4, m.getMessage());
                 pstmt.setLong(5, blockIndex + 1);

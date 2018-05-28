@@ -17,8 +17,8 @@ public class JsonUtil {
         gsonBuilder.registerTypeAdapter(Signature.class, new SignatureSerializer());
         gsonBuilder.registerTypeAdapter(Signature.class, new SignatureDeserializer());
 
-        gsonParser = gsonBuilder.create();
-        prettyParser = gsonBuilder.setPrettyPrinting().create();
+        gsonParser = gsonBuilder.disableHtmlEscaping().create();
+        prettyParser = gsonBuilder.disableHtmlEscaping().setPrettyPrinting().create();
     }
 
     public static Gson getParser() {

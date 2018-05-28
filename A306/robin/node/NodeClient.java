@@ -179,7 +179,7 @@ public class NodeClient implements MiningCompleteListener {
 
     private boolean isMessageSignatureValid(Message message) {
         try {
-            new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSender());
+            new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSenderPublicKey());
             return true;
         } catch (IOException | BadVerificationException e) {
             return false;

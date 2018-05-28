@@ -49,7 +49,7 @@ public class NetworkRequestHandler {
 
     private static void sendMessage(Message message) {
         try {
-            RSAOAEPVerify verify = new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSender());
+            RSAOAEPVerify verify = new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSenderPublicKey());
         } catch (IOException | BadVerificationException e) {
             // Invalid signature.
             return;
