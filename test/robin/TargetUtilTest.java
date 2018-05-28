@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     AAU-mail: mselma17@student.aau.dk */
 
-class ChainTest {
+class TargetUtilTest {
 
 
     // Create lower difficulty
@@ -24,7 +24,7 @@ class ChainTest {
         Block b2 = new Block("hash", "prevHash", "1f00ffff", 52400, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 2419200000L, 2, null);
 
 
-        BigInteger newTarget = Chain.adjustTarget(b2, b1).getBigIntegerTarget();
+        BigInteger newTarget = TargetUtil.adjustTarget(b2, b1).getBigIntegerTarget();
 
         BigInteger oldTarget = new BigInteger("0000ffffffff0000000000000000000000000000000000000000000000000000", 16);
 
@@ -47,7 +47,7 @@ class ChainTest {
         Block b1 = new Block("hash", "prevHash", "1f00ffff", 38100, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 0L, 2, null);
         Block b2 = new Block("hash", "prevHash", "1f00ffff", 52400, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 604800000L, 2, null);
 
-        BigInteger newTarget = Chain.adjustTarget(b2, b1).getBigIntegerTarget();
+        BigInteger newTarget = TargetUtil.adjustTarget(b2, b1).getBigIntegerTarget();
 
         BigInteger oldTarget = new BigInteger("0000ffffffff0000000000000000000000000000000000000000000000000000", 16);
 
@@ -70,7 +70,7 @@ class ChainTest {
         Block b1 = new Block("hash", "prevHash", "1f00ffff", 38100, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 0L, 2, null);
         Block b2 = new Block("hash", "prevHash", "1f00ffff", 52400, "484402e866a9e0ed173b84ab975374df612e0f6b74afd00da945a0b9faab25d3", 1209600000L, 2, null);
 
-        BigInteger newTarget = Chain.adjustTarget(b2, b1).getBigIntegerTarget();
+        BigInteger newTarget = TargetUtil.adjustTarget(b2, b1).getBigIntegerTarget();
 
         BigInteger oldTarget = new BigInteger("0000ffffffff0000000000000000000000000000000000000000000000000000", 16);
 

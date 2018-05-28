@@ -7,7 +7,7 @@ import java.math.BigInteger;
  * The class chain: is used to adjust target difficulty and generate new target so that the miners can create
  * a block for the blockchain.
  */
-public class Chain {
+public class TargetUtil {
 
     private static int targetAdjustInterval = 20;
 
