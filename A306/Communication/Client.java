@@ -1,6 +1,13 @@
 package Communication;
 
+import RSA.RSAKey;
+import RSA.RSAOAEPEncrypt;
+import RSA.RSAOAEPSign;
+import org.bouncycastle.jcajce.provider.asymmetric.RSA;
+import robin.Message;
+
 import java.io.*;
+import java.math.BigInteger;
 import java.net.Socket;
 
 // Client Main.
@@ -21,11 +28,19 @@ public class Client
         setupConnection(console, "127.0.0.1", 140);
         console.println("Connected.\nChat started.");
 
-        if (writer != null && reader != null)
-            chat(console);
+        try
+        {
+            if (writer != null && reader != null)
+                chat(console);
 
-        else
-            endSession(console, "Session ended: No streams setup.");
+            else
+                endSession(console, "Session ended: No streams setup.");
+        }
+
+        catch (IOException e)
+        {
+            console.println("Chat exception.");
+        }
     }
 
     // Ending session.
@@ -87,36 +102,53 @@ public class Client
     }
 
     // chatting with server.
-    private static void serverWrite(String message) throws IOException
+    private static void serverWrite(Message message) throws IOException
     {
-        writer.write(message);
+        writer.write(message.getMessage() + " : " + message.getSender().getModulus().toString() + CommunicationSimulator.KEYSEPERATOR+
+                message.getSender().getExponent().toString() + " : " + message.getRecipient().getModulus().toString() + CommunicationSimulator.KEYSEPERATOR +
+                message.getRecipient().getExponent().toString() + " : " + message.getSignature());
         writer.newLine();
         writer.flush();
     }
 
     // Receive message from server.
-    private static String getMessage() throws IOException
+    private static Message nodeMessage() throws IOException
     {
-        String message;
+        Message message;
+        String receiverMessage;
 
-        message = reader.readLine();
+        receiverMessage = reader.readLine();
 
-        if (message.length() > 0)
+        if (receiverMessage.length() > 0)
+        {
+            message = new Message(CommunicationSimulator.getNumber(receiverMessage, 0, ']') + "]",
+                    new RSAKey(CommunicationSimulator.getSenderN(receiverMessage), CommunicationSimulator.getSenderE(receiverMessage)),
+                    new RSAKey(CommunicationSimulator.getReceiverN(receiverMessage), CommunicationSimulator.getReceiverE(receiverMessage)));
+
             return message;
+        }
 
-        return "";
+        return new Message("Error", new RSAKey(new BigInteger("0"), new BigInteger("0")), new RSAKey(new BigInteger("0"), new BigInteger("0")));
     }
 
     // Chat.
-    private static void chat(PrintWriter console)
+    private static void chat(PrintWriter console) throws IOException
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         String message;
-        int[] keyPair = new int[2];
+        BigInteger[] senderKey;
+        BigInteger[] keyPair;
 
         // Entering address.
-        console.print("Address (format: xxx-xxx): ");
+        console.print("Your address (format xxx_xxx): ");
+        console.flush();
+        senderKey = CommunicationSimulator.receiveKey(input);
+        RSAKey sender = new RSAKey(senderKey[0], senderKey[1]);
+
+        console.print("\nReceiver address (format xxx_xxx): ");
+        console.flush();
         keyPair = CommunicationSimulator.receiveKey(input);
+        RSAKey receiver = new RSAKey(keyPair[0], keyPair[1]);
 
         while (true)
         {
@@ -124,14 +156,18 @@ public class Client
             {
                 console.print(": ");
                 console.flush();
-                message = input.readLine();     // Reads String from console.
+                message = input.readLine();
+                Message preparedMessage;
 
                 // Start encryption and hashing.
+                RSAOAEPEncrypt encryptedMessage = new RSAOAEPEncrypt(message, new RSAKey(keyPair[0], keyPair[1]));
+                preparedMessage = new Message(CommunicationSimulator.bytesToString(encryptedMessage.getEncryptedMessage()), sender, receiver);
+                preparedMessage.signMessage(CommunicationSimulator.bytesToString(new RSAOAEPSign(preparedMessage.getMessage(), sender).getSignature()));
+                serverWrite(preparedMessage);
 
-                if (message.length() > 0)
-                    serverWrite(message);
-
-                console.println(getMessage());
+                // Printing received message from node. First decrypt before printing.
+                /*console.println(nodeMessage().getMessage());
+                console.flush();*/
             }
 
             catch (IOException e)

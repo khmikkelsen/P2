@@ -1,21 +1,22 @@
 package Communication;
 
 import RSA.*;
-import robin.StringUtil;
-import robin.Message;
+import robin.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommunicationSimulator
 {
-    private static final char KEYSEPERATOR = '_';
+    public static final char KEYSEPERATOR = '_';
 
     // Entering receivers public key as address.
-    public static int[] receiveKey(BufferedReader reader)
+    public static BigInteger[] receiveKey(BufferedReader reader)
     {
         String key;
 
@@ -29,13 +30,13 @@ public class CommunicationSimulator
 
             else
             {
-                return new int[]{Integer.parseInt(getNumber(key, 0, KEYSEPERATOR)), Integer.parseInt(getNumber(key, KEYSEPERATOR))};
+                return new BigInteger[]{new BigInteger(getNumber(key, 0, KEYSEPERATOR)), new BigInteger(getNumber(key, KEYSEPERATOR))};
             }
         }
 
         catch (IOException e)
         {
-            return new int[]{0, 0};
+            return new BigInteger[]{new BigInteger("0"), new BigInteger("0")};
         }
     }
 
@@ -96,7 +97,7 @@ public class CommunicationSimulator
             return "0";
     }
 
-    private static String getNumber(String text, int startIndex)
+    public static String getNumber(String text, int startIndex)
     {
         char[] number = text.toCharArray();
         String returnNumber = "";
@@ -115,7 +116,7 @@ public class CommunicationSimulator
     }
 
     // Gets a number from a String searching backwards.
-    private static String getNumberBackwards(String text, char startIndex)
+    public static String getNumberBackwards(String text, char startIndex)
     {
         char[] number = text.toCharArray();
 
@@ -130,13 +131,28 @@ public class CommunicationSimulator
         return null;
     }
 
+    public static String getNumberBackwards(String text, char startIndex, char endIndex)
+    {
+        char[] number = text.toCharArray();
+
+        for (int i = number.length - 1; i >= 0; i--)
+        {
+            if (number[i] == startIndex)
+            {
+                return getNumber(text, i, endIndex);
+            }
+        }
+
+        return null;
+    }
+
     // Copy of previous getNumber, but using int as index.
-    private static String getNumber(String text, int startIndex, char endIndex)
+    public static String getNumber(String text, int startIndex, char endIndex)
     {
         char[] number = text.toCharArray();
         String returnNumber = "";
 
-        for (int i = startIndex; i < number.length && number[i] != endIndex; i++)
+        for (int i = startIndex; i < number.length && (number[i] != endIndex && number[i] != ']'); i++)
         {
             returnNumber = returnNumber + number[i];
         }
@@ -151,28 +167,6 @@ public class CommunicationSimulator
     // Main method
     public static void main(String[] args)
     {
-        // Verification test.
-        /*final String message = "Hej";
-
-        try
-        {
-            KeyPairGenerator senderKey = new KeyPairGenerator(2048);
-            KeyPairGenerator receiverKey = new KeyPairGenerator(2048);
-
-            Message m = new Message(message, senderKey.getPublicKey(), receiverKey.getPublicKey());
-
-            // Signing and verifying.
-            RSAOAEPSign signature = new RSAOAEPSign(m.calculateHash(), senderKey.getPrivateKey());
-            RSAOAEPVerify verify = new RSAOAEPVerify(signature.getSignature(), m.calculateHash().getBytes(), senderKey.getPublicKey());
-
-            System.out.println("Verified.");
-        }
-
-        catch (IOException | BadVerificationException e)
-        {
-            System.out.println("Not verified.");
-        }*/
-
         simulateCommunication();
     }
 
@@ -193,7 +187,7 @@ public class CommunicationSimulator
     }
 
     // Simulates a client and return encrypted message.
-    public static String clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
+    public static Message clientSimulator(KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
     {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 
@@ -210,54 +204,80 @@ public class CommunicationSimulator
 
         catch (IOException e)
         {
-            return e.getCause().toString();
+            return null;
         }
     }
 
     // Prepares message to be send to node.
-    private static String prepareMessage(String message, KeyPairGenerator receiverKeys, KeyPairGenerator senderKeys)
+    public static Message prepareMessage(String message, KeyPairGenerator receiver, KeyPairGenerator sender)
     {
         try
         {
-            // Encrypting message.
-            RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, new byte[]{1, 2}, receiverKeys.getPublicKey());
-            System.out.println("\nEncrypted message: " + bytesToString(encrypt.getEncryptedMessage()) + "\n");
+            String encryptedMessage = bytesToString(new RSAOAEPEncrypt(message, receiver.getPublicKey()).getEncryptedMessage());
+            Message returnMessage = new Message(encryptedMessage, sender.getPublicKey(), receiver.getPublicKey());
+            String signedMessage = bytesToString(new RSAOAEPSign(encryptedMessage, sender.getPrivateKey()).getSignature());
+            returnMessage.signMessage(signedMessage);
 
-            String encryptedNodeMessage = bytesToString(encrypt.getEncryptedMessage()) + " : " +
-                    senderKeys.getPublicKey().getModulus() + KEYSEPERATOR + senderKeys.getPublicKey().getExponent() + " : " +
-                    receiverKeys.getPublicKey().getModulus() + KEYSEPERATOR + receiverKeys.getPublicKey().getExponent();
-
-            // Singing message.
-            RSAOAEPSign signature = new RSAOAEPSign(encryptedNodeMessage, senderKeys.getPrivateKey());
-
-            String preparedMessage = encryptedNodeMessage  + " : " + bytesToString(signature.getSignature());
-            System.out.println("Prepared message with signature: " + preparedMessage);
-
-            return preparedMessage;
+            return returnMessage;
         }
 
         catch (IOException e)
         {
-            return "IOException.";
+            return null;
         }
     }
 
     // Simulates a node.
-    public static void nodeSimulator(String message)
+    public static void nodeSimulator(Message message)
     {
-        System.out.println("\n\nNode:\n");
+        // Chain
+        Chain chain = new Chain();
+
+        // Blocks
+        List<Block> blocks = new ArrayList<>();
+
+        System.out.println("Encrypted message: " + message.getMessage());
+        System.out.println("Signature of message: " + message.getSignature() + "\n");
+        System.out.println("\nNode:\n");
 
         try
         {
-            RSAOAEPVerify verifySignature = new RSAOAEPVerify(stringToByte(getSignature(message)), messageNoSignature(message).getBytes(), new RSAKey(getSenderN(message), getSenderE(message)));
-            System.out.println("Message verified.");
+            // Genesis block
+            blocks.add(new Block("0", chain.getTarget().getCompactTarget(), List.of(prepareMessage("Hello, world", new KeyPairGenerator(2048), new KeyPairGenerator(2048)))));
+            blocks.get(blocks.size() - 1).mineBlock();
+
+            // Creating second block.
+            blocks.add(new Block(blocks.get(blocks.size() - 1).calculateHash(), chain.getTarget().getCompactTarget(), List.of(message)));
+            blocks.get(blocks.size() - 1).mineBlock();
+
+            // Third block as incoming block.
+            blocks.add(incomingBlock(chain, blocks.get(blocks.size() - 1).calculateHash()));
+
+            // Mining genesis and newly created blocks and prints results.
+            printMerkleHashesAndNonce(blocks);
+
+            // Validating all incoming blocks.
+            System.out.println("Validating incoming blocks...\nResult: " +
+                    (validateBlocks(List.of(blocks.get(blocks.size() - 1)), chain.getTarget().getCompactTarget()) &&
+                            validateBlockMessages(List.of(blocks.get(blocks.size() - 1))) ?  "validated" : "not validated"));
+
+            // Start writing to database after incoming block.
+            //writeToDatabase(blocks);
         }
 
-        catch (IOException | BadVerificationException e)
+        catch (IOException e)
         {
             System.out.println("Message not verified.");
             e.printStackTrace();
         }
+    }
+
+    // Returns an incoming block.
+    private static Block incomingBlock(Chain chain, String previousHash) throws IOException
+    {
+        Block minedBlock = new Block(previousHash, chain.getTarget().getCompactTarget(), getMessages());
+        minedBlock.mineBlock();
+        return minedBlock;
     }
 
     // Gets the sender key N.
@@ -286,6 +306,40 @@ public class CommunicationSimulator
     {
         String number = getNumber(message, getCharStart(message, KEYSEPERATOR, 1), ' ');
         return new BigInteger(number);
+    }
+
+    // Returns receiver's key N.
+    public static BigInteger getReceiverN(String message)
+    {
+        int colonCounter = 0;
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            if (message.charAt(i) == ':')
+                colonCounter++;
+
+            if (colonCounter == 2)
+                return new BigInteger(getNumber(message, i + 2, '_'));
+        }
+
+        return null;
+    }
+
+    // Returns receiver's key E.
+    public static BigInteger getReceiverE(String message)
+    {
+        int underscoreCounter = 0;
+
+        for (int i = 0; i < message.length(); i++)
+        {
+            if (message.charAt(i) == '_')
+                underscoreCounter++;
+
+            if (underscoreCounter == 2)
+                return new BigInteger(getNumber(message, i + 1, ' '));
+        }
+
+        return null;
     }
 
     // Returns the signature of a message.
@@ -325,14 +379,20 @@ public class CommunicationSimulator
         return result;
     }
 
-    // Converts byte array into a String.
+    // Converts byte array into a String array.
     public static String bytesToString(byte[] array)
     {
         String result = "[";
 
         for (int i = 0; i < array.length; i++)
         {
-            result = result + String.valueOf(array[i]) + ",";
+            if (i == array.length - 1)
+            {
+                result = result + String.valueOf(array[i]);
+                continue;
+            }
+
+            result = result + String.valueOf(array[i]) + ", ";
         }
 
         return result + "]";
@@ -341,16 +401,44 @@ public class CommunicationSimulator
     // Converts byte array String to byte array.
     public static byte[] stringToByte(String array)
     {
-        byte[] result = new byte[stringByteArraySize(array)];
-        char[] charArray = array.toCharArray();
+        String arrayNoSpaces = removeSpaces(array);
+        byte[] result = new byte[stringByteArraySize(arrayNoSpaces)];
+        char[] charArray = arrayNoSpaces.toCharArray();
 
-        for (int i = 0, j = 0; i < array.length() - 2; i++)
+        for (int i = 0, j = 0; i < arrayNoSpaces.length() - 2; i++)
         {
             if (charArray[i] == '[' || charArray[i] == ',')
             {
-                result[j] = (byte) Integer.parseInt(getNumber(array, i + 1, ','));
+                result[j] = (byte) Integer.parseInt(getNumber(arrayNoSpaces, i + 1, ','));
                 j++;
             }
+        }
+
+        return result;
+    }
+
+    // Removes spaces from a String.
+    private static String removeSpaces(String str)
+    {
+        String result = "";
+
+        for (int i = 0; i < str.length(); i++)
+        {
+            if (str.charAt(i) != ' ')
+                result = result + str.charAt(i);
+        }
+
+        return result;
+    }
+
+    // Converts byte array to String.
+    public static String toString(byte[] array)
+    {
+        String result = "";
+
+        for (int i = 0; i < array.length; i++)
+        {
+            result = result + (char) array[i];
         }
 
         return result;
@@ -367,6 +455,96 @@ public class CommunicationSimulator
                 commas++;
         }
 
-        return commas;
+        return commas + 1;
+    }
+
+    // Adds some blocks to a list.
+    private static List<Message> getMessages() throws IOException
+    {
+        String m1 = "Hej";
+        String m2 = "Hvordan går det?";
+        String m3 = "A306.";
+
+        // Keys for each message.
+        KeyPairGenerator m1Key = new KeyPairGenerator(2048);
+        KeyPairGenerator m2Key = new KeyPairGenerator(2048);
+        KeyPairGenerator m3Key = new KeyPairGenerator(2048);
+
+        // Sending messages to each other.
+        Message m1Prepared = prepareMessage(m1, m2Key, m1Key);
+        Message m2Prepared = prepareMessage(m2, m3Key, m2Key);
+        Message m3Prepared = prepareMessage(m3, m1Key, m3Key);
+
+        return List.of(m1Prepared, m2Prepared, m3Prepared);
+    }
+
+    // Mines all blocks on a node.
+    public static void mineBlocks(List<Block> blocks)
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            blocks.get(i).mineBlock();
+        }
+    }
+
+    // Prints merkle root hashes for all blocks.
+    public static void printMerkleHashesAndNonce(List<Block> blocks)
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            System.out.println("Block " + (i + 1) + " merkle root hash: " + blocks.get(i).getMerkleRootHash());
+            System.out.println("Nonce: " + blocks.get(i).getNonce() + "\n");
+        }
+    }
+
+    // Validates all messages in all blocks.
+    public static boolean validateBlockMessages(List<Block> blocks)
+    {
+        try
+        {
+            for (int i = 0; i < blocks.size(); i++)
+            {
+                for (int j = 0; j < blocks.get(i).getMessages().size(); j++)
+                {
+                    Message message = blocks.get(i).getMessages().get(j);
+                    new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSender());
+                }
+            }
+
+            return true;
+        }
+
+        catch (IOException | BadVerificationException e)
+        {
+            return false;
+        }
+    }
+
+    // Validates a block.
+    public static boolean validateBlocks(List<Block> blocks, String compactTarget)
+    {
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            if (new BigInteger(blocks.get(i).calculateHash(), 16).compareTo(Target.calculateBigIntergerTarget(compactTarget)) == 1 ||
+                    !BlockUtil.calculateMerkleRootHash(blocks.get(i).getMessages()).equals(blocks.get(i).getMerkleRootHash()))
+                return false;
+        }
+
+        return true;
+    }
+
+    // Writes a list of blocks to a database.
+    public static void writeToDatabase(List<Block> blocks) throws SQLException
+    {
+        DatabaseConnection database = new DatabaseConnection();
+
+        database.setup();
+        database.createBlockTable();
+        database.createMessageTable();
+
+        for (int i = 0; i < blocks.size(); i++)
+        {
+            database.addBlock(blocks.get(i));
+        }
     }
 }

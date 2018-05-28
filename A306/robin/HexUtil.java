@@ -19,7 +19,7 @@ public class HexUtil {
     }
 
     /**
-     * The function ZeroPadHex is used to prepend a zero for numbers not a multiple of 2.
+     * The function ZeroPadHex is used to prepend a zero for numbers with digits that are not a multiple of 2.
      * @param hexValue String to add padding for a hex value
      * @return padded hex value
      */

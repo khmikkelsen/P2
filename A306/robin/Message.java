@@ -2,6 +2,11 @@
 package robin;
 
 import RSA.RSAKey;
+import RSA.RSAOAEPSign;
+import RSA.Signature;
+
+import java.io.IOException;
+import java.util.Objects;
 
 //Is message signed or unsigned, and is sender/receiver public keys? is it the message encrypted before signing?
 /* Signing message and public key encryption:
@@ -19,7 +24,7 @@ public class Message {
     private String message;
     private RSAKey sender;
     private RSAKey recipient;
-    private String signature;
+    private Signature signature;
 
     public Message(String message, RSAKey sender, RSAKey recipient) {
         this.message = message;
@@ -27,7 +32,7 @@ public class Message {
         this.recipient = recipient;
     }
 
-    public Message(String message, RSAKey sender, RSAKey recipient, String signature) {
+    public Message(String message, RSAKey sender, RSAKey recipient, Signature signature) {
         this.message = message;
         this.sender = sender;
         this.recipient = recipient;
@@ -36,9 +41,9 @@ public class Message {
 
     public String calculateHash() {
         return StringUtil.applySha256(message
-                + recipient.toString()
-                + sender.toString()
-                + signature);
+                + recipient.getBase64String()
+                + sender.getBase64String()
+                + signature.getBase64String());
     }
 
     public RSAKey getRecipient() {
@@ -53,12 +58,34 @@ public class Message {
         return message;
     }
 
-    public String getSignature() {
+    public Signature getSignature() {
         return signature;
     }
 
-    public void signMessage(String privateKey) {
-        // TODO: Sign message
-        this.signature = privateKey;
+    public void signMessage(RSAKey privateKey) {
+        try {
+            RSAOAEPSign sign = new RSAOAEPSign(message, privateKey);
+            this.signature = new Signature(sign.getSignature());
+        }
+
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message1 = (Message) o;
+        return Objects.equals(message, message1.message) &&
+                Objects.equals(sender, message1.sender) &&
+                Objects.equals(recipient, message1.recipient) &&
+                Objects.equals(signature, message1.signature);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message, sender, recipient, signature);
     }
 }
