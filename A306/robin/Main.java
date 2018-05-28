@@ -57,9 +57,16 @@ public class Main {
 
         Message m = new Message("My text message", senderPublicKey, recipientPublicKey);
         m.signMessage(senderPrivateKey);
-        SendMessage com = new SendMessage(m);
 
-        String json = JsonUtil.getParser().toJson(com);//"{\"command\":\"sendmessage\",\"message\":{\"message\":\"Message\",\"sender\":\"MIIBCgKCAQEAqZbHeEeMLkN6/pDewlOPE8aZwY5cuasV3NIGi6SYTGARqNRDFkmBLV/L0YL+bBjBtbDZyASJwcySlIK3cOtcQ9T0qyT/e+vhfrAREiCUg1A9ePA+eZKz1T6TJSSiuboXkkacH+tANehjQVchjKh9k2IUQyulapCTg3yh/tT7DHkI8ou1u/cJe8PiW12IL7XJtkNz1oWZamK8Y9XEOpCwxVvTr28lzSyWequF6AXuRt6LKizBy6PQco6zLK3p/uo7jnWPALoS65pBf7++34wt118GbnMxXokLiX13CL77R7InRbPI97MTPU13TZEUKENHrdfG+IZGK0g7prRdIYyXLQIDAQAB\",\"recipient\":\"MIIBCgKCAQEAlH3MNtkg/T0rHUby3p1cUZz0pWQh5lqppseibWcDLnTUdOlnT2uLv6N6kmdEa3HEZ+qhhQ6lhN5rk0ydSNQQ93F4mF0ksCQp0tU6+3xMj/WD8VEJ8WdSjAa4yTRfEG1KXdR81cd9PTmshiWKlXtKpxY0CEaCnDJsW3h9n9SPg3uWXhgUesBNnmZOKzltu4RItxwx62OKMLhUiZmyDdmYEixGwVE/kGD7U+2vBl+3v1ivkkxIX0gzW7cx0QsK4UkGo5c2pns6zxs3ZJ65TXDbaaddKCFTtk+OsULyLhUeWKjSO6iayRZlSCX7A+4mn5ATkorPjKeiu+Fy1eX1W14FUwIDAQAB\",\"signature\":\"aosijd\"}}";
+        Block latestBlock = DatabaseConnection.getLatestBlock();
+
+        Block newBlock = new Block(latestBlock.getHash(), latestBlock.getCompactTarget(), Collections.singletonList(m));
+        newBlock.mineBlock();
+
+        BlockData command = new BlockData(newBlock);
+
+
+        String json = JsonUtil.getParser().toJson(command);//"{\"command\":\"sendmessage\",\"message\":{\"message\":\"Message\",\"sender\":\"MIIBCgKCAQEAqZbHeEeMLkN6/pDewlOPE8aZwY5cuasV3NIGi6SYTGARqNRDFkmBLV/L0YL+bBjBtbDZyASJwcySlIK3cOtcQ9T0qyT/e+vhfrAREiCUg1A9ePA+eZKz1T6TJSSiuboXkkacH+tANehjQVchjKh9k2IUQyulapCTg3yh/tT7DHkI8ou1u/cJe8PiW12IL7XJtkNz1oWZamK8Y9XEOpCwxVvTr28lzSyWequF6AXuRt6LKizBy6PQco6zLK3p/uo7jnWPALoS65pBf7++34wt118GbnMxXokLiX13CL77R7InRbPI97MTPU13TZEUKENHrdfG+IZGK0g7prRdIYyXLQIDAQAB\",\"recipient\":\"MIIBCgKCAQEAlH3MNtkg/T0rHUby3p1cUZz0pWQh5lqppseibWcDLnTUdOlnT2uLv6N6kmdEa3HEZ+qhhQ6lhN5rk0ydSNQQ93F4mF0ksCQp0tU6+3xMj/WD8VEJ8WdSjAa4yTRfEG1KXdR81cd9PTmshiWKlXtKpxY0CEaCnDJsW3h9n9SPg3uWXhgUesBNnmZOKzltu4RItxwx62OKMLhUiZmyDdmYEixGwVE/kGD7U+2vBl+3v1ivkkxIX0gzW7cx0QsK4UkGo5c2pns6zxs3ZJ65TXDbaaddKCFTtk+OsULyLhUeWKjSO6iayRZlSCX7A+4mn5ATkorPjKeiu+Fy1eX1W14FUwIDAQAB\",\"signature\":\"aosijd\"}}";
 
         networkRequestHandler.handleIncomingRequest(json);
 

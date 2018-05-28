@@ -83,7 +83,6 @@ public class NodeClient implements MiningCompleteListener {
                 // Remove all messages, that are included
                 messagePool.removeAll(newBlock.getMessages());
 
-
                 // Stop the mining thread.
                 stopMining();
 
@@ -92,6 +91,9 @@ public class NodeClient implements MiningCompleteListener {
 
                 // Add block to database.
                 DatabaseConnection.addBlock(newBlock);
+
+
+                System.out.println(JsonUtil.getPrettyParser().toJson(DatabaseConnection.getBlockTable()));
 
             }
         } catch (SQLException e) {

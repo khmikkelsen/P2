@@ -35,6 +35,20 @@ public class NetworkRequestHandler {
                 nodeClient.validateIncomingMessage(incomingMessage);
 
                 break;
+
+            case BLOCK_DATA:
+                Block incomingBlock;
+
+                try {
+                    BlockData blockData = JsonUtil.getParser().fromJson(request, BlockData.class);
+                    incomingBlock = blockData.getBlock();
+                } catch (JsonSyntaxException e) {
+                    break;
+                }
+
+                nodeClient.validateIncomingBlock(incomingBlock);
+
+                break;
             case GET_BLOCK_COUNT:
 
                 break;

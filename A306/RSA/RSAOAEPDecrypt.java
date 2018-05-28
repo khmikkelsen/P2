@@ -107,6 +107,6 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
         return M;
     }
-    public byte[] getDecrypt() { return this.decryptedMessage; }
+
     public byte[] getDecryptedMessage() { return this.DM; }
 }
