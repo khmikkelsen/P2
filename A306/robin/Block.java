@@ -4,11 +4,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class Block {
     private String prevHeadhash;
     private String compactTarget;
-    private int nonce = 0; //nonce starts at zero and is incremented at each hash
+    private int nonce = new Random().nextInt(Integer.MAX_VALUE); // nonce starts at random number and is incremented at each hash
     private String merkleRootHash;
     private long timestamp;
 
@@ -37,9 +38,7 @@ public class Block {
 
 
     /**
-     * The method calculateHash: creates a hashed header of the block.
-     *
-     * @return hash of block
+     * Return the hash of all the fields in the header.
      */
     public final String calculateHash() {
         return StringUtil.applySha256(
@@ -53,12 +52,11 @@ public class Block {
     }
 
     public void mineBlock() {
-
         this.merkleRootHash = BlockUtil.calculateMerkleRootHash(messages);
 
         BigInteger target = new Target(compactTarget).getBigIntegerTarget();
 
-        while (new BigInteger(this.calculateHash(), 16).compareTo(target) > 0) {
+        while (new BigInteger(this.calculateHash(), 16).compareTo(target) >= 0) {
             if (nonce == Integer.MAX_VALUE) {
                 nonce = 0;
                 this.timestamp = new Date().getTime();
