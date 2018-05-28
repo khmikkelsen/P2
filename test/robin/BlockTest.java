@@ -2,6 +2,7 @@ package robin;
 
 import RSA.KeyPairGenerator;
 import RSA.RSAKey;
+import RSA.RSAKeyPair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,19 +24,20 @@ class BlockTest {
 
     @BeforeEach
     void generateKeys() throws IOException {
-        KeyPairGenerator k1 = new KeyPairGenerator(2048);
-        KeyPairGenerator k2 = new KeyPairGenerator(2048);
+        KeyPairGenerator gen = new KeyPairGenerator(2048);
 
-        KeyPairGenerator k1false = new KeyPairGenerator(2048);
+        RSAKeyPair pair1 = gen.generateKeyPair();
+        key1Public = pair1.getPublicKey();
+        key1Private = pair1.getPrivateKey();
 
 
-        key1Public = k1.getPublicKey();
-        key1Private = k1.getPrivateKey();
+        RSAKeyPair pair2 = gen.generateKeyPair();
+        key2Public = pair2.getPublicKey();
+        key2Private = pair2.getPrivateKey();
 
-        key2Public = k2.getPublicKey();
-        key2Private = k2.getPrivateKey();
 
-        key1FalsePrivate = k1false.getPrivateKey();
+        RSAKeyPair pair1False = gen.generateKeyPair();
+        key1FalsePrivate = pair1False.getPrivateKey();
     }
 
     @Test

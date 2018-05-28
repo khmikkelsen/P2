@@ -11,6 +11,7 @@ public class Block {
     private int nonce = 0; //nonce starts at zero and is incremented at each hash
     private String merkleRootHash;
     private long timestamp;
+
     private Long index; // Can be null.
 
     private String hash;
@@ -47,7 +48,6 @@ public class Block {
                         + merkleRootHash
                         + Integer.toString(nonce)
                         + compactTarget
-                        + index
 
         );
     }
@@ -56,7 +56,9 @@ public class Block {
 
         this.merkleRootHash = BlockUtil.calculateMerkleRootHash(messages);
 
-        while (new BigInteger(this.calculateHash(), 16).compareTo(Chain.getTarget().getBigIntegerTarget()) > 0) {
+        BigInteger target = new Target(compactTarget).getBigIntegerTarget();
+
+        while (new BigInteger(this.calculateHash(), 16).compareTo(target) > 0) {
             if (nonce == Integer.MAX_VALUE) {
                 nonce = 0;
                 this.timestamp = new Date().getTime();

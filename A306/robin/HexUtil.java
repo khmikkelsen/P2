@@ -18,6 +18,14 @@ public class HexUtil {
         return hexValue;
     }
 
+    public static String prependZeros(String hexValue, int length) {
+        while (hexValue.length() < length) {
+            hexValue = "0" + hexValue;
+        }
+
+        return hexValue;
+    }
+
     /**
      * The function ZeroPadHex is used to prepend a zero for numbers with digits that are not a multiple of 2.
      * @param hexValue String to add padding for a hex value

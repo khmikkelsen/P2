@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseConnection {
 
     // SQLite connection string
-    private static final String url = "jdbc:sqlite:C://sqlite/db/p2_blockchain.db";
+    private static final String url = "jdbc:sqlite:C://p2_blockchain/sqlite/p2_blockchain.db";
 
     public static void setup() throws SQLException {
         // SQL statement for creating a new table
@@ -40,6 +40,30 @@ public class DatabaseConnection {
         Connection conn = DriverManager.getConnection(url);
 
         return conn;
+    }
+
+    public static List<Block> getBlockTable() throws SQLException {
+
+        String blockQuery = "SELECT block_id FROM blocks where block_id > 0";
+
+        List<Long> blockIndices = new ArrayList<>();
+
+        try (Connection conn = connect()) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(blockQuery);
+
+            while (rs.next()) {
+                blockIndices.add(rs.getLong("block_id") - 1);
+            }
+        }
+
+        List<Block> blocks = new ArrayList<>();
+
+        for (Long index: blockIndices) {
+            blocks.add(getBlockByIndex(index));
+        }
+
+        return blocks;
     }
 
     public static Block getBlockByIndex(long blockIndex) throws SQLException {
@@ -105,11 +129,11 @@ public class DatabaseConnection {
      * @return Index of the added block
      * @throws SQLException
      */
-    public static long addBlock(Block block) throws SQLException {
+    public static Long addBlock(Block block) throws SQLException {
         String query = "INSERT INTO blocks (hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp) VALUES(?,?,?,?,?,?)";
 
         try (Connection conn = connect(); PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, block.calculateHash());
+            statement.setString(1, HexUtil.prependZeros(block.calculateHash(), 64));
             statement.setString(2, block.getPrevHeadHash());
             statement.setString(3, block.getMerkleRootHash());
             statement.setString(4, block.getCompactTarget());
@@ -121,19 +145,23 @@ public class DatabaseConnection {
         // Block has now been inserted. Get it's id.
         query = "SELECT block_id FROM blocks ORDER BY block_id DESC LIMIT 1;";
 
+        long blockIndex;
+
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
-            rs.next();
-
-            long blockIndex = rs.getLong("block_id") - 1;
-
-            addMessages(block.getMessages(), blockIndex);
-
-            // Return index, not "id"
-            return blockIndex;
+            // Get index = id - 1.
+            if (rs.next()) {
+                blockIndex = rs.getLong("block_id") - 1;
+            } else {
+                return null;
+            }
         }
+
+        addMessages(block.getMessages(), blockIndex);
+
+        return blockIndex;
     }
 
 
@@ -160,28 +188,34 @@ public class DatabaseConnection {
     public static Block getLatestBlock() throws SQLException {
         String blockQuery = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp FROM blocks ORDER BY block_id DESC LIMIT 1";
 
+        String hash;
+        String previousHash;
+        String merkleRootHash;
+        String compactTarget;
+        int nonce;
+        long minedTimestamp;
+        long blockIndex;
+
         try (Connection conn = connect()) {
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(blockQuery);
 
             if (rs.next()) {
-                String hash = rs.getString("hash");
-                String previousHash = rs.getString("previous_hash");
-                String merkleRootHash = rs.getString("merkle_root_hash");
-                String compactTarget = rs.getString("compact_difficulty");
-                int nonce = rs.getInt("nonce");
-                long minedTimestamp = rs.getLong("mined_timestamp");
-                long blockIndex = rs.getLong("block_id") - 1;
-
-                List<Message> messages = getMessagesInBlock(blockIndex);
-
-                Block block = new Block(hash, previousHash, compactTarget, nonce, merkleRootHash, minedTimestamp, blockIndex, messages);
-
-                return block;
+                hash = rs.getString("hash");
+                previousHash = rs.getString("previous_hash");
+                merkleRootHash = rs.getString("merkle_root_hash");
+                compactTarget = rs.getString("compact_difficulty");
+                nonce = rs.getInt("nonce");
+                minedTimestamp = rs.getLong("mined_timestamp");
+                blockIndex = rs.getLong("block_id") - 1;
+            } else {
+                return null;
             }
-
-            return null;
         }
+
+        List<Message> messages = getMessagesInBlock(blockIndex);
+
+        return new Block(hash, previousHash, compactTarget, nonce, merkleRootHash, minedTimestamp, blockIndex, messages);
     }
 
     private static void addMessages(List<Message> messages, long blockIndex) throws SQLException {
