@@ -42,7 +42,7 @@ public class Main
             byte[] signature = sign.getSignature();
             RSAOAEPVerify veri = new RSAOAEPVerify(signature, copypasta.getBytes(),32, Alicepub);
         }
-        catch (IOException | BadVerificationException e) {e.printStackTrace();}
+        catch (IOException | BadVerificationException e) {e.printStackTrace(); System.out.println("Message wrong");}
 
     }
 

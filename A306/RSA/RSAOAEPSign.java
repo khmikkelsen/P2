@@ -3,6 +3,7 @@ package RSA;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.BitSet;
 import java.util.Random;
 
@@ -75,17 +76,34 @@ public class RSAOAEPSign extends RSAOAEP
 
     private byte[] encodeMessage(int emBits) throws IOException
     {
+        ByteArrayOutputStream ConcatenateStream = new ByteArrayOutputStream();
         byte[] DB;
-        byte[] out;
         int emLen = ceil(emBits, 8);
         int PS = genPS(emLen);
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-
-        // Step 6
         byte[] hHash = sha256(M);
 
-        // Step 8 + 7
+        DB = genDB(salt, PS);
+        byte[] dbMask = MGF(hHash, emLen - hLen - 1, hLen);
+        byte[] maskedDB = xorByteArrays(DB, dbMask);
+
+        maskedDB = paddZeros(maskedDB, (8*emLen) - emBits);
+
+        ConcatenateStream.write( maskedDB );
+        ConcatenateStream.write( hHash );
+        ConcatenateStream.write( (byte)0xbc );
+
+        byte[] out = ConcatenateStream.toByteArray();
+
+        if (out.length != modBits/8)
+          throw new ArithmeticException("length != modBits/8");
+
+        return out;
+    }
+    private byte[] genDB (byte[] salt, int PS) throws IOException
+    {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
         if (PS > 0)
         {
             for (int i = 0; i < PS; i++)
@@ -101,35 +119,9 @@ public class RSAOAEPSign extends RSAOAEP
             if (salt != null)
                 stream.write( salt );
         }
-        DB = stream.toByteArray();
-        stream.reset();
-
-        // Step 8
-        byte[] dbMask = MGF(hHash, emLen - hLen - 1, hLen);
-
-        // Step 10
-        byte[] maskedDB = xorByteArrays(DB, dbMask);
-
-        // Step 11
-        int temp = (8*emLen)-emBits;
-
-        BitSet maskedDBBitset = BitSet.valueOf(maskedDB);
-        for (int i = 7; i > 7 - temp; i--)
-            maskedDBBitset.set(i, false);
-        maskedDB = maskedDBBitset.toByteArray();
-
-        // Step 12
-        stream.write( maskedDB );
-        stream.write( hHash );
-        stream.write( (byte)0xbc );
-
-        out = stream.toByteArray();
-
-        if (out.length != modBits/8)
-          throw new ArithmeticException("length != modBits/8");
-
-        return out;
+        return stream.toByteArray();
     }
+
     private byte[] genSalt()
     {
         byte[] out;
@@ -165,4 +157,8 @@ public class RSAOAEPSign extends RSAOAEP
         return emLen - sLen - hLen - 2;
     }
     public byte[] getSignature() { return signature; }
+    public String getSignatureBase64String()
+    {
+        return new String(Base64.getEncoder().encode(signature));
+    }
 }

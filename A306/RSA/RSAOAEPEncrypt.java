@@ -3,6 +3,7 @@ package RSA;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.Random;
 
 import static java.lang.Math.pow;
@@ -35,7 +36,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
         this.lHash = sha256(L);
 
         if(k < lHash.length*2 + 2)
-            throw new ArithmeticException("Decryption error; k less than lHash*2+2");
+            throw new ArithmeticException("Encryption error; k less than lHash*2+2");
         if(M.length > k - lHash.length*2 -2 )
             throw new IllegalArgumentException("Message too long, at most k - lHash*2 - 2 bytes");
 
@@ -141,6 +142,10 @@ public class RSAOAEPEncrypt extends RSAOAEP
     public byte[] getEncryptedMessage()
     {
         return this.encryptedMessage;
+    }
+    public String getEncryptedMessageBase64String ()
+    {
+        return new String(Base64.getEncoder().encode(encryptedMessage));
     }
 
 }

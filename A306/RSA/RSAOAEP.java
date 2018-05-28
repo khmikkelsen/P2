@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.BitSet;
 
 abstract class RSAOAEP
 {
@@ -98,6 +99,16 @@ abstract class RSAOAEP
 
         return null;
     }
+    // Bit padding for verification & signing
+    protected byte[] paddZeros(byte[] arrToPadd, int amountToPadd)
+    {
+        BitSet arrToPaddBitset = BitSet.valueOf(arrToPadd);
+        for (int i = 7; i > 7 - amountToPadd; i--)
+            arrToPaddBitset.set(i, false);
+
+        return arrToPaddBitset.toByteArray();
+    }
+
     /*
      * \ceil method, returns ceiling of two integers.
      */

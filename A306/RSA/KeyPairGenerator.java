@@ -15,12 +15,13 @@ public class KeyPairGenerator extends RSAOAEP {
         genKeys(keyBitSize / 2, new BigInteger("65537"));
     }
 
-    private void genKeys(int keyBitsSize, BigInteger publicExponent) throws IOException {
-
+    private void genKeys(int keyBitsSize, BigInteger publicExponent) throws IOException
+    {
         BigInteger p, q, lambda;
         SecureRandom rand = new SecureRandom();
 
-        while (true) {
+        while (true)
+        {
             p = BigInteger.probablePrime(keyBitsSize, rand);
             q = BigInteger.probablePrime(keyBitsSize, rand);
             BigInteger rsaMod = p.multiply(q);
