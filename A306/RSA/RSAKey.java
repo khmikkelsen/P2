@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Base64;
+import java.util.Objects;
 
 /**
  * RSAKey
@@ -88,5 +89,21 @@ public class RSAKey {
     @Override
     public String toString() {
         return n.toString(16) + "-\n" + exponent.toString(16);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RSAKey rsaKey = (RSAKey) o;
+        return Objects.equals(n, rsaKey.n) &&
+                Objects.equals(exponent, rsaKey.exponent) &&
+                Objects.equals(base64Key, rsaKey.base64Key);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(n, exponent, base64Key);
     }
 }

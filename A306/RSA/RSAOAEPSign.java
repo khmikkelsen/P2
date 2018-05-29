@@ -104,8 +104,7 @@ public class RSAOAEPSign extends RSAOAEP
     {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-        if (PS > 0)
-        {
+        if (PS > 0) {
             for (int i = 0; i < PS; i++)
                 stream.write( (byte) 0x0);
 
@@ -113,23 +112,20 @@ public class RSAOAEPSign extends RSAOAEP
             if (salt != null)
                 stream.write( salt );
         }
-        else
-        {
+        else {
             stream.write( (byte) 0x01 );
             if (salt != null)
                 stream.write( salt );
         }
         return stream.toByteArray();
     }
-
     private byte[] genSalt()
     {
         byte[] out;
 
         if (sLen <= 0)
             out = null;
-        else
-        {
+        else {
             out = new byte[sLen];
             new Random().nextBytes(out);
         }
@@ -147,9 +143,7 @@ public class RSAOAEPSign extends RSAOAEP
         if (salt != null)
             stream.write( salt );
 
-        byte[] out = stream.toByteArray();
-
-        return out;
+        return stream.toByteArray();
     }
 
     private int genPS(int emLen)

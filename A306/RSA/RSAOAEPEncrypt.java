@@ -12,16 +12,15 @@ public class RSAOAEPEncrypt extends RSAOAEP
 {
     private byte[] M;
     private byte[] EM;
-
     private byte[] L;
     private byte[] lHash;
     private byte[] DB;
-    private int PS;
+    private byte[] encryptedMessage;
 
-    private RSAKey recipient;
+    private int PS;
     private int k;
 
-    private byte[] encryptedMessage;
+    private RSAKey recipient;
 
     public RSAOAEPEncrypt(String message, RSAKey recipient) throws IOException
     {
@@ -113,23 +112,19 @@ public class RSAOAEPEncrypt extends RSAOAEP
     private byte[] genDB() throws IOException
     {
         ByteArrayOutputStream DB = new ByteArrayOutputStream();
-
         DB.write( lHash );
 
-        if (PS <= 0)
-        {
+        if (PS <= 0) {
             DB.write(0x01);
             DB.write( M );
         }
-        else
-        {
+        else {
             for (int i = 0; i < PS; i++)
                 DB.write( 0x00 );
 
             DB.write( 0x01);
             DB.write( M );
         }
-
         return DB.toByteArray();
     }
     // Returns amount of 0 bytes to pad in DB, k - M.length - 2*hLen - 2 bytes

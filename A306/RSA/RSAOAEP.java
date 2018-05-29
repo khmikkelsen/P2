@@ -27,16 +27,14 @@ abstract class RSAOAEP
         ByteArrayOutputStream outputT = new ByteArrayOutputStream( );
         ByteArrayOutputStream outputC = new ByteArrayOutputStream( );
 
-        for (int i = 0; i < ceil; i++)
-        {
+        for (int i = 0; i < ceil; i++) {
             outputC.write( seed );
             outputC.write( I2OSP(BigInteger.valueOf(i), 4) );
 
-            byte[] temp = sha256(outputC.toByteArray());
+            byte[] seedAndCounter = sha256(outputC.toByteArray());
 
             outputT.write( outputT.toByteArray() );
-            outputT.write( temp );
-
+            outputT.write( seedAndCounter );
             outputC.reset();
         }
 
