@@ -7,6 +7,8 @@ import com.google.gson.GsonBuilder;
 
 public class JsonUtil {
     private static Gson gsonParser;
+    private static Gson prettyParser;
+
 
     static {
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -15,10 +17,15 @@ public class JsonUtil {
         gsonBuilder.registerTypeAdapter(Signature.class, new SignatureSerializer());
         gsonBuilder.registerTypeAdapter(Signature.class, new SignatureDeserializer());
 
-        gsonParser = gsonBuilder.create();
+        gsonParser = gsonBuilder.disableHtmlEscaping().create();
+        prettyParser = gsonBuilder.disableHtmlEscaping().setPrettyPrinting().create();
     }
 
     public static Gson getParser() {
         return gsonParser;
+    }
+
+    public static Gson getPrettyParser() {
+        return prettyParser;
     }
 }

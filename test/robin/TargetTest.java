@@ -75,4 +75,14 @@ class TargetTest {
         BigInteger num2 = Target.calculateBigIntergerTarget(compactTarget);
         assertEquals(num1, num2);
     }
+
+    @Test
+    void t01() {
+        String compact = "01012345";
+
+        BigInteger num1 = new BigInteger("1", 10);
+        BigInteger num2 = Target.calculateBigIntergerTarget(compact);
+
+        assertEquals(num1, num2);
+    }
 }

@@ -2,6 +2,7 @@ package UserClient;
 
 import RSA.KeyPairGenerator;
 import RSA.RSAKey;
+import RSA.RSAKeyPair;
 import com.google.gson.JsonSyntaxException;
 import robin.Message;
 import robin.commands.SendMessage;
@@ -26,105 +27,40 @@ public class UserClient {
     String isKeys;
     */
 
+    private final String keyPath = "C:\\p2_blockchain\\userclient\\user.txt";
 
     public static void main(String args[]) {
-
         UserClient u = new UserClient();
-        u.genCopyKeys();
+//        u.genCopyKeys();
     }
 
-    void genCopyKeys() {
-        KeyPairGenerator newGenKeys = null;
-        {
-            try {
-                newGenKeys = new KeyPairGenerator(2048);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    private void saveKeys(RSAKeyPair keyPair) {
+        Path pt = Paths.get(keyPath);
 
-        String keyPairString = JsonUtil.getParser().toJson(newGenKeys);
-        writeToFile("C:\\Users\\M2\\IdeaProjects\\WorkingP2" +
-                "\\A306\\UserClient\\user2.txt", keyPairString);
+
     }
 
-    public static void writeToFile(String path, String Keys) {
-        Path fileToCheckFor = Paths.get(path);
-        if (!exists(fileToCheckFor)) {
-            Charset charset = Charset.forName("UTF-8");
-
-            try (BufferedWriter out = Files.newBufferedWriter(fileToCheckFor, charset, StandardOpenOption.CREATE_NEW)) {
-                out.write(Keys);
-
-            } catch (IOException e) {
-                System.out.println("Error creating, and/or writing to file");
-            }
-        }
-    }
-
-    public void readFile(String path) {
-        Path pt = Paths.get(path);
-        String inputKeys = null;
-
+    private RSAKeyPair getSavedKeys() {
+        Path pt = Paths.get(keyPath);
+        String fileInput = null;
         try (BufferedReader reader = Files.newBufferedReader(pt)) {
-            String input = null;
+
             String line = null;
             while ((line = reader.readLine()) != null) {
-                input += line;
+                fileInput += line;
             }
         } catch (IOException e) {
             System.out.println("Error trying to read file");
+            return null;
         }
 
         try {
-            KeyPairGenerator savedKeyPair = JsonUtil.getParser
-                    ().fromJson(inputKeys, KeyPairGenerator
-                    .class);
-            if (savedKeyPair != null) { /* Do something with keys */ }
-            else {
+            RSAKeyPair savedKeyPair = JsonUtil.getParser().fromJson(fileInput, RSAKeyPair.class);
 
-            }
-        } catch (JsonSyntaxException e) {
+            return savedKeyPair;
+        } catch (Exception e) {
+            return null;
             // Create new keypair.
         }
     }
-
-    /*
-    private String findIfKeysInUse(String dirPath) throws
-            IOException {
-
-        File dir = new File(dirPath);
-
-        if (exists(Paths.get(dir.getPath())) && dir.isDirectory()) {
-            //list of files and directories in specified directory
-            File[] listOfFiles = dir.listFiles();
-
-            if (listOfFiles != null) {
-
-                for (File listOfFile1 : listOfFiles) {
-                    //test om filen indeholder key
-                    readFile(listOfFile1.getAbsolutePath());
-                }
-
-                for (File listOfFile : listOfFiles) {
-                    if (listOfFile.isDirectory()) {
-                        return findIfKeysInUse(listOfFile.getPath());
-                    }
-                }
-
-            }
-        }
-        if()
-                return
-        else
-            return
-    }
-    */
-
-
-
-       /* private void sendMessage() {
-        String jsonCommand = JsonUtil.getParser().toJson(new
-                SendMessage());
-    }*/
 }
