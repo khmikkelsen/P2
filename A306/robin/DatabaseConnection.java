@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseConnection {
 
     // SQLite connection string
-    private static final String url = "jdbc:sqlite:C://p2_blockchain/sqlite/p2_blockchain.db";
+    private static final String url = "jdbc:sqlite:C://sqlite/db/p2_blockchain.db";
 
     public static void setup() throws SQLException {
         // SQL statement for creating a new table

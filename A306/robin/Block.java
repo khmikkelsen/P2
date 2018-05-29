@@ -28,6 +28,7 @@ public class Block {
         this.timestamp = new Date().getTime();
         this.prevHeadhash = prevHeadhash;
         this.compactTarget = compactTarget;
+        this.merkleRootHash = BlockUtil.calculateMerkleRootHash(messages);
         this.messages = messages;
     }
 

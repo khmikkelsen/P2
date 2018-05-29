@@ -42,11 +42,14 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.decryptedMessage = decryptRSA(encryptedMessage);
         this.DM = decodeOAEP();
     }
-    /*
-     * RSA Decrypt primitive
+
+    /**
+     * RSA Decrypt primitive.
      * Computes an integer representative of the encrypted message, c. Computes m = c^k (mod n),
      * where k is the recipients private k, and n the corresponding RSA modulus.
      * Outputs an integer representative of k length (length of RSA modulus).
+     * @param encryptedMessage Encrypted message to be decrypted.
+     * @return Returns the decrypted byte array.
      */
     public byte[] decryptRSA(byte[] encryptedMessage)
     {
@@ -62,12 +65,15 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
         return I2OSP(m, k);
     }
-    /*
-     * RSAOAEP decode primitive
+
+    /**
+     * RSAOAEP decode primitive.
      * Extract the first byte from the encrypted message, if not 0, output invalid.
      * Extract the next lHash bytes to get maskedSeed, and the last k - lHash - 1, where k denotes length of RSA modulus
      * to get maskedDB. Let seedMask be MGF(maskedDB) and the seed to be maskedSeed XOR seedMask. Let dbMask MGF(seed),
      * a byte string of k - lHash - 1 length. Let DB be maskedDB XOR dbMask. Extract M from DB, and output M.
+     * @return Returns decoded message M.
+     * @throws IOException I/O error.
      */
     private byte[] decodeOAEP() throws IOException
     {

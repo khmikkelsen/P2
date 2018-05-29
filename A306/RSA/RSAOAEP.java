@@ -9,9 +9,15 @@ import java.util.BitSet;
 
 abstract class RSAOAEP
 {
-    /*
-     * Mask-generation function
-     * Returns a masked byte string of a desired length maskLen. hLen defines the length of output from hash function.
+    /**
+     * Mask generation function, MGF1, from RSA PKCS#1.
+     * Takes an input byte array and masks of a desired length maskLen.
+     * hLen defines the length of the output from desired hash function. In this implementation, SHA-256 is used.
+     * @param seed Byte array to be masked.
+     * @param maskLen Desired length of mask.
+     * @param hLen Length of output from hash function. In this implementation SHA-256.
+     * @return Returns the masked byte array of byte length maskLen.
+     * @throws IOException IOException thrown by ByteArrayOutputStream in case of I/O error.
      */
     protected byte[] MGF(byte[] seed, int maskLen, int hLen) throws IOException
     {
@@ -39,8 +45,12 @@ abstract class RSAOAEP
 
         return mask;
     }
-    /*
-     * Performs XOR operation on 2 byte arrays
+
+    /**
+     * XOR operation on two byte arrays. Throws exception if they are not of equal length.
+     * @param arr1 First array to be XOR'd.
+     * @param arr2 Second array to be XOR'd.
+     * @return Returns the XOR'd byte array.
      */
     protected byte[] xorByteArrays(byte[] arr1, byte[] arr2)
     {
@@ -54,9 +64,13 @@ abstract class RSAOAEP
 
         return out;
     }
-    /*
-     * Integer-To-Octet-String-Primitive
+
+    /**
+     * Integer-To-Octet-String-Primitive.
      * Method returns an octet string representative of an integer of a desired length xLen.
+     * @param x BigInteger to convert to byte array.
+     * @param xLen Desired length of byte array.
+     * @return Returns byte array representative of input BigInteger of the desired length.
      */
     protected byte[] I2OSP (BigInteger x, int xLen)
     {
@@ -72,9 +86,11 @@ abstract class RSAOAEP
 
         return out;
     }
-    /*
-     * Octet-String-To-Integer-Primitive
-     * Method returns an integer representative of input byte array.
+
+    /**
+     * Converts a byte array to a BigInteger representative.
+     * @param octet Byte array to convert.
+     * @return BigInteger representative of input byte array.
      */
     protected BigInteger OS2IP (byte[] octet)
     {
@@ -87,7 +103,12 @@ abstract class RSAOAEP
 
         return out;
     }
-    // Method returns hash of input byte array
+
+    /**
+     * Hash function to be used in this implementation. SHA-256. Output of this is of 32 byte length.
+     * @param octet Byte array to hash.
+     * @return Returns hashed byte array.
+     */
     protected byte[] sha256(byte[] octet)
     {
         MessageDigest digest;
@@ -99,7 +120,13 @@ abstract class RSAOAEP
 
         return null;
     }
-    // Bit padding for verification & signing
+
+    /**
+     * For usage in RSAOAEPSign and RSAOAEPVerify. Padds the left most amountToPadd bits in the leftmost byte.
+     * @param arrToPadd Byte array to padd.
+     * @param amountToPadd Amount of bits to padd in leftmost byte.
+     * @return Returns the padded byte array.
+     */
     protected byte[] paddZeros(byte[] arrToPadd, int amountToPadd)
     {
         BitSet arrToPaddBitset = BitSet.valueOf(arrToPadd);
@@ -109,8 +136,11 @@ abstract class RSAOAEP
         return arrToPaddBitset.toByteArray();
     }
 
-    /*
-     * \ceil method, returns ceiling of two integers.
+    /**
+     * Ceiling method. Returns the ceiling of two integers.
+     * @param x The dividend.
+     * @param y The divisor.
+     * @return Ceiling integer of x divided by y.
      */
     protected int ceil(int x, int y)
     {
