@@ -12,6 +12,7 @@ import java.util.List;
 public class DatabaseConnection {
 
     // SQLite connection string
+
     private String url = "jdbc:sqlite:";
 
     public void setup() throws SQLException {

@@ -2,22 +2,44 @@ package RSA;
 
 import org.bouncycastle.asn1.*;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Base64;
 import java.util.Objects;
 
+/**
+ * RSAKey
+ * Class to be used for a key, containing RSA modulus n and the exponent.
+ * Has base64 string from ASN.1 standard.
+ * Constructors allow from either BigInteger n and exponent or from a base64 string in ASN.1 standard.
+ */
 public class RSAKey {
     private BigInteger n;
     private BigInteger exponent;
     private String base64Key;
 
+    /**
+     * Constructor for
+     * @param n RSA modulus
+     * @param exponent RSA exponent
+     * @throws IOException caused by IOException in calculateBase64String
+     */
     public RSAKey(BigInteger n, BigInteger exponent) throws IOException {
         this.n = n;
         this.exponent = exponent;
         this.base64Key = calculateBase64String();
     }
 
+    /**
+     *
+     * @param base64Key Takes a base64 in ASN.1 standard string,
+     *                 and decodes it to an RSAKey with BigIntegers RSA modulus and exponent
+     * @throws InvalidRSAKeyException If base64 string cannot be converted, throws an InvalidRSAKeyException.
+     * @throws IOException IOException caused by ASN.1 conversion.
+     */
     public RSAKey(String base64Key) throws InvalidRSAKeyException, IOException {
         byte[] decodedBytes = Base64.getDecoder().decode(base64Key);
 
@@ -48,7 +70,9 @@ public class RSAKey {
 
         return base64Key;
     }
-
+    /*
+     * Getters
+     */
     public BigInteger getModulus() {
         return n;
     }
@@ -60,7 +84,6 @@ public class RSAKey {
     public String getBase64String() {
         return base64Key;
     }
-
 
     @Override
     public String toString() {

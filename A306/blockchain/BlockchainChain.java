@@ -93,7 +93,7 @@ public class BlockchainChain {
     }
 
     //check if blocks are valid
-        void isChainValid() {
+    void isChainValid() {
         for (int i = 0; i < chain.size() - 1; i++) {
 
             final BlockVers2 currentBlock = chain.get(i);
