@@ -8,6 +8,8 @@ import simulator.Simulator;
 import node.network.commands.*;
 import json.JsonUtil;
 
+import java.sql.SQLException;
+
 public class NetworkHandler {
 
     NodeClient nodeClient;
@@ -60,7 +62,7 @@ public class NetworkHandler {
         }
     }
 
-    public void broadcastBlock(Simulator simulator, Block newBlock) {
+    public void broadcastBlock(Simulator simulator, Block newBlock) throws SQLException {
         BlockDataCommand blockDataCommandCommand = new BlockDataCommand(newBlock);
         String command = JsonUtil.getParser().toJson(blockDataCommandCommand);
         simulator.broadcastBlock(nodeClient, command);

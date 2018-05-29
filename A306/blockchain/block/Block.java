@@ -8,6 +8,7 @@ import json.JsonUtil;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class Block {
@@ -119,6 +120,27 @@ public class Block {
     public String getJSon ()
     {
         return JsonUtil.getParser().toJson(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Block block = (Block) o;
+        return nonce == block.nonce &&
+                timestamp == block.timestamp &&
+                Objects.equals(prevHeadhash, block.prevHeadhash) &&
+                Objects.equals(compactTarget, block.compactTarget) &&
+                Objects.equals(merkleRootHash, block.merkleRootHash) &&
+                Objects.equals(index, block.index) &&
+                Objects.equals(hash, block.hash) &&
+                Objects.equals(messages, block.messages);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(prevHeadhash, compactTarget, nonce, merkleRootHash, timestamp, index, hash, messages);
     }
 }
 

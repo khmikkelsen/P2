@@ -29,7 +29,10 @@ public class UserClient {
 
     public UserClient(Simulator simulator) {
         this.simulator = simulator;
+        start();
+    }
 
+    public void start() {
         keyPair = getSavedKeys();
 
         if (keyPair == null) {

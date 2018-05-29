@@ -55,8 +55,8 @@ public class NodeClient implements MiningCompleteListener {
             if (newBlock != null) {
                 databaseConnection.addBlock(newBlock);
 
-                System.out.println(simulatorName + " successfully mined a blockchain.block, message count: " + messagePool.size());
-//                System.out.println(JsonUtil.getPrettyParser().toJson(databaseConnection.getBlockTable()));
+                System.out.println(simulatorName + " successfully mined a block, message count: " + messagePool.size());
+//                System.out.println(JsonUtil.getPrettyParser().toJson(databaseConnection.getBlockchain()));
 
                 messagePool.removeAll(newBlock.getMessages());
 
@@ -125,7 +125,7 @@ public class NodeClient implements MiningCompleteListener {
                 databaseConnection.addBlock(newBlock);
 
                 System.out.println(simulatorName + " added incoming blockchain.block to database");
-//                System.out.println(JsonUtil.getPrettyParser().toJson(databaseConnection.getBlockTable()));
+//                System.out.println(JsonUtil.getPrettyParser().toJson(databaseConnection.getBlockchain()));
 
             }
         } catch (SQLException e) {
@@ -243,7 +243,7 @@ public class NodeClient implements MiningCompleteListener {
             RSAKey genesisPrivateKey = new RSAKey("MIICCQKCAQEAgu1qZL08/NV5d423pAi1IA8IxzSROVl6t4zWRstR9Olrpyb4QNRfg5kzN7XpcmmXcIDAEu32u1JAKlRNENpERH21odU99g7Rocxz6gCtVK76ucti4cn4wgIgQbzA03Jn01rGo4WDUCgPQUZpdQJQBi4+uGp9tDPQCswVpSAbWXxvQwLlpZ0IohfdjHo0axpcsDt9spPIIHceoLPLkGildS0ye+IO50wfYfsM3lZSlVSiWUIITOqJQtWcSo7ebGIDyeC1r5Th0dCpKSPjAtAACwoonoRVJZaVVFpAq0AS67TKQOHStopKmoBbsO84L+LQ4+47DveuDxcWac05z00jtQKCAQACeiCYGSl2eh54cn6zNIlNZY4WYL+k91+rlIH4UxVGSNqaeLxb06Nz+gRz98sxI4oeh4e6w/RLUnt4IYystohx8vPqWikNhvW/NdRKl3/aro3RUTsEx71fBEsdG0ewUxrfmY57s7AKkUYf8h0Bfk1KdKUHTa0k/pGffAF71IntQoxqfsPRVgHgQeQ0BN7OuZc+dDLxbA5MEGRSyWzxmc01P6VP2pmndG3WE9l4q5z84m4AunBMA/5tr7bB4I9I49X2J5D/TEDWTCaU1YWia7t2ljdl9c/K5rdbDQ1ZHPrAZc4BZWpvnlr72dNbAu2sU/AXDzGSJn4w+nZUgB03wcNJ");
             RSAKey genesisPublicKey = new RSAKey("MIIBCgKCAQEAgu1qZL08/NV5d423pAi1IA8IxzSROVl6t4zWRstR9Olrpyb4QNRfg5kzN7XpcmmXcIDAEu32u1JAKlRNENpERH21odU99g7Rocxz6gCtVK76ucti4cn4wgIgQbzA03Jn01rGo4WDUCgPQUZpdQJQBi4+uGp9tDPQCswVpSAbWXxvQwLlpZ0IohfdjHo0axpcsDt9spPIIHceoLPLkGildS0ye+IO50wfYfsM3lZSlVSiWUIITOqJQtWcSo7ebGIDyeC1r5Th0dCpKSPjAtAACwoonoRVJZaVVFpAq0AS67TKQOHStopKmoBbsO84L+LQ4+47DveuDxcWac05z00jtQIDAQAB");
 
-            Message genesisMessage = new Message("Genesis blockchain.block", genesisPublicKey, genesisPublicKey);
+            Message genesisMessage = new Message("Genesis block", genesisPublicKey, genesisPublicKey);
             genesisMessage.signMessage(genesisPrivateKey);
 
             Block genesisBlock = new Block("00007836244f37d24bf9b4f59fbe51ee85d54f12cc2349fde04199b5dd969013",
@@ -259,5 +259,10 @@ public class NodeClient implements MiningCompleteListener {
         } catch (SQLException | InvalidRSAKeyException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public List<Block> getBlockchain() throws SQLException {
+        return databaseConnection.getBlockchain();
     }
 }

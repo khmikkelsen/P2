@@ -44,7 +44,7 @@ public class DatabaseConnection {
         return conn;
     }
 
-    public List<Block> getBlockTable() throws SQLException {
+    public List<Block> getBlockchain() throws SQLException {
 
         String blockQuery = "SELECT block_id FROM blocks where block_id > 0";
 
@@ -263,7 +263,7 @@ public class DatabaseConnection {
                 + " signature text NOT NULL,\n"
                 + "	message text NOT NULL,\n"
                 + "	block_id int NOT NULL,\n"
-                + " FOREIGN KEY(block_id) REFERENCES blockchain.block(block_id)\n"
+                + " FOREIGN KEY(block_id) REFERENCES block(block_id)\n"
                 + ");";
 
         try (Connection conn = DriverManager.getConnection(url);

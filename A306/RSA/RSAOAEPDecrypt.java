@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 
-public class RSAOAEPDecrypt extends RSAOAEP
-{
+public class RSAOAEPDecrypt extends RSAOAEP {
     private byte[] L;
     private byte[] lHash;
     private byte[] decryptedMessage;
@@ -15,8 +14,7 @@ public class RSAOAEPDecrypt extends RSAOAEP
 
     private RSAKey recipient;
 
-    public RSAOAEPDecrypt(byte[] encryptedMessage, RSAKey recipient) throws IOException
-    {
+    public RSAOAEPDecrypt(byte[] encryptedMessage, RSAKey recipient) throws IOException {
         this.recipient = recipient;
         if (recipient.getModulus().bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
@@ -29,8 +27,8 @@ public class RSAOAEPDecrypt extends RSAOAEP
         this.decryptedMessage = decryptRSA(encryptedMessage);
         this.decodedMessage = decodeOAEP();
     }
-    public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, RSAKey recipient) throws IOException
-    {
+
+    public RSAOAEPDecrypt(byte[] encryptedMessage, byte[] label, RSAKey recipient) throws IOException {
         this.recipient = recipient;
         if (recipient.getModulus().bitLength() % 8 != 0)
             throw new IllegalArgumentException("Keys invalid");
@@ -48,11 +46,11 @@ public class RSAOAEPDecrypt extends RSAOAEP
      * Computes an integer representative of the encrypted message, c. Computes m = c^k (mod n),
      * where k is the recipients private k, and n the corresponding rsa modulus.
      * Outputs an integer representative of k length (length of rsa modulus).
+     *
      * @param encryptedMessage Encrypted message to be decrypted.
      * @return Returns the decrypted byte array.
      */
-    public byte[] decryptRSA(byte[] encryptedMessage)
-    {
+    public byte[] decryptRSA(byte[] encryptedMessage) {
         if (encryptedMessage.length != k)
             throw new IllegalArgumentException("Encrypted message length != rsa modulus length");
 
@@ -68,11 +66,11 @@ public class RSAOAEPDecrypt extends RSAOAEP
      * Extract the next lHash bytes to get maskedSeed, and the last k - lHash - 1, where k denotes length of rsa modulus
      * to get maskedDB. Let seedMask be MGF(maskedDB) and the seed to be maskedSeed XOR seedMask. Let dbMask MGF(seed),
      * a byte string of k - lHash - 1 length. Let DB be maskedDB XOR dbMask. Extract M from DB, and output M.
+     *
      * @return Returns decoded message M.
      * @throws IOException I/O error.
      */
-    private byte[] decodeOAEP() throws IOException
-    {
+    private byte[] decodeOAEP() throws IOException {
         if (decryptedMessage[0] != 0)
             throw new ArithmeticException("Leftmost byte of decrypted message != 0");
 
@@ -90,12 +88,12 @@ public class RSAOAEPDecrypt extends RSAOAEP
         int messageIndex = calcMessageIndex(DB);
 
         byte[] M = new byte[DB.length - messageIndex];
-        System.arraycopy(DB, messageIndex , M, 0, DB.length - messageIndex);
+        System.arraycopy(DB, messageIndex, M, 0, DB.length - messageIndex);
 
         return M;
     }
-    private int calcMessageIndex(byte[] DB)
-    {
+
+    private int calcMessageIndex(byte[] DB) {
         boolean check = false;
         int j = lHash.length;
 
@@ -111,4 +109,8 @@ public class RSAOAEPDecrypt extends RSAOAEP
         }
         return j;
     }
-    public byte[] getDecryptedMessage() { return this.decodedMessage; }
+
+    public byte[] getDecryptedMessage() {
+        return this.decodedMessage;
+    }
+}
