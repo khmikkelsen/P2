@@ -1,10 +1,9 @@
-package RSA;
+package rsa;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Base64;
-import java.util.BitSet;
 import java.util.Random;
 
 public class RSAOAEPSign extends RSAOAEP

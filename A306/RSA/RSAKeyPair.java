@@ -1,4 +1,4 @@
-package RSA;
+package rsa;
 
 /**
  * Class for a pair of RSAKeys.

@@ -1,10 +1,10 @@
 package userclient;
 
-import RSA.*;
-import robin.Message;
-import robin.Simulator;
-import robin.commands.SendMessage;
-import robin.json.JsonUtil;
+import rsa.*;
+import blockchain.message.Message;
+import simulator.Simulator;
+import node.network.commands.SendMessageCommand;
+import json.JsonUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -48,7 +48,7 @@ public class UserClient {
      */
     private void broadcastMessage(Message message) {
 
-        SendMessage command = new SendMessage(message);
+        SendMessageCommand command = new SendMessageCommand(message);
         String commandString = JsonUtil.getParser().toJson(command);
 
         // Broadcast message to nodes (through simulator)
@@ -93,7 +93,7 @@ public class UserClient {
             try {
                 recipientPublicKey = new RSAKey(scanner.nextLine());
             } catch (IllegalArgumentException | IOException | InvalidRSAKeyException e) {
-                System.out.println("Invalid RSA public key");
+                System.out.println("Invalid rsa public key");
             }
         }
 

@@ -1,4 +1,4 @@
-package RSA;
+package rsa;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.BitSet;
 abstract class RSAOAEP
 {
     /**
-     * Mask generation function, MGF1, from RSA PKCS#1.
+     * Mask generation function, MGF1, from rsa PKCS#1.
      * Takes an input byte array and masks of a desired length maskLen.
      * hLen defines the length of the output from desired hash function. In this implementation, SHA-256 is used.
      * @param seed Byte array to be masked.

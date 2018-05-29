@@ -1,4 +1,4 @@
-package RSA;
+package rsa;
 
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
@@ -11,6 +11,7 @@ class RSAKeyTest
     void testHashLength() throws IOException
     {
         KeyPairGenerator keyPairGenerator = new KeyPairGenerator(2048);
-        assertEquals(keyPairGenerator.getPublicKey().getBase64String().length(), 360);
+        RSAKeyPair pair = keyPairGenerator.generateKeyPair();
+        assertEquals(pair.getPublicKey().getBase64String().length(), 360);
     }
 }

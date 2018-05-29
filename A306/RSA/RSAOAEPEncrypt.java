@@ -1,4 +1,4 @@
-package RSA;
+package rsa;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -66,9 +66,9 @@ public class RSAOAEPEncrypt extends RSAOAEP
         this.encryptedMessage = RSAEncrypt();
     }
 
-    /* RSA Encryption primitive
+    /* rsa Encryption primitive
      * Compute for byte string EM an integer representative m. Compute c = m^e (mod n), where e is the recipient's
-     * public key and n is the recipients RSA modulus. Convert the integer c to be a k (RSA modulus length) byte string, C.
+     * public key and n is the recipients rsa modulus. Convert the integer c to be a k (rsa modulus length) byte string, C.
      * Output C.
      */
     private byte[] RSAEncrypt()
@@ -77,7 +77,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
         BigInteger c = m.modPow(recipient.getExponent(), recipient.getModulus());
         byte[] C = I2OSP(c, k);
         if (C.length != k)
-            throw new ArithmeticException("Ciphertext length not equal to RSA Modulus length");
+            throw new ArithmeticException("Ciphertext length not equal to rsa Modulus length");
 
         return C;
     }
@@ -107,7 +107,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
         return EM;
     }
 
-    // Generate DB(data block) consisting of DB = lHash || PS || 0x01 || M or
+    // Generate DB(data blockchain.block) consisting of DB = lHash || PS || 0x01 || M or
     // DB = lHash || 0x01 || M incase PS is empty
     private byte[] genDB() throws IOException
     {
