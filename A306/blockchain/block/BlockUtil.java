@@ -54,7 +54,9 @@ public class BlockUtil {
             }
 
             if (nodes.size() > hashedCount) {
-                newNodes.add(nodes.get(nodes.size() - 1));
+                String lastNode = nodes.get(nodes.size() - 1);
+                String combinedHash = StringUtil.applySha256(lastNode + lastNode);
+                newNodes.add(combinedHash);
             }
 
             return calculateMerkleRoot(newNodes);
