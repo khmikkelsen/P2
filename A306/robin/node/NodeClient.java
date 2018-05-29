@@ -5,7 +5,6 @@ import RSA.InvalidRSAKeyException;
 import RSA.RSAKey;
 import RSA.RSAOAEPVerify;
 import robin.*;
-import robin.json.JsonUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -34,7 +33,7 @@ public class NodeClient implements MiningCompleteListener {
         this.simulator = simulator;
         this.databaseConnection = databaseConnection;
 
-        mineGensisBlock();
+        mineGenesisBlock();
         networkHandler = new NetworkHandler(this);
     }
 
@@ -226,7 +225,7 @@ public class NodeClient implements MiningCompleteListener {
         return simulatorName;
     }
 
-    private void mineGensisBlock() {
+    private void mineGenesisBlock() {
         try {
             if (databaseConnection.getBlockCount() != 0) {
                 return;
@@ -238,7 +237,7 @@ public class NodeClient implements MiningCompleteListener {
             Message genesisMessage = new Message("Genesis block", genesisPublicKey, genesisPublicKey);
             genesisMessage.signMessage(genesisPrivateKey);
 
-            Block genisisBlock = new Block("00007836244f37d24bf9b4f59fbe51ee85d54f12cc2349fde04199b5dd969013",
+            Block genesisBlock = new Block("00007836244f37d24bf9b4f59fbe51ee85d54f12cc2349fde04199b5dd969013",
                     "0000000000000000000000000000000000000000000000000000000000000000",
                     "1e100000",
                     144267,
@@ -247,7 +246,7 @@ public class NodeClient implements MiningCompleteListener {
                     0,
                     Collections.singletonList(genesisMessage));
 
-            databaseConnection.addBlock(genisisBlock);
+            databaseConnection.addBlock(genesisBlock);
         } catch (SQLException | InvalidRSAKeyException | IOException e) {
             throw new RuntimeException(e);
         }
