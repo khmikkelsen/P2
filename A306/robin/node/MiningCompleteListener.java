@@ -6,5 +6,5 @@ import robin.DatabaseConnection;
 import java.sql.SQLException;
 
 public interface MiningCompleteListener {
-  void miningComplete(final Block block);
+    void onMiningComplete(final Block block);
 }

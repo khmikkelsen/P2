@@ -12,9 +12,10 @@ import java.util.List;
 public class DatabaseConnection {
 
     // SQLite connection string
-    private static final String url = "jdbc:sqlite:C://sqlite/db/p2_blockchain.db";
 
-    public static void setup() throws SQLException {
+    private String url = "jdbc:sqlite:";
+
+    public void setup() throws SQLException {
         // SQL statement for creating a new table
         String sql = "PRAGMA foreign_keys = ON;";
 
@@ -27,22 +28,20 @@ public class DatabaseConnection {
         createMessageTable();
     }
 
-    static {
-        try {
-            setup();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+
+    public DatabaseConnection(String url) throws SQLException {
+        this.url += url;
+        setup();
     }
 
-    private static Connection connect() throws SQLException {
+    private Connection connect() throws SQLException {
         // SQLite connection string
         Connection conn = DriverManager.getConnection(url);
 
         return conn;
     }
 
-    public static List<Block> getBlockTable() throws SQLException {
+    public List<Block> getBlockTable() throws SQLException {
 
         String blockQuery = "SELECT block_id FROM blocks where block_id > 0";
 
@@ -59,14 +58,14 @@ public class DatabaseConnection {
 
         List<Block> blocks = new ArrayList<>();
 
-        for (Long index: blockIndices) {
+        for (Long index : blockIndices) {
             blocks.add(getBlockByIndex(index));
         }
 
         return blocks;
     }
 
-    public static Block getBlockByIndex(long blockIndex) throws SQLException {
+    public Block getBlockByIndex(long blockIndex) throws SQLException {
         List<Message> messages = getMessagesInBlock(blockIndex);
 
         String blockQuery = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp FROM blocks where block_id = ?";
@@ -93,7 +92,7 @@ public class DatabaseConnection {
         return null;
     }
 
-    public static List<Message> getMessagesInBlock(long blockIndex) throws SQLException {
+    public List<Message> getMessagesInBlock(long blockIndex) throws SQLException {
         String messageQuery = "SELECT recipient, sender, signature, message FROM messages where block_id = ?";
 
         List<Message> messages = new ArrayList<>();
@@ -129,7 +128,7 @@ public class DatabaseConnection {
      * @return Index of the added block
      * @throws SQLException
      */
-    public static Long addBlock(Block block) throws SQLException {
+    public Long addBlock(Block block) throws SQLException {
         String query = "INSERT INTO blocks (hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp) VALUES(?,?,?,?,?,?)";
 
         try (Connection conn = connect(); PreparedStatement statement = conn.prepareStatement(query)) {
@@ -165,7 +164,7 @@ public class DatabaseConnection {
     }
 
 
-    public static long getBlockCount() throws SQLException {
+    public long getBlockCount() throws SQLException {
         // Block has now been inserted. Get it's id.
         String query = "SELECT block_id FROM blocks ORDER BY block_id DESC LIMIT 1;";
 
@@ -185,7 +184,7 @@ public class DatabaseConnection {
         }
     }
 
-    public static Block getLatestBlock() throws SQLException {
+    public Block getLatestBlock() throws SQLException {
         String blockQuery = "SELECT block_id, hash, previous_hash, merkle_root_hash, compact_difficulty, nonce, mined_timestamp FROM blocks ORDER BY block_id DESC LIMIT 1";
 
         String hash;
@@ -218,7 +217,7 @@ public class DatabaseConnection {
         return new Block(hash, previousHash, compactTarget, nonce, merkleRootHash, minedTimestamp, blockIndex, messages);
     }
 
-    private static void addMessages(List<Message> messages, long blockIndex) throws SQLException {
+    private void addMessages(List<Message> messages, long blockIndex) throws SQLException {
         String query = "INSERT INTO messages (recipient, sender, signature, message, block_id) VALUES(?,?,?,?,?)";
 
         for (Message m : messages) {
@@ -233,7 +232,7 @@ public class DatabaseConnection {
         }
     }
 
-    public static void createBlockTable() throws SQLException {
+    public void createBlockTable() throws SQLException {
         // SQL statement for creating a new table
         String query = "CREATE TABLE IF NOT EXISTS blocks (\n"
                 + "	block_id integer PRIMARY KEY AUTOINCREMENT,\n"
@@ -252,7 +251,7 @@ public class DatabaseConnection {
         }
     }
 
-    public static void createMessageTable() throws SQLException {
+    public void createMessageTable() throws SQLException {
         // SQL statement for creating a new table
         String query = "CREATE TABLE IF NOT EXISTS messages (\n"
                 + "	message_id integer PRIMARY KEY AUTOINCREMENT,\n"

@@ -9,15 +9,15 @@ import robin.node.NodeClient;
 
 import java.io.IOException;
 
-public class NetworkRequestHandler {
+public class NetworkHandler {
 
     NodeClient nodeClient;
 
-    public NetworkRequestHandler(NodeClient nodeClient) {
+    public NetworkHandler(NodeClient nodeClient) {
         this.nodeClient = nodeClient;
     }
 
-    public void handleIncomingRequest(String request) {
+    public void sendRequest(String request) {
         // Find out which command was invoked by mapping to NetworkCommand which has an Enum field.
         NetworkCommand c = JsonUtil.getParser().fromJson(request, NetworkCommand.class);
 
@@ -35,6 +35,20 @@ public class NetworkRequestHandler {
                 nodeClient.validateIncomingMessage(incomingMessage);
 
                 break;
+
+            case BLOCK_DATA:
+                Block incomingBlock;
+
+                try {
+                    BlockData blockData = JsonUtil.getParser().fromJson(request, BlockData.class);
+                    incomingBlock = blockData.getBlock();
+                } catch (JsonSyntaxException e) {
+                    break;
+                }
+
+                nodeClient.validateIncomingBlock(incomingBlock);
+
+                break;
             case GET_BLOCK_COUNT:
 
                 break;
@@ -47,18 +61,9 @@ public class NetworkRequestHandler {
         }
     }
 
-    private static void sendMessage(Message message) {
-        try {
-            RSAOAEPVerify verify = new RSAOAEPVerify(message.getSignature().getBytes(), message.getMessage().getBytes(), message.getSenderPublicKey());
-        } catch (IOException | BadVerificationException e) {
-            // Invalid signature.
-            return;
-        }
-
-        // TODO: Add to queue of messages and begin mining at some point.
-    }
-
-    private void sendBlockCount(long blockCount) {
-        // Create socket and respond.
+    public void broadcastBlock(Simulator simulator, Block newBlock) {
+        BlockData blockDataCommand = new BlockData(newBlock);
+        String command = JsonUtil.getParser().toJson(blockDataCommand);
+        simulator.broadcastBlock(nodeClient, command);
     }
 }

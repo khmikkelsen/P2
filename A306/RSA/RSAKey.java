@@ -16,7 +16,6 @@ import java.util.Objects;
  * Has base64 string from ASN.1 standard.
  * Constructors allow from either BigInteger n and exponent or from a base64 string in ASN.1 standard.
  */
-
 public class RSAKey {
     private BigInteger n;
     private BigInteger exponent;

@@ -6,5 +6,6 @@ public enum CommandType {
     @SerializedName("sendmessage") SEND_MESSAGE,
     @SerializedName("getblockcount") GET_BLOCK_COUNT,
     @SerializedName("getblock") GET_BLOCK,
+    @SerializedName("blockdata") BLOCK_DATA,
     UNKNOWN
 }

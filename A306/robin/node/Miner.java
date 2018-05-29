@@ -1,7 +1,7 @@
 package robin.node;
 
 import robin.Block;
-import robin.Chain;
+import robin.TargetUtil;
 import robin.DatabaseConnection;
 import robin.Message;
 
@@ -12,11 +12,13 @@ import java.util.List;
 public class Miner implements Runnable {
 
     private List<Message> messages;
+    private DatabaseConnection databaseConnection;
+
     private List<MiningCompleteListener> listeners = new ArrayList<>();
 
-
-    public Miner(List<Message> messages) {
+    public Miner(List<Message> messages, DatabaseConnection databaseConnection) {
         this.messages = messages;
+        this.databaseConnection = databaseConnection;
     }
 
     public final void addListener(MiningCompleteListener listener) {
@@ -28,12 +30,8 @@ public class Miner implements Runnable {
     }
 
     private final void notifyListeners(Block block) {
-        if (block != null) {
-            System.out.println("Successfully mined block");
-        }
-
         for (MiningCompleteListener listener : listeners) {
-            listener.miningComplete(block);
+            listener.onMiningComplete(block);
         }
 
         listeners = null;
@@ -42,8 +40,7 @@ public class Miner implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Started mining");
-            Block latestBlock = DatabaseConnection.getLatestBlock();
+            Block latestBlock = databaseConnection.getLatestBlock();
 
             if (latestBlock == null) {
                 notifyListeners(null);
@@ -54,23 +51,22 @@ public class Miner implements Runnable {
             String compactTarget = latestBlock.getCompactTarget();
 
             // If the block before this block is a multiple of the target adjust interval, first adjust local target.
-            if ((newBlockIndex - 1) % Chain.getTargetAdjustInterval() == 0 && (newBlockIndex - 1) > 0) {
+            if ((newBlockIndex - 1) % TargetUtil.getTargetAdjustInterval() == 0 && (newBlockIndex - 1) > 0) {
                 System.out.println(newBlockIndex);
                 // Start period block == previous block - target adjust interval.
-                Block startPeriodBlock = DatabaseConnection.getBlockByIndex(newBlockIndex - 1 - Chain.getTargetAdjustInterval());
+                Block startPeriodBlock = databaseConnection.getBlockByIndex(newBlockIndex - 1 - TargetUtil.getTargetAdjustInterval());
 
-                compactTarget = Chain.adjustTarget(latestBlock, startPeriodBlock).getCompactTarget();
+                compactTarget = TargetUtil.adjustTarget(latestBlock, startPeriodBlock).getCompactTarget();
             }
 
             // Otherwise the target should be the same as in the previous block.
             Block newBlock = new Block(latestBlock.getHash(), compactTarget, messages);
 
             // Mine the block. This method blocks until it is done.
-            System.out.println("Started finding nonce...");
             newBlock.mineBlock();
 
             notifyListeners(newBlock);
-        } catch (NullPointerException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }

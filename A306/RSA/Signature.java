@@ -1,6 +1,8 @@
 package RSA;
 
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 
 public class Signature {
     private byte[] bytes;
@@ -22,5 +24,22 @@ public class Signature {
 
     public byte[] getBytes() {
         return bytes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Signature signature = (Signature) o;
+        return Arrays.equals(bytes, signature.bytes) &&
+                Objects.equals(base64String, signature.base64String);
+    }
+
+    @Override
+    public int hashCode() {
+
+        int result = Objects.hash(base64String);
+        result = 31 * result + Arrays.hashCode(bytes);
+        return result;
     }
 }
