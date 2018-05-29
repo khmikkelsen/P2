@@ -3,6 +3,7 @@ package RSA;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.Random;
 
 import static java.lang.Math.pow;
@@ -11,16 +12,15 @@ public class RSAOAEPEncrypt extends RSAOAEP
 {
     private byte[] M;
     private byte[] EM;
-
     private byte[] L;
     private byte[] lHash;
     private byte[] DB;
-    private int PS;
+    private byte[] encryptedMessage;
 
-    private RSAKey recipient;
+    private int PS;
     private int k;
 
-    private byte[] encryptedMessage;
+    private RSAKey recipient;
 
     public RSAOAEPEncrypt(String message, RSAKey recipient) throws IOException
     {
@@ -35,7 +35,7 @@ public class RSAOAEPEncrypt extends RSAOAEP
         this.lHash = sha256(L);
 
         if(k < lHash.length*2 + 2)
-            throw new ArithmeticException("Decryption error; k less than lHash*2+2");
+            throw new ArithmeticException("Encryption error; k less than lHash*2+2");
         if(M.length > k - lHash.length*2 -2 )
             throw new IllegalArgumentException("Message too long, at most k - lHash*2 - 2 bytes");
 
@@ -112,23 +112,19 @@ public class RSAOAEPEncrypt extends RSAOAEP
     private byte[] genDB() throws IOException
     {
         ByteArrayOutputStream DB = new ByteArrayOutputStream();
-
         DB.write( lHash );
 
-        if (PS <= 0)
-        {
+        if (PS <= 0) {
             DB.write(0x01);
             DB.write( M );
         }
-        else
-        {
+        else {
             for (int i = 0; i < PS; i++)
                 DB.write( 0x00 );
 
             DB.write( 0x01);
             DB.write( M );
         }
-
         return DB.toByteArray();
     }
     // Returns amount of 0 bytes to pad in DB, k - M.length - 2*hLen - 2 bytes
@@ -141,6 +137,10 @@ public class RSAOAEPEncrypt extends RSAOAEP
     public byte[] getEncryptedMessage()
     {
         return this.encryptedMessage;
+    }
+    public String getEncryptedMessageBase64String ()
+    {
+        return new String(Base64.getEncoder().encode(encryptedMessage));
     }
 
 }
