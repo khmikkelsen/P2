@@ -122,8 +122,6 @@ class BlockTest {
         m2.signMessage(receiverKeyPrivate);
 
         List<Message> messages = new ArrayList<>(Arrays.asList(m, m2));
-
-
         Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
 
         assertEquals(64, blockTest.getMerkleRootHash().length());
