@@ -112,10 +112,10 @@ class BlockTest {
         assertNotEquals(merkleRootHash01, merkleRootHash02);
     }
 
+    //Test "getMerkleRootHash" is 64.//
     @Test
     void getMerkleRootHashTest04() {
 
-        //Test "getMerkleRootHash" is 64.//
         Message m = new Message("Test Message", senderKey, receiverKey);
         m.signMessage(senderKeyPrivate);
         Message m2 = new Message("Test", receiverKey, senderKey);
