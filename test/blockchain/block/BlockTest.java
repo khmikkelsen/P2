@@ -112,7 +112,7 @@ class BlockTest {
         assertNotEquals(merkleRootHash01, merkleRootHash02);
     }
 
-    //Test "getMerkleRootHash" is 64.//
+    //Test "getMerkleRootHash" is 64.
     @Test
     void getMerkleRootHashTest04() {
 
