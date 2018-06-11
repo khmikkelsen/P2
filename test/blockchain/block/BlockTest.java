@@ -70,7 +70,7 @@ class BlockTest {
 
         Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
 
-        assertEquals("3720e16ad9712e01705e6bfb72d31cbc3fa2999e32384e54b0cb57e1822c93dd", blockTest.getMerkleRootHash());
+        assertEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", blockTest.getMerkleRootHash());
     }
 
     @Test
@@ -88,7 +88,6 @@ class BlockTest {
         Block blockTest = new Block("prevHeadhash", "1f00ffff", messages);
 
         assertNotEquals("f5fc51789712f3fcb992ee2b5d7f7819948b8ef3714e7f012233ad021d6bb042", blockTest.getMerkleRootHash());
-
     }
 
     @Test
