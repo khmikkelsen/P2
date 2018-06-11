@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TargetTest {
 
-
     // Calculate compact target from 1000
     @Test
     void calculateCompactTargetTest01() {
