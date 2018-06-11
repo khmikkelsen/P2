@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TargetTest {
 
 
-    // Calculate compact blockchain.target from 1000
+    // Calculate compact target from 1000
     @Test
     void calculateCompactTargetTest01() {
         BigInteger num = new BigInteger("1000", 10);
