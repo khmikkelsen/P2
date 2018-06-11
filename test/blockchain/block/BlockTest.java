@@ -17,10 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class BlockTest {
-    private RSAKey key1Public;
-    private RSAKey key1Private;
-    private RSAKey key2Public;
-    private RSAKey key2Private;
     private RSAKey key1FalsePrivate;
     private RSAKey senderKey;
     private RSAKey senderKeyPrivate;
@@ -30,16 +26,6 @@ class BlockTest {
     @BeforeEach
     void generateKeys() throws IOException {
         KeyPairGenerator gen = new KeyPairGenerator(2048);
-
-        RSAKeyPair pair1 = gen.generateKeyPair();
-        key1Public = pair1.getPublicKey();
-        key1Private = pair1.getPrivateKey();
-
-
-        RSAKeyPair pair2 = gen.generateKeyPair();
-        key2Public = pair2.getPublicKey();
-        key2Private = pair2.getPrivateKey();
-
 
         RSAKeyPair pair1False = gen.generateKeyPair();
         key1FalsePrivate = pair1False.getPrivateKey();
