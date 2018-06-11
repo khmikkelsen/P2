@@ -47,9 +47,7 @@ class TargetUtilTest {
         assertTrue(expectedFactor.compareTo(factor) == 0);
     }
 
-
     // Hit the exact blockchain.target
-
     @Test
     void adjustDifficultyTest03() {
 
