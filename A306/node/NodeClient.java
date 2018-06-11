@@ -124,7 +124,7 @@ public class NodeClient implements MiningCompleteListener {
                 // Add blockchain.block to database.
                 databaseConnection.addBlock(newBlock);
 
-                System.out.println(simulatorName + " added incoming blockchain.block to database");
+                System.out.println(simulatorName + " added incoming block to database");
 //                System.out.println(JsonUtil.getPrettyParser().toJson(databaseConnection.getBlockchain()));
 
             }
@@ -138,7 +138,7 @@ public class NodeClient implements MiningCompleteListener {
 
         // Doesn't deal with this node not being up to date with the longest chain.
         // This node should retrieve the chain on startup before accepting incoming connections.
-        // 1. Must refer to the latest blockchain.block.
+        // 1. Must refer to the latest block.
         if (!isPreviousHashCorrect(previousBlock, newBlock.getPrevHeadHash())) {
             return false;
         }
@@ -158,8 +158,8 @@ public class NodeClient implements MiningCompleteListener {
             return false;
         }
 
-        // 5. Is claimed blockchain.target correct according to rules?
-        // blockCount == new blockchain.block index
+        // 5. Is claimed target correct according to rules?
+        // blockCount == new block index
         if (!isTargetValid(newBlock, previousBlock, blockCount)) {
             return false;
         }

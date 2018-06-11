@@ -125,10 +125,10 @@ public class DatabaseConnection {
     }
 
     /**
-     * Adds a blockchain.block to the database and returns it's id.
+     * Adds block to the database and returns it's id.
      *
-     * @param block The blockchain.block to add
-     * @return Index of the added blockchain.block
+     * @param block The block to add
+     * @return Index of the added block
      * @throws SQLException
      */
     public Long addBlock(Block block) throws SQLException {

@@ -6,8 +6,8 @@ import java.math.BigInteger;
 
 
 /**
- * The class chain: is used to adjust blockchain.target difficulty and generate new blockchain.target so that the miners can create
- * a blockchain.block for the blockchain.
+ * The class chain: is used to adjust target difficulty and generate new blockchain.target so that the miners can create
+ * a block for the blockchain.
  */
 public class TargetUtil {
 
@@ -18,7 +18,7 @@ public class TargetUtil {
 
     /*BigInteger is used for large Integers, i.e greater than 64-bit
      * The BigInteger constructor: takes the string representation of a big int and the base(radix) to make a BigInteger
-     * The proofOfWorkLimit : is maximum blockchain.target, and is what difficulty 1 sets the hash blockchain.block
+     * The proofOfWorkLimit : is maximum target, and is what difficulty 1 sets the hash block
      * blockchain.target as. (the bits field  is compact difficulty)
      */
 //    private static final String limit = new Target(new BigInteger("00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16)).getCompactTarget();
