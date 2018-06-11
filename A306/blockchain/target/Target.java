@@ -41,7 +41,9 @@ public class Target {
         // each set of 2 hex digits.
         String base256 = bigIntegerTarget.toString(16);
 
-        int exponent = (base256.length() + 2 - 1) / 2;
+        base256 = HexUtil.zeroPadHex(base256);
+
+        int exponent = base256.length() / 2;
 
         // Take first 3 base 256 hex digits
         String compactTarget = HexUtil.zeroPadHex(Integer.toString(exponent, 16))
@@ -53,11 +55,11 @@ public class Target {
     /**
      * The function calculateBigIntegerTarget: uses compactTargets first digit value to find length of the BigInt
      * representation. Then, gets the value of rest of digits. This data is used in a formula to convert compact form
-     * into a BigInteger blockchain.target - which is needed to compare zeros.
+     * into a BigInteger target - which is needed to compare zeros.
      */
     public static BigInteger calculateBigIntergerTarget(String compactTarget) {
         if (compactTarget.length() != 8) {
-            throw new IllegalArgumentException("A compact blockchain.target is 8 hex digits long");
+            throw new IllegalArgumentException("A compact target is 8 hex digits long");
         }
 
         int exponent = Integer.valueOf(compactTarget.substring(0, 2), 16);
