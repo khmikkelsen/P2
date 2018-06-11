@@ -23,8 +23,9 @@ class RSAOAEPEncryptTest
     {
         String message = "Hello, world";
         KeyPairGenerator keyPair = new KeyPairGenerator(2048);
-        RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, keyPair.generateKeyPair().getPublicKey());
-        assertEquals(new String(new RSAOAEPDecrypt(encrypt.getEncryptedMessage(), keyPair.generateKeyPair().getPrivateKey()).getDecryptedMessage()), message);
+        RSAKeyPair key = keyPair.generateKeyPair();
+        RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, key.getPublicKey());
+        assertEquals(new String(new RSAOAEPDecrypt(encrypt.getEncryptedMessage(), key.getPrivateKey()).getDecryptedMessage()), message);
     }
 
     // Tests the length of decrypted byte array.
@@ -33,7 +34,8 @@ class RSAOAEPEncryptTest
     {
         String message = "Hello, world";
         KeyPairGenerator keyPair = new KeyPairGenerator(2048);
-        RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, keyPair.generateKeyPair().getPublicKey());
-        assertEquals(new RSAOAEPDecrypt(encrypt.getEncryptedMessage(), keyPair.generateKeyPair().getPrivateKey()).getDecryptedMessage().length, message.getBytes().length);
+        RSAKeyPair key = keyPair.generateKeyPair();
+        RSAOAEPEncrypt encrypt = new RSAOAEPEncrypt(message, key.getPublicKey());
+        assertEquals(new RSAOAEPDecrypt(encrypt.getEncryptedMessage(), key.getPrivateKey()).getDecryptedMessage().length, message.getBytes().length);
     }
 }
