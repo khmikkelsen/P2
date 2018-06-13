@@ -53,6 +53,10 @@ public class Simulator {
             }
         }
 
+        checkDBEquality();
+    }
+
+    private void checkDBEquality() throws SQLException {
         // Test if all the nodes have a correct blockchain stored.
         List<List<Block>> nodeBlocks = new ArrayList<>();
 
