@@ -52,7 +52,7 @@ public class Miner implements Runnable {
 
             // If the blockchain.block before this blockchain.block is a multiple of the blockchain.target adjust interval, first adjust local blockchain.target.
             if ((newBlockIndex - 1) % TargetUtil.getTargetAdjustInterval() == 0 && (newBlockIndex - 1) > 0) {
-                System.out.println(newBlockIndex);
+//                System.out.println(newBlockIndex);
                 // Start period blockchain.block == previous blockchain.block - blockchain.target adjust interval.
                 Block startPeriodBlock = databaseConnection.getBlockByIndex(newBlockIndex - 1 - TargetUtil.getTargetAdjustInterval());
 

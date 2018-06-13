@@ -11,7 +11,7 @@ import java.math.BigInteger;
  */
 public class TargetUtil {
 
-    private static int targetAdjustInterval = 20;
+    private static int targetAdjustInterval = 2;
 
     // Two weeks (in seconds);wanted time for 20 blocks = 20 minutes.
     private static final long targetTimespan = 20 * 60 * 1000;
